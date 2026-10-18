@@ -1,0 +1,34 @@
+{
+  "experiment": "exact",
+  "checkpoint": "../progen-gflownets-test/progen/checkpoints/progen2-medium",
+  "precision": "float32",
+  "seeds": [0, 1, 2],
+  "feature_batch_size": 16,
+  "cpu_threads": 1,
+  "reference": "AAAA",
+  "alphabet": "AGLS",
+  "mutation_budget": 4,
+  "maximum_sequences": 20000,
+  "tv_threshold": 0.05,
+  "training": {
+    "hidden_size": 128,
+    "steps": 2000,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "normalizer_learning_rate": 0.01,
+    "beta": 1.0,
+    "gradient_clip": 1.0,
+    "log_every": 100
+  },
+  "supervised": {
+    "hidden_size": 128,
+    "steps": 2000,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "beta": 1.0,
+    "gradient_clip": 1.0,
+    "log_every": 100,
+    "rollouts": 4096
+  },
+  "evaluation": {"raw_count": 256, "selected_count": 32, "filter_pool_count": 1024, "seed_offset": 100000}
+}

@@ -1,0 +1,68 @@
+{
+  "experiment": "diversity",
+  "checkpoint": "../progen-gflownets-test/progen/checkpoints/progen2-medium",
+  "precision": "float32",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "feature_batch_size": 8,
+  "cpu_threads": 1,
+  "training": {
+    "hidden_size": 128,
+    "steps": 20000,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "normalizer_learning_rate": 0.01,
+    "beta": 1.0,
+    "gradient_clip": 1.0,
+    "log_every": 100,
+    "lr_decay": {
+      "after_fraction": 0.4,
+      "factor": 0.1
+    }
+  },
+  "supervised": {
+    "hidden_size": 128,
+    "steps": 20000,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "beta": 1.0,
+    "gradient_clip": 1.0,
+    "log_every": 100,
+    "rollouts": 4096,
+    "lr_decay": {
+      "after_fraction": 0.4,
+      "factor": 0.1
+    }
+  },
+  "evaluation": {
+    "raw_count": 256,
+    "selected_count": 32,
+    "repeats": 100,
+    "seed_offset": 200000
+  },
+  "arms": [
+    "original",
+    "count_corrected"
+  ],
+  "development_run": "runs/target-diagnostic-v1",
+  "source_sha256": {
+    "config.json": "6764786212b338a6c11fc38b15a9fdcdfad1667c4eaea79e8fedb531d02a90c5",
+    "status.json": "4d19dccade68c10507b356612f7f73adb7ef174ca8ddce600366737a9e845a8b",
+    "diagnostic_manifest.json": "bd979ffa46e42ca40f8adca21bf3bebf8dd486cbcc9946fc227c93b543070e1e",
+    "panel_manifest.json": "51d5941c18ecd05eed2e4eb2c1f1e43482bb8fbdaed03cd74dcafa2d8d4af7be",
+    "provenance.json": "2d226eef5cb0ae7a96adc137e8e2782fdd763c24818ec543a1dcc97e2cb8e1ea",
+    "costs.json": "cbf4465bf852d07fb47e1857ccf961ea5eee6f0933c7fd5baf3efbbd3c72bf0a",
+    "parent-00/inputs.pt": "05836e153fe182b780418ffc589f152ca625a18317993f70db49da9fe6969b6b",
+    "parent-00/scorer_fits.json": "0da6bf7e4dde6bd5af9e30f02c2ec60a728890697e7dc99c1e36b79c378d7483",
+    "parent-00/mlp-0.pt": "933439e25874426ac2effe60208d9be1417ae5a5c57c6e5c6710490091a96549",
+    "parent-01/inputs.pt": "92219dda4ef31e6294a7a2866ccc9278bf2bc47df202dc3222cb6fb89d53deb2",
+    "parent-01/scorer_fits.json": "627bb2e9877bd30294c3355b51c3c772e3f1d64cdbfd7325345461a7ee5f2b3a",
+    "parent-01/mlp-0.pt": "1140785d3fbc96e867dedd3d13afbd595f4b397ac12419f56d05e1bf10e55bcc",
+    "parent-02/inputs.pt": "12c55e1f6e9911abf1596e64f42b28a85ddef6044140efaa4b7629105dd7fc56",
+    "parent-02/scorer_fits.json": "9e70156229935a7d6c567b7e62de6072c68ff45c8a24353e66b32f66241027c6",
+    "parent-02/mlp-0.pt": "29d27dd3e3035980bd353dd26dd38d7fde48ff68f62ed12c829a4e2498924c04"
+  }
+}

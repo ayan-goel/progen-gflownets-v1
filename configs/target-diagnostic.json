@@ -1,0 +1,37 @@
+{
+  "experiment": "target-diagnostic",
+  "checkpoint": "../progen-gflownets-test/progen/checkpoints/progen2-medium",
+  "required_exact_run": "runs/exact-decay-long",
+  "panel": "data/processed/stability-panel-v1",
+  "precision": "float32",
+  "feature_batch_size": 8,
+  "cpu_threads": 1,
+  "ensemble_seeds": [0, 1, 2, 3, 4],
+  "alphas": [1.0, 0.5, 0.25],
+  "beta": 1.0,
+  "raw_count": 256,
+  "selected_count": 32,
+  "scorer": {
+    "ridge_penalties": [0.1, 1.0, 10.0, 100.0],
+    "hidden_size": 128,
+    "steps": 500,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "gradient_clip": 1.0,
+    "validate_every": 25,
+    "minimum_spearman": 0.2
+  },
+  "panel_preparation": {
+    "anchor_parent": "1O6X.pdb",
+    "development_parents": 3,
+    "confirmation_parents": 5,
+    "min_variants": 300,
+    "min_length": 40,
+    "max_length": 72,
+    "maximum_reference_identity": 0.3,
+    "split_seed": 42,
+    "inner_seed": 43,
+    "inner_validation_fraction": 0.2
+  }
+}

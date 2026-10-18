@@ -1,0 +1,66 @@
+{
+  "experiment": "biological",
+  "checkpoint": "../progen-gflownets-test/progen/checkpoints/progen2-medium",
+  "precision": "float32",
+  "data_task": "data/processed/local-v1",
+  "required_exact_run": "runs/exact-decay-long",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "feature_batch_size": 8,
+  "cpu_threads": 1,
+  "maximum_sequences": 20000,
+  "scorer_seed": 0,
+  "scorer": {
+    "ridge_penalties": [
+      0.1,
+      1.0,
+      10.0,
+      100.0
+    ],
+    "hidden_size": 128,
+    "steps": 500,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "gradient_clip": 1.0,
+    "validate_every": 25,
+    "minimum_spearman": 0.2
+  },
+  "training": {
+    "hidden_size": 128,
+    "steps": 20000,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "normalizer_learning_rate": 0.01,
+    "beta": 1.0,
+    "gradient_clip": 1.0,
+    "log_every": 100,
+    "lr_decay": {
+      "after_fraction": 0.4,
+      "factor": 0.1
+    }
+  },
+  "supervised": {
+    "hidden_size": 128,
+    "steps": 20000,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "beta": 1.0,
+    "gradient_clip": 1.0,
+    "log_every": 100,
+    "rollouts": 4096,
+    "lr_decay": {
+      "after_fraction": 0.4,
+      "factor": 0.1
+    }
+  },
+  "evaluation": {
+    "raw_count": 256,
+    "selected_count": 32,
+    "filter_pool_count": 1024,
+    "seed_offset": 100000
+  }
+}

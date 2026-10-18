@@ -1,0 +1,57 @@
+# Local research inputs, outputs and reading material
+/runs/
+/data/
+/literature/
+/checkpoints/
+/outputs/
+/artifacts/
+/logs/
+/wandb/
+/tensorboard/
+
+# Generated verification evidence; retain the handwritten navigation page
+/docs/verification/*
+!/docs/verification/README.md
+
+# Python environments, bytecode, tools and build products
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+.nox/
+.cache/
+.ipynb_checkpoints/
+/build/
+/dist/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# Generated weights, tensors and training logs
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.npy
+*.npz
+*.log
+*.tmp
+*.tmp.*
+events.out.tfevents.*
+
+# Local secrets and editor/OS temporary files
+.env
+.env.*
+!.env.example
+.DS_Store
+*.swp
+*.swo
+*~
