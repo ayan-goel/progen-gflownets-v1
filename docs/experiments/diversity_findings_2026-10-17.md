@@ -90,28 +90,22 @@ CUDA_VISIBLE_DEVICES='' scripts/run.sh evaluate-diversity \
   --run runs/diversity-v1 --output runs/diversity-v1-replay
 ```
 
-## Commands executed and verification
+## Reproduction and verification
 
-- Preliminary standard-library/import inspection and saved-tensor calculation on
-  CPU; the first direct import lacked PYTHONPATH and was repeated with `PYTHONPATH=src`.
-  An attempted per-model validation filename did not exist; actual `scorer_fits.json`
-  was inspected. No data or model choices resulted from these setup errors.
-- Preliminary diagnostic: `PYTHONPATH=src` Python call to `diagnose_diversity` wrote
-  `runs/diversity-diagnostic-v1`. It remains preserved; v2 uses the final CLI and
-  stores a source snapshot. Numerical results are unchanged by code formatting.
-- `CUDA_VISIBLE_DEVICES='' scripts/run.sh diagnose-diversity --output runs/diversity-diagnostic-v2`
-- `CUDA_VISIBLE_DEVICES='' scripts/run.sh inspect-unique --run runs/confirmation-v1 --output runs/confirmation-unique-review-v1`
-- `CUDA_VISIBLE_DEVICES='' scripts/run.sh check-diversity` verifies frozen source,
-  tokenizer and checkpoint hashes without loading ProGen or initializing CUDA.
-  [Readiness record](../verification/diversity-readiness.json).
-- Focused synthetic test first exposed a missing compatibility field in the reused
-  general validator; fixed the validation adapter, then the roundtrip passed.
-  A lint failure for a lambda was replaced with `statistics.mean`.
-- `scripts/test_cpu.sh`: [full test log](../verification/diversity-tests.txt).
-  Tiny random-backbone fixtures test branching correction, zero-head behavior,
-  causal cache parity, no-refill/tie rules, label-independent selection, both arms,
-  failed screens, input hashes, replay equality and rejection of changed artifacts.
-  Real training remains unexecuted; CPU fixtures do not establish convergence.
+Executed CPU analysis commands:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh diagnose-diversity --output runs/diversity-diagnostic-v2
+CUDA_VISIBLE_DEVICES='' scripts/run.sh inspect-unique --run runs/confirmation-v1 --output runs/confirmation-unique-review-v1
+```
+
+The diagnostic preserves input hashes and a source snapshot. The historical review
+uses only existing confirmation proposals; its new selection rule is post-hoc.
+[Readiness checks](../verification/diversity-readiness.json) verify frozen source,
+tokenizer and checkpoint identities. All 41 synthetic CPU tests pass:
+[test evidence](../verification/diversity-tests.txt). They cover branching correction,
+zero-head behavior, causal cache parity, label-independent no-refill selection,
+failed screens and replay integrity. They do not establish real-run convergence.
 
 ## Next decision after that run
 

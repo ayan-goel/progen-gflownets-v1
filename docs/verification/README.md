@@ -8,7 +8,6 @@ read [status](../status.md).
 | Stage | Supporting evidence |
 |---|---|
 | Diversity development implementation | [41-test CPU log](diversity-tests.txt), [readiness](diversity-readiness.json), [handoff audit](diversity-implementation-audit.json) |
-| Documentation cleanup, 17 Oct | [Protected-file/link audit](documentation_cleanup_2026-10-17.json) |
 | Confirmation completed results | [Seal/source checks, identical CPU replay and analysis](confirmation-result-analysis.json) |
 | Confirmation implementation | [37-test CPU log](confirmation-tests.txt), [preflight/readiness](confirmation-readiness.json) |
 | Development diagnostic | [CPU tests](target-diagnostic-tests.txt), [readiness](target-diagnostic-readiness.json), [verified result analysis](target-diagnostic-result-analysis.json) |

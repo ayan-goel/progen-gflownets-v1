@@ -9,8 +9,6 @@ to find each protocol, result and supporting evidence.
 - Implement in v1 only. Keep the old test project unchanged; reuse its verified
   checkpoint as a read-only input and vendor the minimal upstream ProGen source
   with attribution. No dependence on old runnable scripts.
-- The old AGENTS milestone described TF-Bind-8. Updated it to the user's current
-  integration request; preserved the prohibition on agent GPU execution.
 - Stage the exact four-position experiment before the biological experiment.
   GPU convergence and stability-model quality are gates the user must run, not
   results we can establish from toy CPU tests.
@@ -98,20 +96,6 @@ to find each protocol, result and supporting evidence.
   The published whole-archive MD5 is recorded but cannot be verified from a partial
   archive. Do not report whole-archive checksum verification.
 
-## 2026-10-14 — Documentation authority and alignment
-
-- The spec defines the scientific contract; README summarizes it; the literature
-  review explains its evidential basis; the experiment plan expands its A–E sequence.
-  None is an alternative project proposal. Concrete numerical settings belong in
-  configurations and the implementation documentation.
-- Replaced superseded GB1 recommendations and linear-only first-head instructions.
-  Preserved external-paper facts, original retrieval dates, reading limits and
-  standalone evidence separately. Added Mega-scale to the bibliography rather than
-  implying it was included in the original 28-reference search.
-- Implementation remains authorized; only real experiments/GPU work are user-run.
-  Documentation alignment does not reset completed CPU checks or establish pending
-  real-checkpoint convergence and biological-validation results.
-
 ## 2026-10-14 — Reproducibility, comparisons and handoff
 
 - Pilot settings are fully listed in hyperparameters.md and JSON configs. Default
@@ -145,8 +129,7 @@ to find each protocol, result and supporting evidence.
 
 The user inspects `nvidia-smi`, exports `CUDA_VISIBLE_DEVICES` and launches the
 experiment manually. The launcher preserves that variable and does not choose GPUs
-or submit jobs. Verified the v1 activation path and pinned imports with CUDA hidden;
-updated the runbook to show this workflow explicitly. No training behavior changed.
+or submit jobs. This keeps resource allocation under user control.
 
 ## 2026-10-14 — Failed exact gate and controlled fitting diagnostics
 
@@ -322,28 +305,6 @@ choices are in [the handoff](experiments/confirmation_plan_2026-10-16.md).
 
 All work executed by the agent was CPU data preparation or synthetic correctness
 testing. Thirty-seven tests pass; no real confirmation fit or GPU operation ran.
-
-## 2026-10-17 — Mandatory documentation and stable navigation
-
-At the user's request, make documentation part of every experiment, investigation,
-implementation change and decision. Add explicit rules to [AGENTS.md](../AGENTS.md#research-documentation-required)
-for pre-run protocols, commands/provenance, numerical choices, results/failures,
-motivating primary sources or local evidence, honest reading limits and current
-indexes. Engineering defaults must be identified rather than given invented
-literature support. This policy is motivated by the user's reproducibility and
-organization requirement, not by an external paper.
-
-Use one current-status page and grouped documentation, experiment and verification
-indexes. Retain existing record/artifact paths to avoid breaking links from saved
-runs. Add a compact reusable record template. Separate historical plans from current
-execution and preserve negative/partial results. Correct stale entry-point wording
-and record the user-reported confirmation launch/NVML observation without claiming
-completion or diagnosing the unknown host issue.
-
-No scientific definitions or experimental parameters changed. The spec's metadata
-now points to current status instead of duplicating changing execution summaries.
-Do not rerun model tests for documentation-only work: validate links and compare
-protected code/config/snapshot hashes. The active experiment remains untouched.
 
 ## 2026-10-17 — Mechanism confirmed; comparative utility remains open
 

@@ -67,11 +67,11 @@ The planned CPU diagnosis is complete and the next experiment is implemented.
   comparing both priors across all three development parents and three seeds.
   It trains GFN/supervised heads and automatically evaluates all final policies.
 - All 41 synthetic CPU tests and lint/format checks pass. CPU readiness verifies
-  source/checkpoint hashes; CUDA was not initialized. Real new training has **not** run.
+  source/checkpoint hashes; CUDA was not initialized. The user has now launched the real ablation; outcomes have not been reviewed.
 
-Next action for the user: `scripts/run.sh diversity --output runs/diversity-v1 --device cuda`
-after activating the project environment and selecting a GPU. Estimated duration
-roughly five hours, conditional on the earlier run's throughput.
+**Current stage:** the user has launched the development ablation. Results have
+not yet been reviewed. After completion, compare all parents and seeds using the
+fixed protocol before selecting any new procedure.
 
 This is development, not fresh confirmation. Afterward inspect count/quality/cost
 tradeoffs and target approximation before selecting any new procedure. Reserve

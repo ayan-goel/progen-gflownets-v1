@@ -21,7 +21,7 @@ are in [AGENTS.md](../AGENTS.md#research-documentation-required).
 |---|---|
 | Chronological experiments, protocols and outcomes | [Experiment index](experiments/README.md) |
 | Why we chose an approach or changed it | [Decision record](decisions.md) |
-| What was implemented, inspected and checked | [Implementation log](implementation_log.md) |
+| How the implementation supports the research choices | [Implementation decisions](implementation_log.md) |
 | Verification findings and their limits | [Verification history](verification.md) |
 | Test logs, readiness records and numerical audits | [Evidence index](verification/README.md) |
 | A consistent format for a new record | [Experiment/analysis template](experiments/TEMPLATE.md) |

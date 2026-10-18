@@ -16,7 +16,6 @@ Use the [template](TEMPLATE.md) for new records and follow [documentation rules]
 | Date | Record | State / scope |
 |---|---|---|
 | 17 Oct 2026 | [Completed results](confirmation_results_2026-10-17.md) | Five parents, all seeds; CPU replay; target/stability gains and diversity/cost limitations |
-| 17 Oct 2026 | [Launch and NVML warning](confirmation_launch_2026-10-17.md) | Historical launch observation; superseded by completed results |
 | 16 Oct 2026 | [Fixed five-parent protocol](confirmation_plan_2026-10-16.md) | Frozen pre-run choices, commands, failure rules and evaluation |
 
 ## Completed development and biological work

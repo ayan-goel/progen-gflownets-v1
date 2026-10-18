@@ -55,3 +55,6 @@ events.out.tfevents.*
 *.swp
 *.swo
 *~
+
+# Local agent instructions
+/AGENTS.md
