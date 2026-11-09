@@ -225,124 +225,97 @@ and fresh confirmation, not hidden repeated tuning against this inspected test s
 No new hyperparameters, training configuration or model changes were introduced.
 See the [pilot results](experiments/biological_first_results_2026-10-15.md).
 
-## 2026-10-15 — Investigate the target before additional guidance training
+## 2026-11-03 — Return to the first biological pilot
 
-Performed literature research and saved-tensor CPU analysis only. The baseline
-places 96.02% of mass on mutations at positions 1–3; a uniform-logit control on the
-same legal-action tree places 96.67% there. A complete-path 20-amino-acid likelihood
-counterfactual is even more concentrated overall (95.74% on one candidate).
-Therefore neither interpreting early-position mass as learned biology nor simply
-switching likelihood definitions is justified. Preserve the implemented target.
+The user's meeting direction is to investigate the local stability reward and
+simple predictor baselines in depth before expanding scope. The active project
+therefore returns to the first 1O6X pilot. Retain the frozen backbone, original
+data/splits, reward definition, trajectory-balance learner, supervised future-reward
+baseline, exact tests and completed pilot artifacts unchanged.
 
-Record a proposal for development-only scorer/prior comparisons, followed by fresh
-multi-parent confirmation with matched proposal budgets. Proposed numerical
-choices and their rationale are in [the next-step plan](next_steps_2026-10-15.md).
-They are not implemented settings. Keep frozen ProGen, fixed per-fit rewards and
-the existing GFN head; no spec/configuration, training code or run outputs changed.
-The [literature update](../literature/POST_PILOT_REVIEW_2026-10-15.md) adds eight
-sources with explicit reading limits. No GPU execution or real training occurred.
+Remove the subsequent workflows from the active CLI, code, tests, configurations
+and documentation. They are recoverable outside the project at
+/usr/scratch/agoel320/progen-gflownets-archive/post-pilot-2026-11-03.
+This is a scope reset, not a claim that later results were scientifically invalid.
+The archive is not an active dependency; Git history remains intact.
 
-## 2026-10-15 — Implement the authorized development diagnostic
+The pilot already matched its predicted target but did not improve measured
+stability. That motivates predictor/reward diagnosis before another optimizer
+comparison. See [pilot results](experiments/biological_first_results_2026-10-15.md).
+The next comparison must give linear and neural predictors identical data,
+features and evaluation rules, with training-set size explicitly controlled.
+No new split, threshold, reward transform or hyperparameter sweep is fixed here.
 
-Implement the next bounded stage, not automatic follow-on confirmation training.
-Freeze three development and five reserved parents by coverage, disjoint clusters
-and global sequence-identity screening. Record exact alignment settings, all
-selected/rejected identities and split hashes. Pin the already-installed Biopython
-1.86 dependency. Preserve the old outer split; add a seed-43 20% inner split so
-checkpoint selection does not consume the outer development assessment. Keep the
-reference in fitting and do not refit on inner validation after selection.
+Previously inspected outcomes remain inspected. In particular, the original 204
+test variants and any retired evaluation panels cannot be relabeled as fresh
+confirmation after tuning. New analyses on the original task are developmental.
 
-Reuse the existing scorer fitter through ridge-only and MLP-only configurations;
-leave its implementation and previous behavior unchanged. Compare ridge, MLP seed
-zero and a five-member mean. Cache complete-sequence causal logits instead of
-recomputing each prefix; verify equality with the existing local prior on a
-synthetic ProGen fixture. Compute alpha={1,.5,.25} exact targets, uniform diagnostic
-and construction controls; do not modify the GFN's implemented prior. All
-comparisons use 256 proposal draws and 32 slots with duplicates reported.
 
-Keep failed scorer screens visible instead of suppressing domains. Save weights,
-permitted split rows, caches, predictions, input/source hashes, timing and CPU
-reevaluation. No automatic best setting, positive biological gate or confirmation
-job is introduced. The [implementation record](experiments/target_diagnostic_2026-10-15.md)
-documents numerical choices and their limits; the spec only adds this diagnostic
-stage and corrects stale status. All prior run artifacts remain untouched.
+## 2026-11-03 — Separate predictor quality from target fitting
 
-## 2026-10-15 — Development diagnostic completed and reviewed
+The saved reward arithmetic agrees within floating-point tolerance, while
+influential local ranking errors reduce exact measured utility. Compare both
+predictor families explicitly on nested original-training subsets rather than
+only reporting the validation winner. Keep fixed validation/evaluation identities;
+40 examples is a small-data diagnostic, not a relabeled original training count.
+Use original settings to limit new tuning, and test only half/original/double
+strength plus zero and a reference-capped utility. Exact enumeration isolates
+reward usefulness without another guidance fit. The [protocol and audit](experiments/predictor_reward_study_2026-11-03.md)
+own settings, rationale, evidence and interpretation boundaries.
 
-Verified successful non-smoke completion (62.08 s), six passing inner scorer fits
-per parent, immutable input/source hashes, and byte-identical saved evaluation
-reproduction on CPU. At the original prior, single-MLP exact targets improve
-measured development means by +0.28386 / +0.04515 / +0.14938 kcal/mol. The ensemble's
-average gain is nearly identical; flatter priors broaden coverage but can lower
-stability versus original ProGen. Matched generate-and-select remains competitive.
-The 1O6X development support and scorer split differ from the earlier failed test
-pilot, so this does not establish that the earlier failure was fixed.
 
-Recommend a single-MLP alpha=1/beta=1 primary for the next reserved confirmation
-implementation. Preserve inner selection and all five parents; no new training
-configuration or run was created in this review. No confirmation row files were
-read, real fits performed or GPU operations launched by the agent. See the
-[result record](experiments/target_diagnostic_results_2026-10-15.md) and
-[CPU audit](verification/target-diagnostic-result-analysis.json).
+## 2026-11-03 — Ridge is provisional; test split dependence before new guidance
 
-## 2026-10-16 — Implement fixed five-parent confirmation
+The completed [predictor/reward study](experiments/predictor_reward_study_2026-11-03.md)
+finds comparable full-data regression errors but opposite exact-target utility:
+ridge gains 0.03960 kcal/mol at beta 1; MLP loses 0.01861 on average. MLP still
+wins validation RMSE, so the issue is not a broken family selector. Errors on the
+small high-probability part of the candidate set can dominate guidance utility.
+Treat ridge/beta 1 as a provisional development baseline and predefine a small
+within-parent split-robustness comparison before new GFN training. Keep the neural
+control and track prior-weighted error as well as global prediction accuracy.
+Do not interpret repeated full-data ridge seeds as replication or select the
+largest beta using inspected outcomes. No optimizer change is motivated yet.
 
-The user authorized the recommended single-MLP/original-prior confirmation. Reuse
-all scientific core functions and freeze alpha=1, beta=1, scorer seed zero and the
-existing guidance schedule/seeds. Prepare identity-only candidate supports from
-source availability/identity metadata to avoid opening reserved label files during
-fitting. Keep original panel roles/splits and every parent.
 
-Preserve the existing scorer validation gate: failure skips both guidance learners
-for that parent, but prior/target diagnostic rows and failure counts remain visible.
-Require every parent's fitting phase to finish before recording hashed final fit
-artifacts and releasing test outcomes. Numerical interruption before completion
-keeps outcomes unrevealed. No automatic resume, new tuning loop or follow-on run.
-Use matched 256-proposal/32-slot evaluation with explicit duplicates, exact target
-reference, raw versus selected results and parent-level aggregation. Record cached
-setup and CPU evaluation costs separately. The source protocol and all numerical
-choices are in [the handoff](experiments/confirmation_plan_2026-10-16.md).
+## 2026-11-09 — Test the ridge target with unchanged trajectory balance
 
-All work executed by the agent was CPU data preparation or synthetic correctness
-testing. Thirty-seven tests pass; no real confirmation fit or GPU operation ran.
+Tom's meeting feedback prioritizes an actual GFN rerun using the better reward
+before more split studies. Reuse the full-data ridge checkpoint (seed 0 as an
+arbitrary representative), original cached prior and beta 1. This isolates reward
+source from optimizer, architecture, candidate-support and backbone changes.
+Add observational predicted-target monitoring to check training reliability,
+while retaining fixed steps and final-only checkpoints. The original MLP GFN is
+a saved historical comparator, not a new neural-predictor retraining. The
+[protocol](experiments/ridge_gfn_2026-11-09.md) owns settings and interpretation.
 
-## 2026-10-17 — Mechanism confirmed; comparative utility remains open
+Reward-noise experiments are a subsequent controlled study; distinguish fixed
+corruption of each sequence's score from fresh noise on each query. Attribute
+factorization, partial ProGen training and SubTB require separate review and
+experiments. No such changes are combined with the first ridge run.
 
-The [completed confirmation](experiments/confirmation_results_2026-10-17.md)
-supports the target and its GFN approximation on all five finite supports. Retain
-this positive result alongside mixed selection comparisons, severe concentration
-and higher fitting cost than supervised guidance. More training on this same
-support is not the priority: approximation error is already small. The next
-proposed development design should address distinct-sequence utility and total
-compute, audit prior position bias, and establish scorer validity before expanding
-mutation distance. Fresh evaluation splits are necessary before new tuning; these
-confirmation outcomes have been inspected. No scientific definition, hyperparameter
-or implementation changed, and no new real experiment was launched. Motivation is
-local measured evidence, not an unverified external literature claim.
 
-## 2026-10-17 — Diagnose branching and implement a two-prior development ablation
+## 2026-11-09 — Use the completed ridge GFN as the clean noise-study baseline
 
-User authorized all proposed diagnostics and the next experiment implementation.
-The CPU [development diagnostic](../runs/diversity-diagnostic-v2/report.md) shows
-that local branching alone puts 92–93% of mass on the first three mutation positions,
-versus 2.5–3.0% for uniform candidate identities. Derived a label-free descendant-count
-correction: with uniform logits its edge probabilities telescope to uniform leaves.
-With actual ProGen logits, two targets broaden substantially and one remains narrow;
-raw measured stability declines on one parent. This evidence supports a controlled
-comparison, not adoption as the universally better protein prior.
+All three ridge-reward GFNs match the specified target and improve measured
+expectation over ProGen on the fixed candidate set. Mean gain is +0.03948 kcal/mol,
+with expected unique count in 256 draws decreasing from 10.67 to 9.87. The
+[completed experiment](experiments/ridge_gfn_2026-11-09.md) supports proceeding to
+Tom's reward-noise question while keeping TB and frozen ProGen unchanged.
+Separate noisy-target degradation from optimization error against that target.
+Start by specifying fixed per-sequence score corruption; resampled query noise
+would require a separate interpretation. No noise settings have been chosen yet.
 
-Explicitly added the alternate arm to the spec; kept original prior as control and
-held scorers, support, beta and learner settings fixed. Chose unique selection from
-256 proposals without refill, retaining old repeated-slot outputs. Uniform selection
-is strong and remains an explicit comparator. Chose 100 sampling repeats to reduce
-noise; a descriptive engineering choice, not biological power. A proposed TV .01
-check concerns approximation only. Frozen source hashes prevent accidental drift.
 
-Reuse all three development parents; do not select a favorable subset or retune on
-the completed confirmation. This GPU handoff is development-only. Fresh evaluation
-and multi-mutant measurement/scorer validation remain prerequisites for later
-expansion. The next run addresses whether heads can learn the broader law and whether
-unique-design quality/cost justify them; it cannot show non-enumerable efficiency.
-No external source is claimed for this derived correction; evidence and alternatives
-are in the [protocol](experiments/diversity_plan_2026-10-17.md) and
-[findings](experiments/diversity_findings_2026-10-17.md). No real/GPU run by the agent.
+## 2026-11-09 — Fixed score corruption with crossed noise and training seeds
+
+Implement Tom's noise suggestion as fixed independent Gaussian perturbations of
+dimensionless terminal scores. Preserve beta, reward scale, prior and optimization.
+Two amplitudes (0.25/0.50) crossed with three noise seeds and three training seeds
+separate corrupted-target variability from training variability; reuse the clean
+baseline. Pair each noise vector across amplitudes without recentering or clipping.
+Keep the full training budget because shorter noisy runs would confound the
+comparison. This is a sensitivity model, not an inferred assay-noise distribution.
+Exact evaluation separates target damage from policy-fitting error and reports
+clean predictor expectations distinctly from measured outcomes. The
+[fixed protocol](experiments/reward_noise_2026-11-09.md) owns the complete choices.

@@ -7,7 +7,7 @@ name = "stability-gfn"
 version = "0.1.0"
 description = "Frozen ProGen2 guidance toward Mega-scale folding stability"
 requires-python = ">=3.10"
-dependencies = ["numpy==1.26.4", "torch==2.6.0", "transformers==4.27.4", "tokenizers==0.13.3", "biopython==1.86"]
+dependencies = ["numpy==1.26.4", "torch==2.6.0", "transformers==4.27.4", "tokenizers==0.13.3"]
 
 [project.optional-dependencies]
 dev = ["ruff==0.14.0"]

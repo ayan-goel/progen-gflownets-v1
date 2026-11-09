@@ -15,6 +15,7 @@
 
 # Python environments, bytecode, tools and build products
 .venv/
+.venv-assessment/
 venv/
 env/
 __pycache__/

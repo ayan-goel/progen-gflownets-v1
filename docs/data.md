@@ -1,4 +1,6 @@
-# Mega-scale data contract and audit
+# Stability data contracts and audits
+
+Active task: the original Mega-scale single-substitution pilot. The existing evaluation outcomes have already been inspected.
 
 ## Source and verification
 
@@ -83,17 +85,3 @@ Measurement coverage is 100% by construction in this retrospective benchmark.
 Absence from training and distance one from the reference are also largely fixed
 by this support, so they are descriptive checks, not evidence of open-ended novelty.
 The broader neighborhood and unseen-domain studies remain later milestones.
-
-## Confirmation identity isolation — 16 October 2026
-
-The original panel's five reserved parents and all split hashes remain unchanged.
-A separate [identity-only support manifest](../data/processed/confirmation-support-v1/manifest.json)
-reconstructs their 203/202/201/200/196 test identities from the original source's
-sequence/parent identities and finite-label availability, using the same sorted
-unique single-mutant list and seed-42 split. This preparation does not open panel
-test-label files or retain/rank stability values. It does not create new splits.
-
-The confirmation runner reads only fit/inner rows and candidate identities during
-learning, leaving outer development rows unused. All fits must be complete and
-hashed before test outcomes are opened. At release, label hashes and exact candidate
-identity equality are checked. See [protocol](experiments/confirmation_plan_2026-10-16.md).

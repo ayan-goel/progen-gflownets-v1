@@ -1,0 +1,22 @@
+{
+  "clean_run": "runs/ridge-gfn-v1",
+  "noise_sigmas": [
+    0.25,
+    0.5
+  ],
+  "noise_seeds": [
+    100,
+    101,
+    102
+  ],
+  "input_sha256": {
+    "task.pt": "f7faa53745fb425d53ac2478cd289d369339d78a74ac4363b745012cc7d89ac9",
+    "config.json": "c6aa44ee91b5541ecb41a9cf8197cb4df60012213071059caf82702035b5fbc6",
+    "reward.json": "e5780cd103de4b612045bf5723483e0940e21388ffe619a3500b9d5b585d80ae",
+    "status.json": "98a316ff8a53f05f3685d54e67404401964f7be25a2da95cd54b024ab99e63ec",
+    "evaluation_labels.json": "f911c20c8aac6ef1cd12896ba1443e457a85c9e97c25f501cf1605b70bbaa8c0",
+    "seed-0/gfn.pt": "0709fa6e8064da4e82a1bffa087e0390bb00c35f90b00b9ac0be532e0dd946dc",
+    "seed-1/gfn.pt": "a62210c553ac3475143a3240ec0083e9b4ba6950ca655b93b763cadf44d9b265",
+    "seed-2/gfn.pt": "540027f5996a13069166954fd00c4bda9d6b6c034f1ed365ae574cf5f8c830fe"
+  }
+}

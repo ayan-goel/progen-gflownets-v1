@@ -182,54 +182,14 @@ engineering default derived from the exact task, not a validated biological opti
 Training-time exact monitoring is absent/disabled. Final checkpoints only; no toy
 or privileged weights are reused. The pipeline still stops if the scorer gate fails.
 
-## 2026-10-15 — Development target diagnostic
+## Predictor/reward diagnostic study
 
-The current executable configuration is [target-diagnostic.json](../configs/target-diagnostic.json).
-The [complete numerical-choice table](experiments/target_diagnostic_2026-10-15.md#numerical-choices)
-records panel selection/alignment, inner splits, ridge/MLP settings, ensemble seeds,
-sequence-prior exponents, sampling budgets and metric conventions. These choices
-are frozen before the first diagnostic run; they were not tuned on its outcomes.
-No guidance hyperparameter or previous configuration changed. The main added
-choices are a 20% inner validation partition (seed 43), five MLP seeds 0–4,
-alpha={1,0.5,0.25} at beta=1, and matched 256-proposal/32-slot evaluation.
+The [fixed study protocol](experiments/predictor_reward_study_2026-11-03.md) owns the new training sizes, seeds, beta grid and capped-utility rationale. Predictor optimizer settings are inherited from the original pilot; its artifacts are unchanged.
 
-## 2026-10-16 — Fixed confirmation configuration
+## Ridge-reward GFN rerun
 
-[confirmation.json](../configs/confirmation.json) preserves the biological-pilot
-head architecture and 20,000-update schedule, with the accepted single MLP seed
-zero and original prior/beta=1. Ridge candidates are disabled. Both learners retain
-seeds 0–2, batch 64, width 128 and the rate drop after update 8,000. The intentional
-evaluation change is equal 256-proposal budgets for all policies, with 32 selected
-slots and duplicates retained. The [confirmation protocol](experiments/confirmation_plan_2026-10-16.md#frozen-numerical-choices)
-records every value, inherited default, rationale and failure rule. No parameters
-were chosen using confirmation outcomes. No new scientific core or optimizer was
-introduced.
+The [9 November protocol](experiments/ridge_gfn_2026-11-09.md) inherits the original TB optimizer, architecture, schedule and beta 1. Only the predictor changes; observational exact-target monitoring is enabled.
 
-## 17 October 2026 — Development diversity ablation
+## Fixed reward-noise study
 
-[Configuration](../configs/diversity.json), [protocol](experiments/diversity_plan_2026-10-17.md)
-and [findings](experiments/diversity_findings_2026-10-17.md).
-
-| Choice | Fixed value and rationale |
-|---|---|
-| Data/scorer | All three original development supports; saved MLP-0 predictions and inner screens; SHA-256 freezes inputs and model metadata |
-| Priors | `original` and `count_corrected`; add log descendant count with coefficient exactly 1 so uniform logits give uniform leaves; derived identity, no tuned exponent |
-| Guidance | Same 20,000 updates, width 128, seeds 0/1/2, batch 64, Adam defaults, gradient clip 1 and rate schedule as confirmation; beta=1 for both learners |
-| Supervised rollouts | 4,096, inherited; equal update counts do not mean equal compute |
-| Proposal budget | 256 per policy/batch, no refill; old 32 repeated slots plus up to 32 distinct predicted-best sequences |
-| Ties | First appearance in proposals, independent of outcome labels |
-| Sampling repeats | 100 per final policy; engineering choice to describe sampling noise, not biological sample size or a power calculation |
-| Evaluation seed | 200000 + 1000 × training seed + repeat index 0–99; fixed before new fitting |
-| Trajectory timing seed | 900000 + training seed; one additional 256-trajectory timing batch, not used to choose or report the selection outcome |
-| Approximation check | TV <=0.01 per final GFN fit; engineering diagnostic, not stopping rule or biological gate |
-| Cache consistency | CPU float64 leaf-law comparison with atol=rtol=2e-4 between new prefix cache and saved causal path logits; fail before head fitting if different |
-| Law normalization | Absolute probability sum error <=1e-4; exact metrics use double-precision normalized probabilities |
-| Threads / precision | One CPU thread; frozen ProGen float32 with TF32 disabled; unchanged setup choices |
-| Smoke overrides | Synthetic inputs only, random tiny backbone, one seed, width 8, four updates/learner, batch 4, log every 2, eight supervised rollouts, eight proposals, four selections, two repeats |
-
-Shared original cache/scorer costs (including the original diagnostic's extra
-scorers) are retained as reused source work, not charged as new fitting or silently
-deleted. New prefix caching, each learner's fitting, exact-law evaluation and actual
-trajectory decoding are reported separately. Uniform and exact-target categorical
-sampling exploit enumeration and are not scalable online-generation comparators.
-No new GPU experiment was run while selecting these settings.
+The [noise protocol](experiments/reward_noise_2026-11-09.md) specifies sigma 0.25/0.50, noise seeds 100/101/102 and training seeds 0/1/2. Original TB settings and beta 1 are retained; the clean baseline is reused.

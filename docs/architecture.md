@@ -92,32 +92,10 @@ configured biological run. Interruptions preserve written artifacts; there is no
 automatic restart or overwrite. `running` after a hard kill is not proof of a live
 process or completion. Training-resume support is outside this initial handoff.
 
-## Confirmation modules — 16 October 2026
+## Predictor/reward diagnostics
 
-- `confirmation_data.py`: reconstructs label-free candidate identity files and reads only allowed fitting partitions.
-- `confirmation.py`: validates the fixed protocol, caches frozen features/rewards, reuses existing scorer/learner functions, and seals all-parent fit artifacts.
-- `confirmation_evaluation.py`: checks that seal before releasing outcomes, evaluates actual policy samples plus an exact-target reference, and supports CPU-only replay.
+`reward_study.py` reuses the scorer fitter with explicit ridge/MLP family selection, extracts and saves pooled features once, and evaluates exact targets using the original finite prior. It does not update ProGen or fit a guidance head. See the [study protocol](experiments/predictor_reward_study_2026-11-03.md).
 
-The existing backbone, scorer, guidance and training implementations are unchanged
-relative to the completed development source snapshot. Confirmation has separate
-artifacts and CLI commands rather than altering historical run evaluation behavior.
+`ridge_guidance.py` reuses the original prefix cache with the saved ridge scores, trains the existing TB head, and automatically produces exact and sampled evaluations. It does not load ProGen or refit the predictor.
 
-## Development diversity ablation
-
-`diversity.py` implements label-free descendant counts, path-prior diagnostics,
-deduplication-before-ranking, exact-law categorical evaluation and a clearly
-post-hoc review of old confirmation draws. `diversity_experiment.py` freezes and
-verifies development inputs, caches each parent's prefixes once, writes two explicit
-prior arms, reuses the unchanged TB/supervised learners and seals final fits for
-CPU replay. Existing confirmation code and original-prior behavior are unchanged.
-
-The alternate arm stores logits plus log descendant counts in its task payload;
-thus the existing zero-head baseline, sampling, reward and supervised targets all
-use the same corrected probabilities. The correction uses finite candidate
-identities only. It is not sequence-temperature scaling or original-ProGen global
-conditioning. The [spec](../spec.md) defines the changed prior explicitly.
-
-Selection reports keep the existing repeated-slot rule alongside unique designs
-from the same fixed proposal budget. Categorical repeated evaluation is separated
-from timed trajectory sampling. Known development labels never enter rewards or
-selection, and no reserved panel test file is needed for the new ablation.
+`reward_noise.py` adds fixed terminal-score perturbations to the saved clean ridge task, reuses TB unchanged, and evaluates noisy-target damage separately from learned-policy fit. It stores a single clean prefix cache and per-condition noise/heads.

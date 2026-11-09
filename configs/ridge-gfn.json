@@ -1,0 +1,19 @@
+{
+  "pilot_run": "runs/biological-first",
+  "predictor_run": "runs/predictor-reward-v1",
+  "predictor_seed": 0,
+  "scorer_file": "seed-0-n-950-ridge.pt",
+  "predictions_file": "seed-0-n-950-ridge-predictions.json",
+  "input_sha256": {
+    "runs/biological-first/task.pt": "ae2f49427962a854aaa90c58e1f0bbd8b99eb7b9ebde4af80dffbca96547ab9c",
+    "runs/biological-first/config.json": "e088584519f3314a29cea514363afb2b895379fe47a816eef588f89f89870aeb",
+    "runs/biological-first/evaluation_labels.json": "f911c20c8aac6ef1cd12896ba1443e457a85c9e97c25f501cf1605b70bbaa8c0",
+    "runs/predictor-reward-v1/features.pt": "28afa0cadda545b282a12401c07b17344680e73c865185fae868f8222f14e51b",
+    "runs/predictor-reward-v1/results.json": "a47eac351a151ca6f5452ba53d4554b41aaab513f155d01ac10a0781935f8d58",
+    "runs/predictor-reward-v1/seed-0-n-950-ridge.pt": "49f08ee90153ae54de8b8dcc6feb953e3cbdcac5e47d79100ff358de5d06c639",
+    "runs/predictor-reward-v1/seed-0-n-950-ridge-predictions.json": "9eebb87da925b79e7cd3177195b346184e2f6e7305199f9207d6af9e7a1bc46a",
+    "runs/biological-first/seed-0/gfn.pt": "8cb3157508c368dd797cb7f2017499822bf89d621285e0bd1d17392b4ba2a166",
+    "runs/biological-first/seed-1/gfn.pt": "0376ce95d044592cd026a19eb07a6f31dfeb0d9db24a55573daf5c73ec070ef9",
+    "runs/biological-first/seed-2/gfn.pt": "a90d8523a102be7f6069cd638186fa58acf26154593788ebf12b76d9ebcbfc78"
+  }
+}

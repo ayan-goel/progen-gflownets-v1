@@ -1,0 +1,234 @@
+% Weekly meeting deck. Build with pdflatex twice.
+% Evidence: docs/experiments/biological_first_results_2026-10-15.md;
+% docs/experiments/predictor_reward_study_2026-11-03.md;
+% docs/verification/predictor-reward-results-2026-11-03.json.
+% No slide source footers or section-navigation headers, per presentation preference.
+\documentclass[10pt,aspectratio=169]{beamer}
+\geometry{paperwidth=180mm,paperheight=101.25mm}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{booktabs}
+\usepackage{ragged2e}
+\setlength{\RaggedRightRightskip}{0pt plus 1fil}
+
+% Match the earlier project-progress deck: shared text/title margins,
+% top-aligned frames, sans-serif type and bottom-aligned takeaways.
+\definecolor{navy}{HTML}{233B53}
+\definecolor{teal}{HTML}{207B80}
+\definecolor{ink}{HTML}{293541}
+\definecolor{muted}{HTML}{5D6B76}
+\definecolor{pale}{HTML}{EDF4F5}
+\setbeamercolor{normal text}{fg=ink,bg=white}
+\setbeamercolor{structure}{fg=teal}
+\setbeamercolor{frametitle}{fg=navy}
+\setbeamercolor{block title}{fg=navy,bg=pale}
+\setbeamercolor{block body}{fg=ink,bg=pale}
+\setbeamercolor{takeaway}{fg=navy,bg=pale}
+\setbeamerfont{frametitle}{size=\Large,series=\bfseries}
+\setbeamerfont{block title}{series=\bfseries}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+\setbeamertemplate{itemize items}[circle]
+\setbeamersize{text margin left=10mm,text margin right=10mm}
+\setbeamertemplate{frametitle}{%
+  \vspace{2mm}
+  \usebeamerfont{frametitle}\insertframetitle\par
+  \vspace{1mm}
+}
+\setbeamertemplate{footline}{%
+  \hfill{\fontsize{8}{9}\selectfont\color{muted}
+  \insertframenumber\,/\,\inserttotalframenumber}\hspace{10mm}\vspace{3mm}
+}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.17}
+\setlength{\parskip}{3pt}
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\newcommand{\takeaway}[1]{%
+  \par\vspace{2mm}\vfill
+  \begin{beamercolorbox}[wd=\textwidth,sep=2mm]{takeaway}
+    \small\RaggedRight\leftskip=2mm\rightskip=2mm plus 1fil #1
+  \end{beamercolorbox}
+}
+\title{Stability guidance: weekly update}
+\date{3 November 2026}
+\begin{document}
+
+\begin{frame}[t]{Where we started: the guidance system works}
+\RaggedRight
+\textbf{Goal:} steer a frozen ProGen2 model toward stable proteins by training
+an additional GFlowNet guidance head.
+
+\begin{columns}[T,onlytextwidth]
+\column{.31\textwidth}
+\RaggedRight
+\begin{block}{1. ProGen2}
+Provides sequence probabilities and prefix representations. Its weights stay frozen.
+\end{block}
+\column{.31\textwidth}
+\RaggedRight
+\begin{block}{2. Stability predictor}
+Scores the whole protein. Higher predicted stability increases its target sampling weight.
+\end{block}
+\column{.31\textwidth}
+\RaggedRight
+\begin{block}{3. Guidance head}
+Learns token-level corrections using trajectory balance, to sample the target distribution.
+\end{block}
+\end{columns}
+\vspace{2mm}
+\begin{itemize}
+\item ProGen2 and a standalone GFlowNet were working independently.
+\item Integration passed a 256-sequence synthetic test: distribution distance
+about 0.04--0.05 across three seeds (zero means a perfect match).
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{The first stability result: accurate sampling, no gain}
+\RaggedRight
+\textbf{Task:} Mega-scale stability data for one 72-residue protein, 1O6X.
+950 training sequences, 204 validation sequences, 204 evaluation variants.
+Evaluation variants are single amino-acid substitutions.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lrr}
+\toprule
+ & \multicolumn{2}{c}{Expected stability (kcal/mol)}\\
+Distribution & Predicted & Measured\\
+\midrule
+Constrained ProGen & 3.894 & 4.280\\
+Exact predicted-reward target & 3.973 & 4.270\\
+Trained GFlowNet (three-seed mean) & 3.973 & 4.270\\
+\bottomrule
+\end{tabular}
+\end{center}
+Probability-weighted averages over the same 204 variants; higher is better.
+``Exact'' means probabilities are computed directly, without sampling.
+
+\takeaway{The GFlowNet learned its target accurately. The target itself did not
+improve measured stability, so we investigated the predictor and reward.}
+\end{frame}
+
+\begin{frame}[t]{This week: test the predictor and inspect the reward}
+\RaggedRight
+\begin{columns}[T,onlytextwidth]
+\column{.49\textwidth}
+\RaggedRight
+\begin{block}{A fair predictor comparison}
+\begin{itemize}
+\item Constant training-mean control.
+\item Ridge: a regularized linear model.
+\item MLP: a small neural network.
+\end{itemize}
+\end{block}
+Same frozen ProGen features and partitions. Train on \textbf{40, 190 or 950}
+examples; three seeds with matched subsets. Each subset includes the reference.
+
+Choose predictor settings using validation error only.
+\column{.47\textwidth}
+\RaggedRight
+\begin{block}{A focused reward audit}
+\begin{itemize}
+\item Reconstruct the original score and check normalization.
+\item Test guidance strength $\beta=0,\,0.5,\,1,\,2$.
+\item Compare the original reward with a reward capped at predicted reference stability.
+\end{itemize}
+\end{block}
+$\beta$: guidance strength. Zero recovers ProGen; one is the original setting.
+\end{columns}
+\takeaway{Evaluate every target directly before another GFlowNet fit.
+The original reward arithmetic checked out.}
+\end{frame}
+
+\begin{frame}[t]{The linear predictor gives a better target on this split}
+\RaggedRight
+\begin{columns}[T,onlytextwidth]
+\column{.43\textwidth}
+\RaggedRight
+\textbf{More data improves prediction}
+\begin{center}
+\renewcommand{\arraystretch}{1.22}
+\begin{tabular}{rrr}
+\toprule
+Train size & Ridge & MLP\\
+\midrule
+40 & 1.001 & 0.982\\
+190 & 0.738 & 0.712\\
+950 & 0.524 & 0.529\\
+\bottomrule
+\end{tabular}
+\end{center}
+Evaluation root mean squared error, in kcal/mol; lower is better.
+Three-seed means. Constant control: about 1.16.
+\column{.53\textwidth}
+\RaggedRight
+\textbf{Full-data targets, original strength}
+\begin{center}
+\renewcommand{\arraystretch}{1.22}
+\begin{tabular}{lrr}
+\toprule
+ & Measured & Change\\
+\midrule
+ProGen & 4.280 & ---\\
+Ridge target & \textbf{4.320} & \textbf{+0.040}\\
+MLP target & 4.261 & $-0.019$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Expected stability in kcal/mol, with $\beta=1$ and 950 training examples.
+The MLP loses measured utility in all three seeds.
+\end{columns}
+\takeaway{Similar overall prediction errors can produce different guidance outcomes.
+These are exact target results; no new GFlowNet was trained this week.}
+\end{frame}
+
+\begin{frame}[t]{Why: errors on likely variants matter most}
+\RaggedRight
+ProGen puts \textbf{91.4\% of its probability on five variants}.
+Errors in this small group can dominate the effect of guidance.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{lrrrr}
+\toprule
+Variant & ProGen probability & Measured & Ridge prediction & MLP prediction\\
+\midrule
+V1R & 33.9\% & 4.438 & 4.684 & 4.183\\
+G2I & 10.4\% & 3.830 & 3.904 & 4.816\\
+D3G & 4.4\% & 4.419 & 4.542 & 3.157\\
+\bottomrule
+\end{tabular}
+\end{center}
+Full-data seed-0 models; kcal/mol. G2I: glycine at position 2 replaced by
+isoleucine (same naming convention for other variants).
+
+\begin{itemize}
+\item The neural model ranks G2I above both more-stable alternatives.
+\item All three neural models beat ridge on validation error, but produce worse targets.
+\end{itemize}
+\takeaway{Evaluate prediction errors where ProGen puts its probability.}
+\end{frame}
+
+\begin{frame}[t]{What we learned, and the next focused step}
+\RaggedRight
+\begin{itemize}
+\setlength{\itemsep}{4pt}
+\item \textbf{The linear baseline is competitive.} At full data, its target gains
+about 0.040 kcal/mol over ProGen on this split.
+\item \textbf{Reward capping is not a complete fix.} For the neural predictor,
+it slightly raises mean stability, but lowers the chance of reaching reference-level stability.
+\item \textbf{The limitation is still local evidence.} One protein and an already
+inspected evaluation set; repeated full-data ridge fits are not independent replications.
+\end{itemize}
+\vspace{2mm}
+\begin{block}{Proposed next step}
+Fix ridge and the original guidance strength; check additional predefined
+splits of this protein's data against the neural comparator. Measure overall
+and ProGen-weighted prediction errors, plus exact target quality.
+
+If the gain persists, test whether GFlowNet guidance realizes it. Keep trajectory
+balance for now: target matching has already worked.
+\end{block}
+\end{frame}
+\end{document}

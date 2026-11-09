@@ -1,43 +1,20 @@
 # Research documentation
 
-Start with [current status](status.md), then the [runbook](runbook.md) for commands.
-The [spec](../spec.md) defines the scientific contract. Documentation requirements
-are in [AGENTS.md](../AGENTS.md#research-documentation-required).
+Start with [current status](status.md) and the [scientific specification](../spec.md).
 
-## Current work
-
-| Need | Read |
+| Question | Record |
 |---|---|
-| What is happening and what comes next? | [Current status](status.md) |
-| How do I run or reevaluate it? | [Runbook](runbook.md) |
-| What is the next GPU experiment? | [Diversity findings / handoff](experiments/diversity_findings_2026-10-17.md) |
-| What is fixed for the new ablation? | [Two-prior development protocol](experiments/diversity_plan_2026-10-17.md) |
-| What was fixed for confirmation? | [Five-parent protocol](experiments/confirmation_plan_2026-10-16.md) |
-| What did confirmation establish? | [Completed results](experiments/confirmation_results_2026-10-17.md) |
+| What happened in the original biological pilot? | [Pilot results](experiments/biological_first_results_2026-10-15.md) |
+| What was established before it? | [Experiment history](experiments/README.md), [standalone results](prior_results.md) |
+| What do we do next? | [Predictor/reward study](experiments/predictor_reward_study_2026-11-03.md), [current status](status.md) |
+| How does the implementation work? | [Architecture](architecture.md) |
+| What data and split are used? | [Data contract](data.md) |
+| Which parameters were chosen and why? | [Hyperparameters](hyperparameters.md), [decisions](decisions.md) |
+| What substantive implementation decisions were made? | [Implementation record](implementation_log.md) |
+| How do I run or evaluate the retained code? | [Runbook](runbook.md) |
+| What has been verified? | [Verification](verification.md) |
+| What literature motivates the project? | [Literature index](../literature/README.md) |
 
-## Experiments and evidence
-
-| Need | Read |
-|---|---|
-| Chronological experiments, protocols and outcomes | [Experiment index](experiments/README.md) |
-| Why we chose an approach or changed it | [Decision record](decisions.md) |
-| How the implementation supports the research choices | [Implementation decisions](implementation_log.md) |
-| Verification findings and their limits | [Verification history](verification.md) |
-| Test logs, readiness records and numerical audits | [Evidence index](verification/README.md) |
-| A consistent format for a new record | [Experiment/analysis template](experiments/TEMPLATE.md) |
-
-## Design and literature
-
-- [Architecture](architecture.md): model/module responsibilities and probability conventions.
-- [Data](data.md): releases, filters, splits and outcome isolation.
-- [Hyperparameters](hyperparameters.md): numerical choices and their rationale.
-- [Research plan](../literature/EXPERIMENT_PLAN.md): scientific stages and comparisons.
-- [Literature index](../literature/README.md): synthesis, bibliography, search record and archived sources.
-- [Prior standalone results](prior_results.md): ProGen and TF-Bind-8 history.
-- [Post-pilot planning record](next_steps_2026-10-15.md): rationale leading to the diagnostic and confirmation.
-
-Existing records stay at their original paths so saved links and run references
-remain valid. Dated records preserve what was known at the time; current state
-belongs in [status.md](status.md). A passing CPU smoke test establishes mechanics,
-not real-checkpoint convergence or biological improvement. All real fits and GPU
-operations remain user initiated.
+Document decisions and experimental evidence, not routine activity. Follow
+[project instructions](../AGENTS.md). All GPUs and real experiments remain
+user initiated; only small CPU correctness checks are run during development.

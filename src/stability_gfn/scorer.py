@@ -71,9 +71,17 @@ def initialize_scorer(features, labels, hidden_size):
 
 
 def fit_scorer(
-    train_features, train_labels, validation_features, validation_labels, config, seed=0
+    train_features,
+    train_labels,
+    validation_features,
+    validation_labels,
+    config,
+    seed=0,
+    family="both",
 ):
     """Choose ridge or an MLP using validation RMSE; never accept test labels."""
+    if family not in {"both", "ridge", "mlp"}:
+        raise ValueError("Unknown scorer family")
     torch.manual_seed(seed)
     device = train_features.device
     train_labels = torch.as_tensor(train_labels, dtype=torch.float32, device=device)
@@ -98,7 +106,8 @@ def fit_scorer(
             best_error = metrics["rmse"]
             best_model = copy.deepcopy(model)
 
-    for penalty in config["ridge_penalties"]:
+    penalties = config["ridge_penalties"] if family != "mlp" else []
+    for penalty in penalties:
         if penalty <= 0:
             raise ValueError("Ridge penalties must be positive")
         model = initialize_scorer(train_features, train_labels, hidden_size=0)
@@ -116,38 +125,41 @@ def fit_scorer(
             model.network.bias.zero_()
         consider(model, f"ridge_{penalty}")
 
-    model = initialize_scorer(train_features, train_labels, config["hidden_size"])
-    optimizer = torch.optim.Adam(
-        model.parameters(),
-        lr=config["learning_rate"],
-        weight_decay=config["weight_decay"],
-    )
-    generator = torch.Generator(device=device).manual_seed(seed)
-    for step in range(1, config["steps"] + 1):
-        indices = torch.randint(
-            len(train_labels),
-            (config["batch_size"],),
-            generator=generator,
-            device=device,
+    if family != "ridge":
+        model = initialize_scorer(train_features, train_labels, config["hidden_size"])
+        optimizer = torch.optim.Adam(
+            model.parameters(),
+            lr=config["learning_rate"],
+            weight_decay=config["weight_decay"],
         )
-        loss = (
-            (
-                (model(train_features[indices]) - train_labels[indices])
-                / model.label_scale
+        generator = torch.Generator(device=device).manual_seed(seed)
+        for step in range(1, config["steps"] + 1):
+            indices = torch.randint(
+                len(train_labels),
+                (config["batch_size"],),
+                generator=generator,
+                device=device,
             )
-            .square()
-            .mean()
-        )
-        if not torch.isfinite(loss):
-            raise FloatingPointError("Non-finite scorer loss")
-        optimizer.zero_grad()
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(
-            model.parameters(), config["gradient_clip"], error_if_nonfinite=True
-        )
-        optimizer.step()
-        if step % config["validate_every"] == 0 or step == config["steps"]:
-            consider(model, "mlp", step)
+            loss = (
+                (
+                    (model(train_features[indices]) - train_labels[indices])
+                    / model.label_scale
+                )
+                .square()
+                .mean()
+            )
+            if not torch.isfinite(loss):
+                raise FloatingPointError("Non-finite scorer loss")
+            optimizer.zero_grad()
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(
+                model.parameters(), config["gradient_clip"], error_if_nonfinite=True
+            )
+            optimizer.step()
+            if step % config["validate_every"] == 0 or step == config["steps"]:
+                consider(model, "mlp", step)
+    if best_model is None:
+        raise ValueError("No scorer candidates were evaluated")
     best_model.eval().requires_grad_(False)
     with torch.no_grad():
         validation = regression_metrics(

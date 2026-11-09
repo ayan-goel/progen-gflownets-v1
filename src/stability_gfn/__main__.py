@@ -8,21 +8,10 @@ import os
 os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
-from .confirmation import run_confirmation
-from .confirmation_data import prepare_confirmation_support
-from .confirmation_evaluation import evaluate_confirmation
 from .data import prepare_local_task
 from .diagnostics import fit_exact_conditionals, inspect_saved_fit
-from .diversity import diagnose_diversity, inspect_saved_unique_selection
-from .diversity_experiment import (
-    check_diversity_inputs,
-    evaluate_diversity,
-    run_diversity,
-)
 from .evaluation import evaluate_run
-from .panel import prepare_panel
 from .pipeline import ROOT, project_path, run_experiment
-from .target_experiment import evaluate_target_run, run_target_diagnostic
 
 
 def main():
@@ -70,146 +59,87 @@ def main():
     audit.add_argument("--run", required=True)
     audit.add_argument("--fit", required=True)
     audit.add_argument("--output", required=True)
-    panel = commands.add_parser(
-        "prepare-panel",
-        help="Freeze development/confirmation identities and splits; no models",
+    study = commands.add_parser(
+        "reward-study", help="Matched predictor comparison and exact reward evaluation"
     )
-    panel.add_argument("--config", default="configs/target-diagnostic.json")
-    panel.add_argument(
-        "--csv", default="data/raw/Tsuboyama2023_Dataset2_Dataset3_20230416.csv"
+    study.add_argument("--config", default="configs/predictor-reward-study.json")
+    study.add_argument("--output", required=True)
+    study.add_argument("--device", default="cuda")
+    reward_audit = commands.add_parser(
+        "audit-reward", help="CPU analysis of the original saved reward"
     )
-    panel.add_argument("--output")
-    target = commands.add_parser(
-        "diagnose-target",
-        help="Fit development scorers and evaluate exact targets; no GFN training",
+    reward_audit.add_argument("--run", default="runs/biological-first")
+    reward_audit.add_argument("--output", required=True)
+    ridge = commands.add_parser(
+        "ridge-gfn", help="Train guidance on the saved ridge reward and evaluate"
     )
-    target.add_argument("--config", default="configs/target-diagnostic.json")
-    target.add_argument("--output", required=True)
-    target.add_argument("--device", default="cpu")
-    target.add_argument("--smoke", action="store_true")
-    target_evaluation = commands.add_parser(
-        "evaluate-target",
-        help="Recompute saved development diagnostics on CPU; no fitting",
+    ridge.add_argument("--config", default="configs/ridge-gfn.json")
+    ridge.add_argument("--output")
+    ridge.add_argument("--device", default="cuda")
+    ridge.add_argument(
+        "--check-only",
+        action="store_true",
+        help="CPU input verification only; no training",
     )
-    target_evaluation.add_argument("--run", required=True)
-    target_evaluation.add_argument("--output", required=True)
-    confirmation_prepare = commands.add_parser(
-        "prepare-confirmation",
-        help="Reconstruct reserved candidate identities without opening test-label files",
+    noise = commands.add_parser(
+        "reward-noise", help="Train and evaluate fixed ridge-score noise sensitivity"
     )
-    confirmation_prepare.add_argument("--config", default="configs/confirmation.json")
-    confirmation_run = commands.add_parser(
-        "confirm",
-        help="Fit all reserved parents, then evaluate; real GPU runs are user initiated",
+    noise.add_argument("--config", default="configs/reward-noise.json")
+    noise.add_argument("--output")
+    noise.add_argument("--device", default="cuda")
+    noise.add_argument("--check-only", action="store_true")
+    noise_eval = commands.add_parser(
+        "evaluate-noise", help="CPU evaluation of saved noise-study heads"
     )
-    confirmation_run.add_argument("--config", default="configs/confirmation.json")
-    confirmation_run.add_argument("--output", required=True)
-    confirmation_run.add_argument("--device", default="cpu")
-    confirmation_run.add_argument("--smoke", action="store_true")
-    confirmation_eval = commands.add_parser(
-        "evaluate-confirmation",
-        help="Verify completed fits and evaluate confirmation outcomes on CPU",
-    )
-    confirmation_eval.add_argument("--run", required=True)
-    confirmation_eval.add_argument("--output", required=True)
-    diversity_diag = commands.add_parser(
-        "diagnose-diversity",
-        help="CPU development concentration and unique-selection audit",
-    )
-    diversity_diag.add_argument("--run", default="runs/target-diagnostic-v1")
-    diversity_diag.add_argument("--output", required=True)
-    diversity_run = commands.add_parser(
-        "diversity", help="User-run two-prior development ablation"
-    )
-    diversity_run.add_argument("--config", default="configs/diversity.json")
-    diversity_run.add_argument("--output", required=True)
-    diversity_run.add_argument("--device", default="cpu")
-    diversity_run.add_argument("--smoke", action="store_true")
-    diversity_eval = commands.add_parser(
-        "evaluate-diversity", help="CPU replay of saved development prior ablation"
-    )
-    diversity_eval.add_argument("--run", required=True)
-    diversity_eval.add_argument("--output", required=True)
-    diversity_check = commands.add_parser(
-        "check-diversity",
-        help="CPU-only metadata, checkpoint and frozen-input integrity check",
-    )
-    diversity_check.add_argument("--config", default="configs/diversity.json")
-    unique_review = commands.add_parser(
-        "inspect-unique",
-        help="Post-hoc unique selection from completed confirmation proposals",
-    )
-    unique_review.add_argument("--run", required=True)
-    unique_review.add_argument("--output", required=True)
+    noise_eval.add_argument("--run", required=True)
+    noise_eval.add_argument("--output", required=True)
     args = parser.parse_args()
-    if args.command == "inspect-unique":
-        inspect_saved_unique_selection(
-            project_path(args.run), project_path(args.output)
-        )
-        print(project_path(args.output) / "report.md")
-    elif args.command == "diagnose-diversity":
-        diagnose_diversity(project_path(args.run), project_path(args.output))
-        print(project_path(args.output) / "report.md")
-    elif args.command == "diversity":
-        config = json.loads(project_path(args.config).read_text())
-        run_diversity(config, project_path(args.output), args.device, args.smoke)
-    elif args.command == "evaluate-diversity":
-        evaluate_diversity(project_path(args.run), project_path(args.output))
-        print(project_path(args.output) / "report.md")
-    elif args.command == "check-diversity":
-        import torch
+    if args.command == "reward-noise":
+        from .reward_noise import check_noise_inputs, run_noise_study
 
         config = json.loads(project_path(args.config).read_text())
-        loaded, _ = check_diversity_inputs(config)
+        if args.check_only:
+            _, readiness = check_noise_inputs(config)
+            print(json.dumps(readiness, indent=2))
+        else:
+            if args.output is None:
+                parser.error("reward-noise requires --output unless --check-only")
+            run_noise_study(config, project_path(args.output), args.device)
+    elif args.command == "evaluate-noise":
+        from .reward_noise import evaluate_noise_study
+
+        evaluate_noise_study(project_path(args.run), project_path(args.output))
+        print(project_path(args.output) / "report.md")
+    elif args.command == "ridge-gfn":
+        from .ridge_guidance import prepare_ridge_task, run_ridge_guidance
+
+        config = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            import torch
+
+            torch.set_num_threads(1)
+            _, _, metadata = prepare_ridge_task(config)
+            print(json.dumps(metadata, indent=2))
+        else:
+            if args.output is None:
+                parser.error("ridge-gfn requires --output unless --check-only")
+            run_ridge_guidance(config, project_path(args.output), args.device)
+    elif args.command == "reward-study":
+        from .reward_study import run_reward_study
+
+        run_reward_study(
+            json.loads(project_path(args.config).read_text()),
+            project_path(args.output),
+            args.device,
+        )
+    elif args.command == "audit-reward":
+        from .reward_study import audit_pilot
+
         print(
             json.dumps(
-                {
-                    "parents": [entry["parent"] for entry, _, _ in loaded],
-                    "inputs_verified": True,
-                    "cuda_initialized": torch.cuda.is_initialized(),
-                    "gpu_readiness": "Not queried",
-                },
-                indent=2,
+                audit_pilot(project_path(args.run), project_path(args.output)), indent=2
             )
         )
-    elif args.command == "prepare-confirmation":
-        config = json.loads(project_path(args.config).read_text())
-        manifest = prepare_confirmation_support(
-            project_path(config["panel"]), project_path(config["candidate_support"])
-        )
-        print(json.dumps(manifest, indent=2))
-    elif args.command == "confirm":
-        config = json.loads(project_path(args.config).read_text())
-        run_confirmation(config, project_path(args.output), args.device, args.smoke)
-    elif args.command == "evaluate-confirmation":
-        evaluate_confirmation(project_path(args.run), project_path(args.output))
-        print(project_path(args.output) / "report.md")
-    elif args.command == "prepare-panel":
-        config = json.loads(project_path(args.config).read_text())
-        manifest = prepare_panel(
-            project_path(args.csv),
-            project_path(args.output or config["panel"]),
-            config["panel_preparation"],
-        )
-        print(
-            json.dumps(
-                {
-                    "parents": [
-                        {"parent": entry["parent"], "role": entry["role"]}
-                        for entry in manifest["parents"]
-                    ]
-                },
-                indent=2,
-            )
-        )
-    elif args.command == "diagnose-target":
-        config = json.loads(project_path(args.config).read_text())
-        run_target_diagnostic(
-            config, project_path(args.output), args.device, args.smoke
-        )
-    elif args.command == "evaluate-target":
-        evaluate_target_run(project_path(args.run), project_path(args.output))
-        print(project_path(args.output) / "report.md")
     elif args.command == "prepare":
         manifest = prepare_local_task(
             project_path(args.csv),

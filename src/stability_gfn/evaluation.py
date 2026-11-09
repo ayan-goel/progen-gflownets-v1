@@ -57,7 +57,7 @@ def evaluate_run(run, output, device="cpu"):
         seed_path = run / f"seed-{seed}"
         heads = {"progen": None}
         checkpoint_data = {}
-        for method in ["gfn", "supervised"]:
+        for method in settings.get("methods", ["gfn", "supervised"]):
             heads[method], checkpoint_data[method] = load_head(
                 task, seed_path / f"{method}.pt"
             )

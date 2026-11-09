@@ -77,55 +77,44 @@ before guidance. This verifies mechanics before biology without treating toy
 convergence as evidence of improved stability.
 See [gate and pilot setup](experiments/exact_pass_and_biological_pilot_2026-10-15.md).
 
-## 2026-10-15 — Separate target quality from guidance accuracy
 
-The first biological pilot fit its target accurately without improving measured
-stability. Implement an exact development-target diagnostic so scorer/prior utility
-can be assessed before further guidance training. Reuse the scorer fitter; add
-separate fit/inner/development partitions, three development parents and five
-reserved confirmation parents. Cache teacher-forced causal logits and verify that
-they reproduce the existing prefix-tree prior.
+## 2026-11-03 — Matched predictor and exact-reward diagnostics
 
-Compare ridge, MLP-0 and an ensemble, alongside declared prior-tempering and uniform
-controls. Keep failed screens visible and exclude reserved outcomes from analysis.
-This separates an unhelpful target from difficulty learning a useful target.
-See [development protocol](experiments/target_diagnostic_2026-10-15.md) and
-[results](experiments/target_diagnostic_results_2026-10-15.md).
+Add an optional family selector to the existing scorer fitter; default combined
+selection remains unchanged. The new study calls ridge and MLP separately so
+both receive downstream evaluation, reusing normalization and optimization code.
+Extract complete-sequence features once (the original prefix cache cannot serve
+as pooled predictor features), preserve them, and reuse the original finite prior.
+An independent saved-run audit reconstructs score arithmetic and reports
+probability-shift contributions to measured utility. No GFN training changes.
+See the [study protocol](experiments/predictor_reward_study_2026-11-03.md).
 
-## 2026-10-16 — Seal all confirmation fits before releasing outcomes
 
-Reconstruct reserved candidate identities separately from numerical labels.
-Train the fixed MLP-0/original-prior procedure on all five parents with the existing
-learners. Require every parent's fitting phase to complete or explicitly fail its
-screen before a hashed fit seal permits evaluation. An interrupted fit cannot
-silently release outcomes or omit an unfavorable seed.
+## 2026-11-09 — Reuse cached ProGen inputs with the frozen ridge reward
 
-Use matched proposal budgets, retain duplicates and preserve every final seed.
-Replay verifies sealed artifacts and uses saved inputs on CPU. Synthetic tests
-exercise outcome isolation, failed screens and tampering rejection.
-See [confirmation protocol](experiments/confirmation_plan_2026-10-16.md) and
-[completed results](experiments/confirmation_results_2026-10-17.md).
+A dedicated ridge-guidance runner verifies the original cache and saved full-data
+ridge artifacts, reconstructs predictor outputs without fitting, and replaces
+only the task's scores/predictions. Original inputs and historical heads remain
+unchanged. Existing TB training, progress reporting and sampling evaluation are
+reused. The evaluator accepts an explicit method list so this run needs no
+unrelated supervised-head fit. Default evaluation still includes both original
+learners. A final exact report distinguishes predicted from measured expectations
+and compares the trained policy with its target and historical MLP policies.
 
-## 2026-10-17 — Isolate prior construction and distinct-design utility
+CPU checks exercise the complete synthetic training/evaluation/reload path,
+score substitution with fixed cache tensors, stale input rejection and output
+immutability. All 30 tests pass. See the [protocol](experiments/ridge_gfn_2026-11-09.md).
 
-Confirmation established strong target accuracy but limited diversity and higher
-fitting cost than supervised guidance. Development controls showed that local
-branching induces early-mutation concentration even with uniform logits. Add an
-explicit descendant-count prior arm alongside the original prior; keep scorer,
-support, reward strength and learners fixed. Store corrected logits in each arm's
-task so initialization, sampling, TB rewards and supervised rollouts all use the
-same prior. Reuse prefix features across arms to avoid duplicate backbone work.
 
-Add a separate selection rule that deduplicates the full proposal batch before
-ranking and never refills. Retain repeated-slot metrics and report actual design
-count alongside quality. Exact-law sampling repeats measure selection variability;
-time actual trajectory decoding separately. Keep uniform selection and exact-target
-sampling as finite-support controls, with setup and fitting costs explicit.
+## 2026-11-09 — Fixed reward-noise panel
 
-Freeze development source/scorer hashes and seal final artifacts for CPU replay.
-Synthetic tests verify uniform-leaf correction, zero-head behavior, causal cache
-parity, label-independent selection, failed-screen handling and replay integrity.
-The full suite has 41 passing CPU tests; these do not establish real convergence.
-See [protocol](experiments/diversity_plan_2026-10-17.md),
-[findings](experiments/diversity_findings_2026-10-17.md) and
-[verification](verification/diversity-tests.txt).
+Add a dedicated runner around the existing TB trainer and frozen ridge task.
+A local CPU RNG produces immutable per-sequence noise, independent of training
+RNG. Store the clean task once and only noise tensors/heads per condition; preserve
+clean controls, source and input hashes. Existing optimizer code is unchanged.
+Evaluate full-support distributions after all fits, distinguishing clean-target
+shift from fitting gap to the noisy target. Exact evaluation avoids introducing
+sample/selection noise into this diagnostic. Reevaluate saved heads via a separate
+CPU command. Synthetic checks cover paired perturbations, zero-noise identity,
+RNG isolation, invalid inputs, crossed training/evaluation, decomposition identity,
+replay equality and immutable source artifacts; all 33 tests pass.

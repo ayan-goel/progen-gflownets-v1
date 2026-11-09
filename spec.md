@@ -1,30 +1,43 @@
 # Stability-guided protein generation with frozen ProGen2
 
-**Scientific specification revised: 17 October 2026.** Execution progress is maintained
-in [current status](docs/status.md), commands in the [runbook](docs/runbook.md), and
-dated evidence in the [experiment index](docs/experiments/README.md).
+**Active scope reset: 3 November 2026.** Start from the completed first biological
+pilot. [Current status](docs/status.md) owns execution progress.
 
-## 1. Project objective
+## 1. Project objective and immediate scope
 
-Guide a pretrained protein language model toward stable proteins by learning an additional guidance model with a GFlowNet objective. Keep ProGen2 fixed and use completed-sequence stability feedback to train guidance over its generation decisions.
+Learn an additional guidance head on frozen ProGen2 using whole-sequence
+folding-stability feedback and a GFlowNet objective. The long-term motivation is
+useful, diverse stable proteins; the immediate task is to understand the
+single-substitution Mega-scale benchmark before expanding.
 
-Use **Mega-scale folding-stability data** as the biological foundation. Begin with variants near measured reference proteins, then investigate how performance changes as generation moves farther from those references. The scope is general protein stability, starting within the small-domain regime represented by the dataset.
+Focus on one or two controlled questions: how well a linear versus neural
+predictor generalizes, and whether the chosen reward produces a useful target.
+Keep the original trajectory-balance implementation as the baseline.
+Broader generation, folding pipelines, multi-parent experiments and additional
+scorer-scaling workflows are outside the active implementation.
 
-The central research question is:
+## 2. Retained foundation
 
-> Can GFlowNet-trained guidance produce diverse, more stable protein variants from frozen ProGen2, within a controlled mutation neighborhood, more accurately or economically than alternative guidance and selection methods?
+- Standalone ProGen2 and the adapted TF-Bind-8 GFlowNet run independently.
+  [Prior results](docs/prior_results.md) document the reproduction gap.
+- The 256-sequence synthetic integration test passed across three final seeds.
+- The original biological pilot on 1O6X.pdb used 950 training, 204 validation
+  and 204 evaluation sequences. GFlowNet learned the predicted target, but
+  measured expected stability was 4.26975 versus 4.28005 for constrained ProGen.
+  [Pilot results](docs/experiments/biological_first_results_2026-10-15.md).
+- Keep original numerical definitions and artifacts unchanged while investigating
+  their consequences. The completed predictor/reward study identifies full-data ridge as a provisional baseline;
+  [results and limitations](docs/experiments/predictor_reward_study_2026-11-03.md)
+  motivate the [controlled ridge-reward GFN rerun](docs/experiments/ridge_gfn_2026-11-09.md).
+  The completed rerun realizes the ridge target's modest local gain; controlled
+  reward-noise sensitivity is the next investigation, specified in the
+  [fixed protocol](docs/experiments/reward_noise_2026-11-09.md).
+- Existing evaluation outcomes are inspected development evidence for future
+  choices, not a fresh test set.
 
-Success requires credible stability evaluation, useful sequence diversity and a fair accounting of training and generation costs. Improved predicted rewards alone are insufficient.
-
-## 2. Current foundation
-
-- **ProGen2-medium runs independently.** The existing checkpoint has approximately 765 million parameters and 1,536-dimensional hidden representations. Repetition and termination behavior have been investigated; successful decoding does not establish biological quality.
-- **Standalone GFlowNet training and evaluation are complete for three TF-Bind-8 seeds.** Mean selected-batch score was 0.690, compared with 0.653 for random proposals with the same learned-score selection and 0.471 for unranked random proposals. The paper reports 0.840. This is a working adapted pipeline, with a remaining numerical reproduction gap. [Run report](../progen-gflownets-test/gflownet/runs/tfbind8/report.md)
-- **The integrated exact-task gate passed on 15 October 2026.** Frozen ProGen2 plus TB-trained guidance reached final TV 0.04090 / 0.04686 / 0.04472 across three seeds on the 256-sequence synthetic task. This clears the engineering milestone; the subsequent biological result is recorded below. [Milestone record](docs/experiments/exact_pass_and_biological_pilot_2026-10-15.md)
-- **The first biological pilot completed on 15 October 2026.** The scorer passed validation and GFN accurately fit its predicted target, but measured stability did not improve over the constrained ProGen baseline. Reward ranking and support concentration require analysis before further expansion. [Pilot results](docs/experiments/biological_first_results_2026-10-15.md)
-- **Literature review is available.** It identifies relevant objectives, architectures and comparisons. [Review archive](literature/README.md)
-
-Reuse the existing ProGen adapter knowledge and the [BioSeq-GFN-AL implementation](https://github.com/MJ10/BioSeq-GFN-AL) as references. The TF-Bind-8 generator operates on DNA and is not a pretrained protein guidance head. Preserve the source snapshots, checkpoints and results in `../progen-gflownets-test`.
+The following sections retain the original scientific and implementation contract.
+Proposed changes require an explicit new protocol rather than retroactive edits
+to the completed experiment.
 
 ## 3. Biological task and data
 
@@ -219,35 +232,23 @@ Implement these components in v1, with explicit configurations and documented in
 
 Each run must save its configuration, data/scorer/checkpoint identities, seeds, training curves, model checkpoint, raw sequences, selection decisions, metrics, timing and completion status. Evaluation must be repeatable without retraining. Do not overwrite existing runs.
 
-## 9. Current implementation sequence
+## 9. Current next steps
 
-### A. Audit data and establish the task
+1. Audit the implemented data/split, feature, predictor, reward and TB path.
+2. Specify a fair constant/linear/neural predictor comparison on identical
+   partitions, with a small training-size study and explicit validation rules.
+3. Separate prediction error, ranking and design utility. Evaluate each proposed
+   exact target against existing measurements before guidance training.
+4. Investigate a small number of justified reward strengths/transforms, including
+   a stable-enough objective only if its threshold has a defensible meaning.
+5. Run new GFlowNet training only once a useful target is identified.
+   Consider subtrajectory balance if target fitting becomes a measured bottleneck.
 
-Inspect Mega-scale labels and coverage, select an initial reference, define splits and candidate support, and document the label convention. Verify checkpoint/tokenizer identity and repair environment paths affected by the previous folder rename.
-
-**Deliverable:** a reproducible task manifest and data-quality report. Specific references, numerical reward scaling and compute caps are set from this audit and a small runtime pilot.
-
-### B. Verify the guidance mechanism exactly
-
-Use a four-token alphabet `{A,G,L,S}` and four generated positions, giving 256 completions. Validate the boundary prefix `1`. Use the positive toy reward whose log is the negative squared difference between glycine count and two. This task checks mechanics, not protein stability.
-
-**Acceptance criteria:** zero guidance recovers the baseline; distributions normalize; likelihood implementations agree; backbone weights remain unchanged; and beta-one training reaches a proposed exact total variation below 0.05 in each of three seeds. Also report both KL directions and log-partition error. The threshold is an engineering criterion, not a literature standard.
-
-If learning fails, fit the same head to exact conditional targets as a privileged capacity diagnostic. Do not count that diagnostic as a fair sample-efficiency baseline.
-
-### C. Validate the stability scorer
-
-Fit and compare simple predictors under the declared split. Inspect errors and ranking near the initial reference before freezing the scorer and reward transform. If it cannot provide useful held-out guidance, improve the scorer or narrow the task before optimizing generation against it.
-
-### D. Run the first biological comparison
-
-Train guidance for one reference and one-substitution budget. Compare all four initial methods on the measured-candidate benchmark, preserving held-out labels until evaluation. Use three seeds for the pilot and report each result.
-
-**Deliverable:** one report showing stability, diversity, novelty, locality, distribution diagnostics where tractable, and total cost. A benefit over unguided ProGen alone does not establish a benefit over alternative guidance.
-
-### E. Test the useful operating range
-
-Expand to additional domains, then two-substitution neighborhoods and larger distances when evaluation remains credible. Separate within-domain and unseen-domain results. Increase replication for substantive comparisons as compute permits, and investigate the tradeoff between reward strength, diversity and prediction reliability.
+The [pre-run protocol](docs/experiments/predictor_reward_study_2026-11-03.md)
+fixes the training budgets, validation rules and reward grid for this investigation.
+The capped reward is a diagnostic alternative; the original pilot stays unchanged.
+Reusing previously inspected variants is developmental. Later retired outcomes
+also remain inspected; future independent confirmation needs an exposure audit.
 
 ## 10. Position in the literature
 
@@ -267,139 +268,15 @@ PG-AbD's generator is separate from ProGen2; our generator retains frozen ProGen
 
 ## 11. Scope and execution
 
-This specification is the scientific contract. The [README](README.md), [literature synthesis](literature/REVIEW.md) and [experiment plan](literature/EXPERIMENT_PLAN.md) describe the same active Mega-scale stability project. [Implementation documentation](docs/README.md) records concrete decisions and verification; [prior standalone results](docs/prior_results.md) preserve historical evidence.
+The [README](README.md), [status](docs/status.md), [literature plan](literature/EXPERIMENT_PLAN.md)
+and this specification describe the same local stability investigation.
+The user runs all real experiments and every GPU operation. Development may use
+small synthetic CPU runs and saved-artifact analysis.
 
-The first implementation excludes antibody-specific optimization, Potts-model training, full-backbone fine-tuning, unconstrained long-protein generation and conformational-ensemble design. No wet-lab outcome is implied by a computational score.
+Keep ProGen2 frozen. Exclude antibody-specific optimization, Potts training,
+full-backbone fine-tuning, unconstrained generation, folding assessment pipelines,
+SMC and speculative decoding from this active implementation.
 
-All GPU execution and real experiments remain user initiated. Tiny CPU runs may verify implementation mechanics. Implement in v1, document decisions and hyperparameters, and verify each atomic slice before proceeding. Passing CPU checks does not satisfy the real-checkpoint convergence or biological-validation gates.
-
-## 12. Current post-pilot development diagnostic
-
-The user authorized the [post-pilot plan](docs/next_steps_2026-10-15.md). The completed
-development experiment assesses the target before further guidance training:
-three development parents, with five additional parents reserved for confirmation.
-Coverage-based selection, cluster/alignment screening, immutable splits and every
-numerical choice are recorded in the [implementation record](docs/experiments/target_diagnostic_2026-10-15.md).
-
-Separate inner scorer selection from outer development assessment. Compare ridge,
-a small MLP and a five-member MLP ensemble using the existing frozen features.
-Compute exact stability expectations and matched sampling references at beta=1.
-All parent outcomes and scorer-screen failures remain visible. No confirmation
-labels or guidance fits enter this diagnostic.
-
-The accepted diagnostic ablation tempers **sequence** probabilities:
-
-    p_alpha(x | c) = p0(x | c)^alpha / sum_u p0(u | c)^alpha
-    R_alpha(x | c) = p_alpha(x | c) * exp(beta * s_hat(x,c))
-
-Here x is a full candidate; c specifies its reference/support; u ranges over that
-support; p0 is the locally constrained prior defined above; alpha is a nonnegative
-sequence-prior exponent; p_alpha is its normalized tempered distribution;
-s_hat is the dimensionless predicted stability improvement defined in section 5;
-beta is guidance strength; exp is the exponential function; R_alpha is the positive
-unnormalized target weight. Normalize R_alpha over the support to obtain the exact
-target. Test alpha=1, 0.5, 0.25; alpha=0 is a uniform-candidate diagnostic only.
-
-Alpha=1 preserves the existing generation contract. These ablations do not modify
-the trained generation policy. Adoption of another prior in guidance requires
-consistent baseline sampling, reward and policy probabilities. A tokenwise
-logit temperature is not an equivalent implementation. Stronger scorers, fresh
-confirmation training and larger mutation neighborhoods remain subsequent stages,
-conditioned on the diagnostic evidence. The current command stops for review.
-
-### 15 October 2026 — Development result and proposed confirmation primary
-
-The [diagnostic results](docs/experiments/target_diagnostic_results_2026-10-15.md)
-show positive exact-target gains on all three development supports at alpha=1.
-The recommended confirmation primary is single-MLP seed zero, original prior
-alpha=1 and beta=1, retaining inner checkpoint selection. Ensemble gains are nearly
-identical on average, while tempering trades raw stability for coverage. This is a
-development-based recommendation, not a confirmed optimum. The user authorized this procedure; the confirmation runner and configuration are
-now implemented as described below. Preserve all five reserved
-parents, matched budgets and duplicate accounting when implementing it.
-
-### 16 October 2026 — Confirmation protocol ready
-
-The [fixed protocol](docs/experiments/confirmation_plan_2026-10-16.md) and
-[configuration](configs/confirmation.json) implement all five reserved parents.
-Preserve existing fit/inner/test identities, one MLP seed zero, alpha=1/beta=1,
-20,000 guidance updates with the established late-rate schedule, and guidance
-seeds 0–2. No test-adaptive checkpoint or scorer selection is allowed.
-
-Candidate identities are reconstructed separately using original source label
-availability and the frozen split. Fit/inner labels and predicted candidate rewards
-are the only outcomes used during learning. All parents must finish fitting or
-have an explicitly reported scorer-screen failure before a hashed fit seal permits
-test-label evaluation. Failed screens skip guidance and remain in the denominator
-and report; any partial numerical training failure blocks outcome release.
-
-Compare raw ProGen, GFN, supervised guidance and a privileged exact-target sampler;
-compare score-selected batches with generate-and-select using 256 proposals and
-32 slots for every method. Retain duplicates, all seeds, exact expectation/TV/KL,
-per-parent effects and setup/training/evaluation cost. There is no automatic
-biological success threshold. A positive development result or a passing CPU test
-is not confirmation evidence. The agent has not run the real experiment.
-
-### 17 October 2026 — Development diversity and prior-construction ablation
-
-The [completed confirmation](docs/experiments/confirmation_results_2026-10-17.md)
-establishes accurate target fitting and positive measured raw gains on all five
-supports, with substantial duplication and unresolved advantage over cheaper
-baselines. The [new protocol](docs/experiments/diversity_plan_2026-10-17.md) tests one
-explicit prior change on the three original **development** parents only. Existing
-experiments retain the original locally normalized prior and reward unchanged.
-
-For the new `count_corrected` arm, define the conditional baseline as
-
-\[
-p_C(a\mid h,c)=
-\frac{\exp(\ell_0(a\mid h,c))\,N(ha,c)}
-{\sum_{b\in\mathcal A(h,c)}\exp(\ell_0(b\mid h,c))\,N(hb,c)},
-\qquad
-R_C(x\mid c)=p_C(x\mid c)\exp(\beta\hat{s}(x,c)).
-\]
-
-| Symbol | Meaning |
-|---|---|
-| \(C\) | Identifier for the descendant-count correction arm. |
-| \(h\) | Current generated prefix, including the empty prefix. |
-| \(a\), \(b\) | Candidate next residue; \(b\) is the summation variable. |
-| \(ha\), \(hb\) | Prefix with that residue appended. |
-| \(c\) | Reference sequence, mutation budget and declared candidate support. |
-| \(\mathcal A(h,c)\) | Actions with at least one supported completion after prefix \(h\). |
-| \(\ell_0(a\mid h,c)\) | Frozen ProGen next-residue logit; zero denotes the pretrained model. |
-| \(N(ha,c)\) | Number of distinct supported complete sequences descending from prefix \(ha\); depends only on identities, never labels. |
-| \(p_C(a\mid h,c)\) | Corrected, locally normalized next-residue probability. |
-| \(x\) | Complete candidate sequence. |
-| \(p_C(x\mid c)\) | Product of the corrected next-residue probabilities along \(x\). |
-| \(R_C(x\mid c)\) | Unnormalized corrected-prior stability reward. |
-| \(\hat{s}(x,c)\) | Frozen predicted stability improvement, divided by the fitting-label scale, as defined above. |
-| \(\beta\) | Guidance strength, fixed to one in this ablation. |
-| \(\exp\), \(\sum\), \(\mid\) | Exponential, sum, and “given,” respectively. |
-
-Normalize the reward over candidates to define its target. With equal logits,
-child-to-parent count ratios telescope, giving each complete candidate equal
-probability. With actual ProGen logits, that uniformity is not guaranteed. This is
-our label-free construction control and proposed prior, not an established optimal
-protein prior, original ProGen conditioned on support, or a scalability result.
-Counts require the finite support. The `original` arm remains the explicit control.
-
-Use the same frozen MLP-0 predictions, beta=1, heads, schedules, seed set and
-single-mutant support in both arms. Add log counts to baseline token logits before
-residual guidance; use those same corrected probabilities for sampling, TB reward,
-supervised rollouts and evaluation. A zero residual recovers that arm's baseline.
-No new scorer or real experiment is fitted by the agent.
-
-Keep the old repeated-slot metrics. Add a separate practical selection protocol:
-256 proposals, deduplicate the entire proposal batch, then select up to 32 distinct
-sequences by predicted score, with deterministic first-occurrence tie handling.
-Never refill. Report count/fill rate alongside quality and diversity. Compare
-matched-prior selection, GFN, supervised guidance, exact target and uniform
-candidate selection. Record total costs; equal update counts do not match compute.
-
-The 100 repeated categorical batches per final policy are finite-law sampling
-references, not independent proteins or online decoding measurements. Report actual
-trajectory timings separately. Known development labels are used for evaluation,
-not as guidance rewards or selection criteria. The five inspected confirmation
-parents remain historical evidence. Fresh evaluation identities and outcome-access
-rules must be frozen before a future confirmation or larger-support claim.
+The later work is recoverable outside this project; it is not an active dependency
+or evidence required to execute this task. See the
+[scope decision](docs/decisions.md#2026-11-03--return-to-the-first-biological-pilot).
