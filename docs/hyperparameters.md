@@ -193,3 +193,34 @@ The [9 November protocol](experiments/ridge_gfn_2026-11-09.md) inherits the orig
 ## Fixed reward-noise study
 
 The [noise protocol](experiments/reward_noise_2026-11-09.md) specifies sigma 0.25/0.50, noise seeds 100/101/102 and training seeds 0/1/2. Original TB settings and beta 1 are retained; the clean baseline is reused.
+
+## Local split robustness
+
+The [three-split protocol](experiments/split_robustness_2026-11-09.md) fixes split seeds 43/44/45, predictor seed 0, original partition sizes and validation grids, and beta 1. No new GFN budget is introduced.
+
+
+## Mutation-position holdout
+
+The [grouped-position protocol](experiments/position_holdout_2026-11-09.md) retains
+seeds 43/44/45, predictor seed 0, original scorer settings and beta 1. It assigns
+50/11/11 positions, producing 942–945 training examples including the reference.
+Group integrity takes precedence over equal sequence counts; no GFN budget is added.
+
+
+## GFN follow-up on position-held-out rewards
+
+The [protocol](experiments/position_gfn_2026-11-09.md) retains split seeds 43/44/45
+and crosses training seeds 0/1/2 with them (nine fits). Original 20,000-step TB,
+beta 1, head 128, batch 64 and the step-8,000 rate reduction are unchanged. No
+scorer fitting or reward sweep; exact monitoring observes predicted-target fit.
+
+
+## Multi-protein stability predictors
+
+The [10 November protocol](experiments/multiprotein_2026-11-10.md) fixes the
+64-group panel, 65 sequences per parent, 40% reference-identity component rule,
+selection seed 20261110 and group-split seed 42. It retains the frozen backbone
+and scorer architecture, extends ridge penalties through 1000 and MLP budget to
+2,000 updates, batch 128, validation every 50. All other scorer optimizer settings
+are inherited. MLP seeds 0/1/2; deterministic ridge once. Top 10% selection is
+compared with uniform candidates, without beta or GFN training.

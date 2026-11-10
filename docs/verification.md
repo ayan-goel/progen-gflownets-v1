@@ -61,3 +61,48 @@ crossed panel of four-update fits, exact decomposition of utility change, saved
 replay parity, source immutability and changed-input/real-CPU-training rejection.
 Clean-run input hashes pass preflight. No actual noisy-target experiment or GPU
 execution was performed during implementation.
+
+
+## Local split-study readiness — 9 November
+
+All 37 CPU tests pass. New checks cover deterministic identity-only partitions,
+reference placement, no overlap, sizes, source-order invariance, original-split
+exclusion, changed-input rejection, row/feature alignment, synthetic full pipeline,
+normalized new priors, zero-gain constant controls, report reconstruction, source
+immutability and rejection of real CPU fitting. Real-input preflight reconstructs
+original split membership and verifies cached features and checkpoint hashes;
+new split sizes are 950/204/204. No real fit or GPU operation was run.
+
+
+## Mutation-position holdout readiness — 9 November 2026
+
+All 40 CPU tests pass, including malformed-group rejection, complete/disjoint
+position partitions, input-order invariance and a synthetic three-split end-to-end
+run. [Test output](verification/position-study-cpu-tests-2026-11-09.txt).
+[Real-input preflight](verification/position-study-readiness-2026-11-09.json)
+verifies pinned hashes, original split reconstruction and new position identities/
+counts. No real training or backbone execution was performed. This establishes
+implementation readiness, not scientific outcomes.
+
+
+## Position-held-out GFN readiness — 9 November 2026
+
+[CPU test output](verification/position-gfn-cpu-tests-2026-11-09.txt): all 43 tests
+pass, including six tiny synthetic GFN fits over three position folds, exact replay,
+label separation and input/cache guards. No real training or GPU work was performed.
+[Real-input preflight](verification/position-gfn-readiness-2026-11-09.json) checks
+pinned sources, group membership, priors and ridge checkpoint reconstruction.
+Maximum prediction discrepancy is 2.15e-6 kcal/mol; float32 score rounding changes
+the target by TV below 8.83e-9. Real prefix-feature rebuilding and GFN fitting await
+the user's command; preflight does not execute ProGen.
+
+
+## Multi-protein predictor readiness — 10 November 2026
+
+[All 47 CPU tests pass](verification/multiprotein-cpu-tests-2026-11-10.txt), including
+transitive grouping/exposure exclusion, outcome-independent selection, mixed-length
+feature ordering, synthetic fitting/label separation/replay and primal/dual ridge
+equivalence. [Real preflight](verification/multiprotein-readiness-2026-11-10.json)
+checks prepared-data/model hashes and partition integrity without evaluation-label
+parsing or model execution. CPU preparation completed the documented metadata/QC
+and grouped panel; no real training or GPU execution occurred.

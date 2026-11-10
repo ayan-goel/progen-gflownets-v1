@@ -93,8 +93,149 @@ def main():
     )
     noise_eval.add_argument("--run", required=True)
     noise_eval.add_argument("--output", required=True)
+    splits = commands.add_parser(
+        "split-study",
+        help="Three new local splits: fit predictors and evaluate exact targets",
+    )
+    splits.add_argument("--config", default="configs/split-robustness.json")
+    splits.add_argument("--output")
+    splits.add_argument("--device", default="cuda")
+    splits.add_argument("--check-only", action="store_true")
+    positions = commands.add_parser(
+        "position-study",
+        help="Hold out whole mutation positions; fit predictors and evaluate targets",
+    )
+    positions.add_argument("--config", default="configs/position-holdout.json")
+    positions.add_argument("--output")
+    positions.add_argument("--device", default="cuda")
+    positions.add_argument("--check-only", action="store_true")
+    position_gfn = commands.add_parser(
+        "position-gfn", help="Train GFN on all saved position-held-out ridge targets"
+    )
+    position_gfn.add_argument("--config", default="configs/position-gfn.json")
+    position_gfn.add_argument("--output")
+    position_gfn.add_argument("--device", default="cuda")
+    position_gfn.add_argument("--check-only", action="store_true")
+    position_eval = commands.add_parser(
+        "evaluate-position-gfn", help="CPU reevaluation of saved position-GFN heads"
+    )
+    position_eval.add_argument("--run", required=True)
+    position_eval.add_argument("--output", required=True)
+    multi_prepare = commands.add_parser(
+        "prepare-multiprotein", help="CPU audit and grouped multi-protein split"
+    )
+    multi_prepare.add_argument("--config", default="configs/multiprotein-data.json")
+    multi_prepare.add_argument(
+        "--csv", default="data/raw/Tsuboyama2023_Dataset2_Dataset3_20230416.csv"
+    )
+    multi_prepare.add_argument(
+        "--exposure", default="data/metadata/prior-exposure-2026-11-10.json"
+    )
+    multi_prepare.add_argument("--output", required=True)
+    multi = commands.add_parser(
+        "multiprotein",
+        help="Fit and evaluate stability predictors across protein groups",
+    )
+    multi.add_argument("--config", default="configs/multiprotein.json")
+    multi.add_argument("--output")
+    multi.add_argument("--device", default="cuda")
+    multi.add_argument("--check-only", action="store_true")
+    multi_eval = commands.add_parser(
+        "evaluate-multiprotein", help="CPU replay of multi-protein predictor metrics"
+    )
+    multi_eval.add_argument("--run", required=True)
+    multi_eval.add_argument("--output", required=True)
     args = parser.parse_args()
-    if args.command == "reward-noise":
+    if args.command == "prepare-multiprotein":
+        from .multiprotein_data import prepare_multiprotein
+
+        manifest = prepare_multiprotein(
+            project_path(args.csv),
+            project_path(args.output),
+            project_path(args.exposure),
+            json.loads(project_path(args.config).read_text()),
+        )
+        print(
+            json.dumps(
+                {
+                    key: manifest[key]
+                    for key in [
+                        "eligible_parents",
+                        "components",
+                        "unexposed_components",
+                        "split_counts",
+                        "parent_counts",
+                    ]
+                },
+                indent=2,
+            )
+        )
+    elif args.command == "multiprotein":
+        from .multiprotein import check_multiprotein, run_multiprotein
+
+        config = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            manifest, _ = check_multiprotein(config)
+            print(
+                json.dumps(
+                    {
+                        key: manifest[key]
+                        for key in [
+                            "split_counts",
+                            "parent_counts",
+                            "maximum_cross_partition_reference_identity",
+                            "scope",
+                        ]
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if args.output is None:
+                parser.error("multiprotein requires --output unless --check-only")
+            run_multiprotein(config, project_path(args.output), args.device)
+    elif args.command == "evaluate-multiprotein":
+        from .multiprotein import evaluate_multiprotein
+
+        evaluate_multiprotein(project_path(args.run), project_path(args.output))
+        print(project_path(args.output) / "report.md")
+    elif args.command == "position-gfn":
+        from .position_guidance import prepare_position_guidance, run_position_guidance
+
+        config = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            import torch
+
+            torch.set_num_threads(1)
+            print(json.dumps(prepare_position_guidance(config)[-1], indent=2))
+        else:
+            if args.output is None:
+                parser.error("position-gfn requires --output unless --check-only")
+            run_position_guidance(config, project_path(args.output), args.device)
+    elif args.command == "evaluate-position-gfn":
+        import torch
+
+        from .position_guidance import evaluate_position_guidance
+
+        torch.set_num_threads(1)
+        evaluate_position_guidance(project_path(args.run), project_path(args.output))
+        print(project_path(args.output) / "report.md")
+    elif args.command in {"split-study", "position-study"}:
+        from .split_study import prepare_split_inputs, run_split_study
+
+        config = json.loads(project_path(args.config).read_text())
+        if args.command == "position-study" and config.get("split_unit") != "position":
+            parser.error("position-study requires a position-split configuration")
+        if args.check_only:
+            import torch
+
+            torch.set_num_threads(1)
+            print(json.dumps(prepare_split_inputs(config)[-1], indent=2))
+        else:
+            if args.output is None:
+                parser.error(f"{args.command} requires --output unless --check-only")
+            run_split_study(config, project_path(args.output), args.device)
+    elif args.command == "reward-noise":
         from .reward_noise import check_noise_inputs, run_noise_study
 
         config = json.loads(project_path(args.config).read_text())

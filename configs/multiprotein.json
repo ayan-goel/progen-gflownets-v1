@@ -1,0 +1,34 @@
+{
+  "data": "data/processed/multiprotein-v1",
+  "manifest_sha256": "ca09009f6fe4b49b01c4098ef09b01f8f31c6f89e67b0d49ebb83962d41145b8",
+  "checkpoint": "../progen-gflownets-test/progen/checkpoints/progen2-medium",
+  "checkpoint_sha256": {
+    "config.json": "47b1053ce3bcf31e58566330b07c6cae8c75a9e532cae68a695d7126cc61d9c8",
+    "pytorch_model.bin": "545f4d3e0072c0f422c90e221100d0ebe756989d0f09af3ede57736680adb9e2"
+  },
+  "tokenizer_sha256": "e56176ef2390f7a0ec29930aaa41983406085e026cb6f99f8a6e180b3b3a56bc",
+  "feature_batch_size": 8,
+  "mlp_seeds": [
+    0,
+    1,
+    2
+  ],
+  "selection_fraction": 0.1,
+  "scorer": {
+    "ridge_penalties": [
+      0.1,
+      1,
+      10,
+      100,
+      1000
+    ],
+    "hidden_size": 128,
+    "steps": 2000,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "gradient_clip": 1.0,
+    "validate_every": 50,
+    "minimum_spearman": 0.2
+  }
+}

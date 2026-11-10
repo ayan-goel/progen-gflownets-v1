@@ -99,3 +99,32 @@ process or completion. Training-resume support is outside this initial handoff.
 `ridge_guidance.py` reuses the original prefix cache with the saved ridge scores, trains the existing TB head, and automatically produces exact and sampled evaluations. It does not load ProGen or refit the predictor.
 
 `reward_noise.py` adds fixed terminal-score perturbations to the saved clean ridge task, reuses TB unchanged, and evaluates noisy-target damage separately from learned-policy fit. It stores a single clean prefix cache and per-condition noise/heads.
+
+`split_study.py` reassembles original pooled features, creates identity-based local partitions, computes frozen constrained priors for each new evaluation support, and reuses separate-family predictor evaluation. It reports per-split target gains and prior-weighted prediction errors without training guidance.
+
+
+The same runner supports mutation-position groups via split_unit=position. It
+saves group identities before fitting and reuses the identical frozen-prior and
+predictor paths. The position-study command requires the grouped configuration.
+Its report exposes top-one concentration, reference-level success and diversity
+alongside target gains. See the [protocol](experiments/position_holdout_2026-11-09.md).
+
+
+position_guidance.py reuses saved position-fold predictions and logits, rebuilds
+frozen prefix features, then runs the existing train_tb for each fold/seed. Only
+the residual head and scalar normalizer train. Saved tasks exclude held-out labels;
+post-training evaluation loads separate labels and reports ProGen, exact ridge/
+MLP targets and learned policies. Hash-checked CPU reevaluation requires no source
+run or backbone. The [protocol](experiments/position_gfn_2026-11-09.md) defines
+setup verification and numerical tolerances.
+
+
+## Multi-protein predictor benchmark
+
+multiprotein_data.py freezes similarity-grouped parent partitions and a bounded,
+parent-balanced sequence panel. multiprotein.py extracts frozen pooled features in
+length buckets and fits constant/ridge/MLP comparators. Scorer normalization remains
+training-only; ridge selects primal versus dual by matrix size. Evaluation uses
+separate held-out labels after fitting, fixed candidate identities, and explicit
+uniform-selection baselines. Source/data/model hashes and complete fitting reports
+are saved. The [protocol](experiments/multiprotein_2026-11-10.md) defines interpretation.

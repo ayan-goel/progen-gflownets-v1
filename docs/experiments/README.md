@@ -21,4 +21,16 @@ Completed: [local predictor/reward study, arithmetic audit and results](predicto
 
 Completed: [ridge-reward GFN results](ridge_gfn_2026-11-09.md). All three seeds realize the modest target gain; next is a controlled reward-noise protocol.
 
-Ready for user execution: [fixed reward-noise protocol](reward_noise_2026-11-09.md), 18 fits with reused clean controls.
+Completed: [fixed reward-noise study](reward_noise_2026-11-09.md), all 18 fits closely match noisy targets; some corrupted targets lose biological utility.
+
+Completed: [local three-split robustness study](split_robustness_2026-11-09.md). Both predictors improve target means; ridge is not consistently better. See current status for the next proposed check.
+
+
+Completed: [mutation-position holdout study](position_holdout_2026-11-09.md). Both targets improve their own baselines; ridge gains are larger on all three grouped splits. No new GFN training.
+
+
+Completed: [GFN on position-held-out ridge rewards](position_gfn_2026-11-09.md),
+all nine fits closely match their targets and realize measured stability gains.
+
+
+Ready for user execution: [multi-protein stability predictor benchmark](multiprotein_2026-11-10.md).

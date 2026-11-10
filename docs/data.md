@@ -1,6 +1,8 @@
 # Stability data contracts and audits
 
-Active task: the original Mega-scale single-substitution pilot. The existing evaluation outcomes have already been inspected.
+The original pilot remains preserved. The active multi-protein extension is
+defined by the [10 November protocol](experiments/multiprotein_2026-11-10.md);
+its grouping, exposure exclusions and sampling budget differ from the pilot below.
 
 ## Source and verification
 
@@ -85,3 +87,14 @@ Measurement coverage is 100% by construction in this retrospective benchmark.
 Absence from training and distance one from the reference are also largely fixed
 by this support, so they are descriptive checks, not evidence of open-ended novelty.
 The broader neighborhood and unseen-domain studies remain later milestones.
+
+
+## Multi-protein extension — 10 November 2026
+
+See the [protocol](experiments/multiprotein_2026-11-10.md) for the single source of
+filtering/grouping/selection detail. Immutable panel:
+data/processed/multiprotein-v1, with config configs/multiprotein-data.json and
+exposure snapshot data/metadata/prior-exposure-2026-11-10.json. Identity-only
+inventory generation is in scripts/inventory_prior_exposure.py and refuses to
+overwrite the frozen snapshot. Preparation source labels are not ranked or used
+for choosing groups; evaluation labels stay separate from test identities.

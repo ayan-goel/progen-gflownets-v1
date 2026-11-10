@@ -115,11 +115,18 @@ def fit_scorer(
             (train_features - model.feature_mean) / model.feature_scale
         ).double()
         labels = ((train_labels - model.label_mean) / model.label_scale).double()
-        # Dual ridge avoids a 1536x1536 solve when the pilot has fewer training rows.
-        kernel = features @ features.T + penalty * torch.eye(
-            len(features), device=device, dtype=torch.float64
-        )
-        weights = features.T @ torch.linalg.solve(kernel, labels)
+        # Solve the smaller equivalent ridge system: local pilots use the dual;
+        # multi-protein panels can have more rows than frozen feature dimensions.
+        if len(features) <= features.shape[1]:
+            kernel = features @ features.T + penalty * torch.eye(
+                len(features), device=device, dtype=torch.float64
+            )
+            weights = features.T @ torch.linalg.solve(kernel, labels)
+        else:
+            gram = features.T @ features + penalty * torch.eye(
+                features.shape[1], device=device, dtype=torch.float64
+            )
+            weights = torch.linalg.solve(gram, features.T @ labels)
         with torch.no_grad():
             model.network.weight.copy_(weights.float()[None])
             model.network.bias.zero_()

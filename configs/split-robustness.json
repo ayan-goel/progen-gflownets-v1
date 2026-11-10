@@ -1,0 +1,17 @@
+{
+  "pilot_run": "runs/biological-first",
+  "predictor_run": "runs/predictor-reward-v1",
+  "split_seeds": [
+    43,
+    44,
+    45
+  ],
+  "predictor_seed": 0,
+  "tokenizer_sha256": "e56176ef2390f7a0ec29930aaa41983406085e026cb6f99f8a6e180b3b3a56bc",
+  "input_sha256": {
+    "runs/biological-first/config.json": "e088584519f3314a29cea514363afb2b895379fe47a816eef588f89f89870aeb",
+    "runs/biological-first/data_manifest/manifest.json": "b4c1e03e2c01402db596cb4335fc74d954536412e5d42631555baaa0f1af7a3d",
+    "runs/predictor-reward-v1/features.pt": "28afa0cadda545b282a12401c07b17344680e73c865185fae868f8222f14e51b",
+    "runs/predictor-reward-v1/provenance.json": "583f907333e572638380e616c4c9923df7330d59b23e679f92b6f13ddc2ee723"
+  }
+}

@@ -319,3 +319,130 @@ comparison. This is a sensitivity model, not an inferred assay-noise distributio
 Exact evaluation separates target damage from policy-fitting error and reports
 clean predictor expectations distinctly from measured outcomes. The
 [fixed protocol](experiments/reward_noise_2026-11-09.md) owns the complete choices.
+
+
+## 2026-11-09 — Fixed noise affects target quality more than fitting
+
+All 18 noisy-target GFNs converge closely, while the higher-noise seed-101 target
+falls below the ProGen stability baseline. The [results](experiments/reward_noise_2026-11-09.md)
+therefore prioritize reward-generalization checks; they do not identify a TB
+optimization failure. Favor a controlled local evaluation before opening generation
+beyond known candidates. Partial ProGen unfreezing remains separate, aimed at speed
+or harder-task capacity with a fixed reference target. Noise that happens to help
+on inspected outcomes is not a justification for selecting perturbations or
+claiming noise injection improves biological design.
+
+
+## 2026-11-09 — Three predefined local resplits before wider generation
+
+The user authorized checking whether the ridge advantage survives held-out
+identity changes. Use split seeds 43/44/45 with original partition sizes and
+predictor seed 0, fixed beta 1 and original validation-based predictor selection.
+Reassemble cached frozen pooled features without fitting on evaluation labels.
+Recompute each evaluation support's constrained ProGen prior: a baseline from the
+original 204 candidates would not be the correct comparator. Report global and
+prior-weighted error plus each target's gain over its own baseline. This varies
+both predictor partitions and candidate support; overlapping resplits remain
+local development evidence, not independent confirmation. Full choices are in the
+[protocol](experiments/split_robustness_2026-11-09.md).
+
+
+## 2026-11-09 — Local gains persist; ridge superiority does not
+
+The [three completed resplits](experiments/split_robustness_2026-11-09.md) give
+positive target gains for ridge and MLP, with MLP better on two and essentially
+tied on the third. Keep both baselines rather than treating the original ridge
+win as a general conclusion or selecting MLP using these test outcomes. One
+split's prior assigns 98.36% to a single variant, so utility analysis must retain
+prior concentration and support definitions. Mean stability and reference-level
+success do not always rank predictors identically.
+
+Recommend a predefined mutation-position holdout study before new mutation
+combinations: random substitution holdouts can include other substitutions at
+the same positions in training. This addresses a harder predictor-generalization
+question; it does not establish accuracy on combinations or new families.
+Protocol/implementation remain pending. Keep the current sampler and frozen
+backbone while assessing rewards, with no additional GFN rerun for this analysis.
+
+
+## 2026-11-09 — Group all substitutions by mutation position
+
+The user authorized the harder local generalization check. Keep the same three
+seed values (43/44/45), but permute observed positions rather than variants.
+Allocate 50/11/11 position groups using the inherited 70/15/15 rounding rule;
+retain the reference only in training. Accept slightly unequal sequence counts
+rather than splitting groups to force the previous counts. No position is moved
+based on sequence identity or stability outcomes. Reuse unsupervised frozen
+features and the original scorer settings, with group-disjoint validation for
+model selection. Recompute each support's locally masked prior and report its
+concentration alongside mean utility. These choices address generalization at
+unseen mutation positions without claiming an isolated causal effect of grouping
+or accuracy on combinations. The [protocol](experiments/position_holdout_2026-11-09.md)
+owns full settings, outcome boundaries and limitations.
+
+
+## 2026-11-09 — Useful position-held-out rewards justify a sampler follow-up
+
+The [completed grouped-position study](experiments/position_holdout_2026-11-09.md)
+finds positive target gains for both predictors and larger ridge gains on all
+three splits. These supports have different, less concentrated priors and often
+weaker starting means; the gains are not directly comparable to random-split
+improvements. Prediction error and poor reference-level success on split 45
+remain limitations. Recommend testing the same frozen-backbone TB sampler on all
+three fixed ridge targets, preserving exact MLP baselines and measuring policy
+fit separately from biological utility. This ridge choice is post-hoc development,
+not independent confirmation. Do not tune beta, penalties or choose only a winning
+split from these outcomes. Follow-up protocol/implementation remain pending.
+
+
+## 2026-11-09 — Fixed-support ridge GFN follow-up across all position folds
+
+The user authorized the sampler follow-up. Retain all three fixed grouped supports
+and saved ridge rewards; use inherited training seeds 0/1/2 and 20,000-step TB,
+with no beta, architecture or optimization changes. Reconstruct missing prefix
+features with frozen ProGen, verify matching logits, then reuse saved logits
+exactly to prevent prior drift. Release the backbone before small-head training.
+Keep MLP as an exact distribution comparator; do not fit another MLP sampler.
+Exact evaluation of all policies distinguishes target utility from fitting error
+without best-of selection. Labels are excluded from training tasks and copied for
+evaluation after all fits. The [protocol](experiments/position_gfn_2026-11-09.md)
+owns all settings, tolerances and post-hoc-development interpretation.
+
+
+## 2026-11-10 — Local sampler validation complete; broaden the stability question
+
+The [nine completed grouped-support GFNs](experiments/position_gfn_2026-11-09.md)
+all match their targets closely (maximum final TV 0.001972) and realize measured
+stability gains. Treat this as completion of the local mechanism check, with no
+observed fitting failure justifying a new objective or partial unfreezing. It
+still uses one parent's finite known variants; a low starting baseline and limited
+reference-level success must not be confused with broad biological capability.
+
+The user's stated goal is new stable proteins. Recommend a next protocol for
+stability prediction across multiple proteins, beginning with dataset/exposure
+review and protein/similarity-group separation, retaining simple baselines rather
+than presuming ridge superiority. No new outcomes, groups or training budgets are
+selected here; this is proposed scope, not an implemented expansion or restoration
+of retired workflows. Novel generation also needs an explicit prior/support and
+independent stability assessment.
+
+
+## 2026-11-10 — A bounded grouped stability benchmark before broader generation
+
+The user authorized the multi-protein step. Build components from source cluster,
+shared-sequence and >=40% globally aligned reference-identity links, including
+unselected intermediate parents. Exclude components matching known prior-use
+metadata, without claiming complete exposure or pretraining independence. Choose
+one parent per component and cap the panel at 64 groups with 65 measured sequences
+each, using identity-only hash ranks. Equal parent counts limit scan-size dominance;
+44/10/10 groups provide a first cross-protein feasibility test within the assay's
+short-domain scope. Grouping and selection are fixed before real fitting.
+
+Keep frozen ProGen mean-pooled features, compare constant/ridge/MLP on identical
+candidates, and assess pooled, per-parent and reference-only errors/selection.
+Uniform candidate selection is the explicit comparator; there is no constrained
+ProGen prior in this study. This avoids attributing a changed sampling support to
+better predictor accuracy. Extend the ridge grid to 1000 and MLP budget to 2,000
+updates for this larger panel; validation alone selects checkpoints. The
+[protocol](experiments/multiprotein_2026-11-10.md) owns all choices, rationale,
+primary-source links and limitations. No old workflows or outcomes are restored.

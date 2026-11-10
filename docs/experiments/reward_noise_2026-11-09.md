@@ -1,6 +1,6 @@
 # Fixed reward-noise sensitivity
 
-**Status: protocol fixed and implementation ready; real run not yet executed.**
+**Status: user-run experiment completed; analyzed 9 November 2026.**
 
 ## Question and motivation
 
@@ -126,3 +126,79 @@ CUDA_VISIBLE_DEVICES='' scripts/run.sh evaluate-noise \
 Next decisions depend on this result. Keep SubTB, attribute conditioning and
 partial ProGen training out of this comparison. Per-query stochastic reward noise
 would require a distinct protocol and objective interpretation.
+
+
+## Completed results
+
+Run: runs/reward-noise-v1. All 18 fits completed the prescribed 20,000 updates.
+Total wall time: 18,150.91 seconds (5 h 2 min 31 s). All pinned baseline hashes
+match. Independent CPU replay from saved noise vectors and final heads reproduces
+the entire results object exactly. Original run outputs remain unchanged.
+[Analysis evidence](../verification/reward-noise-results-2026-11-09.json) retains
+checks, aggregates and training-curve diagnostics. No new training or GPU work
+was performed during analysis.
+
+### Optimization remained accurate for every tested fixed noisy target
+
+Largest final TV to the noisy target: **0.000504**. Largest absolute difference
+between GFN and noisy-target expected measured stability: **0.000214 kcal/mol**.
+Across logged observations in the last 4,000 updates, the maximum TV was 0.003980.
+Loss observations were finite and every prescribed final checkpoint was retained.
+These observations support accurate fixed-target fitting across this panel, not
+robustness to fresh stochastic noise on every reward query or to longer tasks.
+
+### Biological utility depended on which scores were corrupted
+
+All numbers below are **expected measured stability**, not predicted scores.
+GFN values average the three training seeds sharing the same noisy target.
+
+| Noise SD (score units) | Noise seed | Noisy target | Trained GFN mean | Target shift from clean |
+|---|---|---:|---:|---:|
+| 0 (clean control) | — | 4.31965 | 4.31953 | 0 |
+| 0.25 | 100 | 4.33343 | 4.33340 | +0.01378 |
+| 0.25 | 101 | 4.29862 | 4.29858 | −0.02103 |
+| 0.25 | 102 | 4.32837 | 4.32826 | +0.00872 |
+| 0.50 | 100 | 4.34719 | 4.34721 | +0.02754 |
+| 0.50 | 101 | 4.25410 | 4.25404 | −0.06555 |
+| 0.50 | 102 | 4.33670 | 4.33666 | +0.01705 |
+
+ProGen's expectation is 4.28005. All lower-noise policies remain above it in mean
+stability, but the higher-noise seed-101 target loses the clean advantage and
+falls below ProGen. Its target shift (−0.06555) is much larger than its policy
+fitting errors (largest magnitude about 0.00014). This is reward-induced loss of
+utility, not failure to learn the requested distribution.
+
+Reference-level success also matters: for noise seed 101 it falls to 83.15% at
+sigma 0.25 and 75.26% at sigma 0.50, versus 83.95% for ProGen and 87.06% for clean
+GFNs. Thus even the lower-noise panel's higher mean dG does not guarantee a better
+stable-enough success rate. Expected unique counts in 256 draws range about
+9.26–10.28 across noisy conditions (ProGen: 10.67; clean GFN: 9.87).
+
+Across the three noise realizations, mean trained stability is 4.32008 at sigma
+0.25 and 4.31264 at sigma 0.50. Those averages hide the downside of individual
+realizations. Two perturbation vectors happen to improve target utility at both
+amplitudes; this does not establish noise injection as a useful training method.
+Three noise vectors, reused across levels, are not enough to estimate a general
+failure probability or assay-noise tolerance. Training replicates are not new
+noise realizations.
+
+### Decision after this experiment
+
+The observed sensitivity is primarily in reward-defined target quality. There
+is no optimization failure here to motivate replacing TB as the immediate fix.
+Prioritize a predeclared within-parent reward-generalization check (including
+ridge/MLP and ProGen controls) before expanding sequence support. Additional
+splits of already inspected variants remain development, not confirmation.
+
+For the eventual goal of novel proteins, the next major biological milestone is
+opening local generation beyond the known-candidate list and assessing previously
+unseen mutations or mutation combinations independently. The current single-mutant
+predictor needs evidence of reliability in that expanded space; successful target
+matching does not provide it.
+
+Tom's output-head-only ProGen unfreezing remains a valid separate architecture
+comparison. On this already solved finite target, its informative endpoints would
+be learning speed or capacity on a harder task, not a large biological gain at the
+same accurately matched target. Preserve frozen reference probabilities if that
+comparison is implemented. Do not combine unfreezing, a new reward and SubTB in
+one experiment. No new follow-up implementation was started during this analysis.

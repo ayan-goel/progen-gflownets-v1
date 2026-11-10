@@ -130,3 +130,110 @@ Reevaluate a completed study without fitting:
 CUDA_VISIBLE_DEVICES='' scripts/run.sh evaluate-noise \
   --run runs/reward-noise-v1 --output runs/reward-noise-review
 ```
+
+
+## Local split robustness
+
+[Protocol](experiments/split_robustness_2026-11-09.md). After setting
+CUDA_VISIBLE_DEVICES yourself:
+
+```bash
+source .venv/bin/activate
+scripts/run.sh split-study --output runs/split-robustness-v1 --device cuda
+```
+
+This computes frozen ProGen priors for three new evaluation sets, fits matched
+ridge/MLP/constant comparisons, and evaluates exact targets at beta 1. It reuses
+pooled full-sequence features and does not train a GFlowNet. Results appear in
+runs/split-robustness-v1/report.md, with complete per-split artifacts underneath.
+Use a new output directory; no automatic overwriting or resume is performed.
+
+CPU-only input verification:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh split-study --check-only
+```
+
+
+## Mutation-position holdout
+
+[Protocol](experiments/position_holdout_2026-11-09.md). Activate .venv and set
+CUDA_VISIBLE_DEVICES yourself, then run:
+
+```bash
+scripts/run.sh position-study --output runs/position-holdout-v1 --device cuda
+```
+
+The command uses configs/position-holdout.json. It fits constant, ridge and MLP
+on three grouped-position splits and evaluates their exact targets automatically.
+Frozen ProGen computes each new prior; no GFN training is performed. Read
+runs/position-holdout-v1/report.md for mean gains, concentration, success and
+diversity. Existing output directories are rejected.
+
+Optional read-only CPU check:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh position-study --check-only
+```
+
+
+## GFN on position-held-out rewards
+
+[Protocol](experiments/position_gfn_2026-11-09.md). With .venv active and your chosen
+CUDA_VISIBLE_DEVICES exported:
+
+```bash
+scripts/run.sh position-gfn --output runs/position-gfn-v1 --device cuda
+```
+
+This builds frozen prefix caches and trains nine heads (three seeds per fixed
+position split), then evaluates automatically. Read runs/position-gfn-v1/report.md;
+evaluation/results.json contains all metrics and evaluation/summary.json summarizes
+seed replication within each split. Expect hours rather than the earlier three-
+minute predictor-only run; no exact runtime has been measured yet. The command
+preserves your GPU selection. Existing outputs are rejected, not overwritten.
+
+Optional CPU preflight (no backbone inference or fitting):
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh position-gfn --check-only
+```
+
+CPU-only reevaluation into a fresh directory, without retraining:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh evaluate-position-gfn   --run runs/position-gfn-v1 --output runs/position-gfn-v1-recheck
+```
+
+
+## Multi-protein stability predictors
+
+[Protocol](experiments/multiprotein_2026-11-10.md). Data preparation is complete.
+After selecting CUDA_VISIBLE_DEVICES yourself and activating .venv:
+
+```bash
+scripts/run.sh multiprotein --output runs/multiprotein-v1 --device cuda
+```
+
+The command extracts frozen ProGen features for 4,160 sequences, fits ridge and
+three MLP seeds plus the constant control, and evaluates automatically. See
+runs/multiprotein-v1/report.md and evaluation/results.json. No GFlowNet training
+or generation is included. Existing output paths are rejected. Runtime is unmeasured.
+
+CPU preflight:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh multiprotein --check-only
+```
+
+CPU saved-prediction metric replay:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh evaluate-multiprotein   --run runs/multiprotein-v1 --output runs/multiprotein-v1-recheck
+```
+
+Data re-preparation into a fresh directory (original pinned panel stays unchanged):
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh prepare-multiprotein   --output data/processed/multiprotein-recheck
+```

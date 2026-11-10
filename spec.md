@@ -1,20 +1,23 @@
 # Stability-guided protein generation with frozen ProGen2
 
-**Active scope reset: 3 November 2026.** Start from the completed first biological
-pilot. [Current status](docs/status.md) owns execution progress.
+**Scope update: 10 November 2026.** The local mechanism studies are complete;
+the user authorized a grouped multi-protein stability-predictor benchmark.
+[Current status](docs/status.md) owns execution progress.
 
 ## 1. Project objective and immediate scope
 
 Learn an additional guidance head on frozen ProGen2 using whole-sequence
 folding-stability feedback and a GFlowNet objective. The long-term motivation is
-useful, diverse stable proteins; the immediate task is to understand the
-single-substitution Mega-scale benchmark before expanding.
+useful, diverse stable proteins; the immediate task is to assess stability rewards
+across protein groups before expanding generation.
 
 Focus on one or two controlled questions: how well a linear versus neural
 predictor generalizes, and whether the chosen reward produces a useful target.
 Keep the original trajectory-balance implementation as the baseline.
-Broader generation, folding pipelines, multi-parent experiments and additional
-scorer-scaling workflows are outside the active implementation.
+The [multi-protein protocol](docs/experiments/multiprotein_2026-11-10.md) now defines
+a bounded 64-group predictor comparison with frozen ProGen features. It performs
+no GFN fitting or generation. Broader generation, folding pipelines and restored
+retired scorer-scaling workflows remain outside the active implementation.
 
 ## 2. Retained foundation
 
@@ -30,8 +33,14 @@ scorer-scaling workflows are outside the active implementation.
   [results and limitations](docs/experiments/predictor_reward_study_2026-11-03.md)
   motivate the [controlled ridge-reward GFN rerun](docs/experiments/ridge_gfn_2026-11-09.md).
   The completed rerun realizes the ridge target's modest local gain; controlled
-  reward-noise sensitivity is the next investigation, specified in the
-  [fixed protocol](docs/experiments/reward_noise_2026-11-09.md).
+  reward-noise sensitivity is complete: accurate fitting persists, but some corrupted
+  targets lose biological utility. [Results and next decision](docs/experiments/reward_noise_2026-11-09.md)
+  motivated the completed [three-split reward-generalization study](docs/experiments/split_robustness_2026-11-09.md).
+  Both predictor families improve target means there; ridge is not consistently
+  better. The completed [position-held-out study](docs/experiments/position_holdout_2026-11-09.md)
+  finds useful targets for both families, with larger ridge gains on its three
+  different supports. The completed GFN follow-up matches these targets across all nine fits and
+  realizes their gains; the evidence still concerns one parent and known candidates.
 - Existing evaluation outcomes are inspected development evidence for future
   choices, not a fresh test set.
 
@@ -234,21 +243,28 @@ Each run must save its configuration, data/scorer/checkpoint identities, seeds, 
 
 ## 9. Current next steps
 
-1. Audit the implemented data/split, feature, predictor, reward and TB path.
-2. Specify a fair constant/linear/neural predictor comparison on identical
-   partitions, with a small training-size study and explicit validation rules.
-3. Separate prediction error, ranking and design utility. Evaluate each proposed
-   exact target against existing measurements before guidance training.
-4. Investigate a small number of justified reward strengths/transforms, including
-   a stable-enough objective only if its threshold has a defensible meaning.
-5. Run new GFlowNet training only once a useful target is identified.
-   Consider subtrajectory balance if target fitting becomes a measured bottleneck.
+The local predictor/reward investigations and GFN follow-up are complete; see
+[current status](docs/status.md). All nine position-held-out-support GFNs closely
+match their fixed targets and realize their measured stability gains. This
+establishes local sampling, not broad generation of new stable proteins.
 
-The [pre-run protocol](docs/experiments/predictor_reward_study_2026-11-03.md)
-fixes the training budgets, validation rules and reward grid for this investigation.
-The capped reward is a diagnostic alternative; the original pilot stays unchanged.
-Reusing previously inspected variants is developmental. Later retired outcomes
-also remain inspected; future independent confirmation needs an exposure audit.
+1. Run the [fixed multi-protein benchmark](docs/experiments/multiprotein_2026-11-10.md).
+   Data/exposure review and grouping are complete: 44 training, 10 validation and
+   10 evaluation parent groups, 65 measured sequences each. Grouping, selection,
+   budgets and metrics are fixed before user-run fitting.
+2. Retain simple ridge/MLP baselines without assuming the local winner generalizes.
+   Assess prediction quality and useful stability selection separately.
+3. Before generating beyond known candidates, define the sequence space, reference
+   probability convention and independent stability assessment. Do not silently
+   extend the locally masked candidate-tree prior to unrestricted generation.
+4. Keep ProGen frozen and TB unchanged unless a broader task demonstrates a fitting
+   limitation. Partial unfreezing and SubTB remain separate proposed experiments.
+
+Previously inspected outcomes, including retired results, remain development
+evidence. A new evaluation protocol requires an exposure audit rather than calling
+reused data independent. The multi-protein benchmark is implemented and ready for user execution. Expanded
+generation is not implemented; original scientific definitions and completed runs
+stay fixed.
 
 ## 10. Position in the literature
 

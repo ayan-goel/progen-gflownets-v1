@@ -1,0 +1,12 @@
+{
+  "source_sha256": "0c7b2bf1f162122d83d5bb39b901cc446e436b5643684ca268f934be145d8398",
+  "exposure_sha256": "3292cfcb324740f22531b52d28b555725340f58b78ee708ee73c9e0e3e9ba956",
+  "min_length": 40,
+  "max_length": 72,
+  "maximum_ci_width": 1.0,
+  "identity_threshold": 0.4,
+  "parent_count": 64,
+  "variants_per_parent": 64,
+  "selection_seed": 20261110,
+  "split_seed": 42
+}

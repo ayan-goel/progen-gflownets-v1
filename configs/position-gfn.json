@@ -1,0 +1,29 @@
+{
+  "source_run": "runs/position-holdout-v1",
+  "input_sha256": {
+    "runs/position-holdout-v1/config.json": "9088396426e22b5f6c8383a0fe06c22d482d686701c0c26155276d73bf1c01f8",
+    "runs/position-holdout-v1/status.json": "a3e1cbb37d2b4286d80fd14434f984514bee4e6a81e13562e9110b6729729e00",
+    "runs/position-holdout-v1/provenance.json": "dbe5d19ca281356f4ca01e62c5a1c8a96406249108635fac8380d7a546d7cdf7",
+    "runs/position-holdout-v1/split-43/partitions.json": "70c7a6a11e08e2bdaefa4b11f3770f38b9e1d78c36c34dc60fd3b63b3a0669f5",
+    "runs/position-holdout-v1/split-43/mutation_positions.json": "c63810b86e6e362471a0bc52162be8d3d1389af92a33e86264ef7299b76edc3a",
+    "runs/position-holdout-v1/split-43/prior.pt": "7631a9ce562c420a93b0a9f8721213ff57abfbb748f71445b5588185d25a1c40",
+    "runs/position-holdout-v1/split-43/results.json": "45796537b2d9955764b8ba6cca03d063fa506b9ccb61ffaeb2a1a9a8d82a5d6e",
+    "runs/position-holdout-v1/split-43/seed-0-n-942-ridge.pt": "e874c757bb524c1781cb9e59f61a89f5687ac88ac453afb1e5eeef108e786e06",
+    "runs/position-holdout-v1/split-43/seed-0-n-942-ridge-predictions.json": "5e373fa6f59ef1ab23ece9ee630afa521fd08b23b2ecb77ca9036d22bc83cd58",
+    "runs/position-holdout-v1/split-43/seed-0-n-942-mlp-predictions.json": "547a3ee2c8f9bfc66603d743a184a6c3acbda3604e1af0873137e0a0fb9e728b",
+    "runs/position-holdout-v1/split-44/partitions.json": "b15f373ca2bb6a409bd74eed80971068267335fd114d57572e3e4a45c5120ae2",
+    "runs/position-holdout-v1/split-44/mutation_positions.json": "b53e48a3f929d620d55e0f93969322672eddd00709b21a089ea180816e5524a6",
+    "runs/position-holdout-v1/split-44/prior.pt": "8c476ae2743e0ef670b238a2f210b7aa5735510da4ab81553f986fbc79f062ab",
+    "runs/position-holdout-v1/split-44/results.json": "bb7802737375389c767d4db84c077bd70d34ebcfb878036979e83a3e9cbebffc",
+    "runs/position-holdout-v1/split-44/seed-0-n-942-ridge.pt": "5984355ebcce541a4708f3030e21e8da2fcb2d3eaf8b483923c78c3529924aae",
+    "runs/position-holdout-v1/split-44/seed-0-n-942-ridge-predictions.json": "513c9f6b67decc42ec8e7400351156b6cdc85a55dcf285cbe1fb86f76930841c",
+    "runs/position-holdout-v1/split-44/seed-0-n-942-mlp-predictions.json": "e7008b96042e65866991dcce64c94280c11cdbff8d7b8f96f956b192af6cbc57",
+    "runs/position-holdout-v1/split-45/partitions.json": "cd1e469c4ea9d9a8c0de3c207920a24bd35f85e52aa3f1992812c3187c20c5fc",
+    "runs/position-holdout-v1/split-45/mutation_positions.json": "16e7cdaf41015ba2106b555ad3f1455a7bdcb8281ce88c356407be39daee23d2",
+    "runs/position-holdout-v1/split-45/prior.pt": "da946b848d2e2e999b4344e4c683be25860f1f24d87b0a3eacb6cf6ca90d0419",
+    "runs/position-holdout-v1/split-45/results.json": "74cbb2c5e516cc0bbeb03143b0fd89978f992a1c2a6865d1d47d5f4312db4a77",
+    "runs/position-holdout-v1/split-45/seed-0-n-945-ridge.pt": "c4b5be7a88678e56061f46cc5626ca7198baa187999204fec56b3b4dc9f8a771",
+    "runs/position-holdout-v1/split-45/seed-0-n-945-ridge-predictions.json": "eb63412abfa0a05e899ff0dd1e67056cb204de887d88fc7a8e3ba21f908bf714",
+    "runs/position-holdout-v1/split-45/seed-0-n-945-mlp-predictions.json": "daa42efb7530995c17f6c1936148dc92a3af2b4f9e91dc39a0130e4a5afb5de7"
+  }
+}

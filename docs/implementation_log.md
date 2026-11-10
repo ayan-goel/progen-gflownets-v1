@@ -118,3 +118,61 @@ sample/selection noise into this diagnostic. Reevaluate saved heads via a separa
 CPU command. Synthetic checks cover paired perturbations, zero-noise identity,
 RNG isolation, invalid inputs, crossed training/evaluation, decomposition identity,
 replay equality and immutable source artifacts; all 33 tests pass.
+
+
+## 2026-11-09 — Reuse pooled features, rebuild candidate-support probabilities
+
+The split-study runner verifies and reassembles the original 1,358 frozen pooled
+features by identity. It reproduces original seed-42 membership as a provenance
+check, then saves label-independent new partitions. Existing prefix-tree caching
+and predictor comparison functions provide the new priors and separate-family
+fits. No generation/training probability conventions change. A summary adds
+prior-weighted errors and compares gains within support; per-split predictions,
+validation selection history and exact probabilities remain inspectable.
+Synthetic end-to-end and integrity tests pass; real experiment remains user-run.
+
+
+## 2026-11-09 — Position-group partitions reuse the local comparison pipeline
+
+Add an explicit position split mode to split_study.py and a position-study
+command with its own fixed config/protocol. A sequence-only grouping function
+rejects ambiguous multi-mutants/indels, keeps groups intact and preserves the
+reference anchor. The original sequence-split mode remains the default. All
+partitions and one-based position lists are saved before model execution. Reuse
+the frozen-prior and predictor code unchanged, allowing each split's actual
+training count instead of forcing 950. Add top-one probability, success and
+expected diversity to the main report so a concentrated prior is visible.
+Synthetic checks cover disjointness, ordering, complete coverage, invalid inputs,
+end-to-end fits, report reconstruction and source immutability; all 40 tests pass.
+
+
+## 2026-11-09 — Reuse grouped rewards and the existing TB learner
+
+position_guidance.py connects verified grouped-position artifacts to the existing
+prefix cache and train_tb implementations. CPU preflight reproduces partitions,
+prior probabilities and saved ridge predictions; pinned input hashes prevent
+silent changes. Prefix representations must be recomputed because the previous
+study retained logits only. Compare new logits to saved ones, keep the saved prior,
+and check float32-score target rounding before training. Save tasks/heads and
+separate post-training labels so CPU reevaluation is independent of ProGen and
+the source study. Exact MLP probabilities remain a comparator, not a fitted head.
+Three synthetic tests cover crossed fitting/replay and label separation, source
+hash/CPU guards and frozen-backbone mismatch rejection. All 43 CPU tests pass.
+
+
+## 2026-11-10 — Grouped multi-protein data and frozen-feature comparison
+
+multiprotein_data.py reuses the release filters/replicate policy, builds transitive
+parent components, excludes documented exposed identities and freezes a bounded
+panel. multiprotein.py batches variable-length sequences by length while preserving
+row order, caches frozen features once and reuses the existing scorer fitting.
+Evaluation labels are parsed only after all model checkpoints and predictions are
+saved. Metrics distinguish across-parent prediction from within-parent ranking;
+cutoff ties are averaged so constant predictions cannot exploit row ordering.
+
+Ridge now solves the smaller primal or dual system, preserving its objective and
+the original dual path for local pilots while avoiding a large row-by-row kernel
+for 2,860 training examples. An explicit equivalence test covers this change.
+Biopython 1.86 was already installed and is pinned for reproducible alignment.
+All 47 CPU tests pass, including grouping/exposure/label independence, mixed-length
+features, synthetic complete execution, exact metric replay and input guards.
