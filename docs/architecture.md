@@ -1,5 +1,22 @@
 # Implementation architecture
 
+This describes the retained stability implementation. The IDR generation-only baseline is
+implemented separately in `stability_gfn.idr`; its
+[protocol](experiments/idr_baseline_2026-11-12.md) owns the new data flow.
+The open-continuation charge pilot reuses the frozen adapter, residual head and TB
+loss. `idr/charge.py` owns reward, rollout and differentiable head updates;
+`idr/charge_experiment.py` owns fixed-budget execution and evaluation. It retains
+only the current rollout’s detached states, rather than enumerating a prefix tree.
+See the [charge protocol](experiments/idr_charge_2026-11-12.md).
+
+`idr/context_experiment.py` tests a direct, zero-initialized task-context output
+branch against the unchanged head. It reuses the existing rollout/TB update and
+scorer functions, preserving historical source files and replay compatibility.
+A paired runner shares the prior sample pool, initializes both heads identically,
+and saves final token-response diagnostics alongside raw samples. The
+[context protocol](experiments/idr_context_2026-11-12.md) owns exact architecture,
+budgets and interpretation. `evaluate-idr-context` replays scoring on CPU.
+
 ## Data flow
 
 ```text

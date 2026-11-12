@@ -1,6 +1,9 @@
 # Stability data contracts and audits
 
-The original pilot remains preserved. The active multi-protein extension is
+These are retained stability data contracts. The prepared IDR reference panel
+and its annotation limits are documented in the
+[IDR protocol](experiments/idr_baseline_2026-11-12.md).
+The completed multi-protein extension is
 defined by the [10 November protocol](experiments/multiprotein_2026-11-10.md);
 its grouping, exposure exclusions and sampling budget differ from the pilot below.
 
@@ -98,3 +101,13 @@ exposure snapshot data/metadata/prior-exposure-2026-11-10.json. Identity-only
 inventory generation is in scripts/inventory_prior_exposure.py and refuses to
 overwrite the frozen snapshot. Preparation source labels are not ranked or used
 for choosing groups; evaluation labels stay separate from test identities.
+
+## Training coverage expansion — 10 November 2026
+
+data/processed/coverage-v1 stores only the added training rows and nested parent
+memberships. The [coverage protocol](experiments/coverage_2026-11-10.md) retains
+the original splits and all frozen grouping/exclusion rules: 42 unused components
+provide 2,730 added sequences. Stages contain 44/64/86 training parents, while
+validation/test identities remain exactly those of multiprotein-v1. Preparation
+selects identities first and processes measurements only for added training
+parents. It neither ranks candidate labels nor opens the separate test-label file.

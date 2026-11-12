@@ -1,0 +1,21 @@
+{
+  "source_run": "runs/multiprotein-v1",
+  "source_sha256": {
+    "features.pt": "6f5d501fa40c8070269d945c983b13df7cec7b980d9cefa48eb9e879dd2d8021",
+    "config.json": "5a7584711c75239e07b91fe0ae15e506004729337a8950bef0612d00b8dd0af1",
+    "data_manifest.json": "ca09009f6fe4b49b01c4098ef09b01f8f31c6f89e67b0d49ebb83962d41145b8",
+    "ridge-seed-0.pt": "fd58baee10190bfd2d62cf5993412d8608d13177897cf1b0df88e238ff142c23",
+    "fitting.json": "0674615c746a5014c5e8a7687ddaf7096e391652b7942633dfdb1f6f6f427a88"
+  },
+  "folds": 5,
+  "fold_seed": 42,
+  "ridge_penalties": [
+    1000,
+    10000,
+    100000,
+    1000000,
+    10000000
+  ],
+  "reference_penalty": 1000,
+  "selection_fraction": 0.1
+}

@@ -1,0 +1,5 @@
+{
+  "source_run": "runs/idr-charge-v1",
+  "source_config_sha256": "1cda219dc7e0fd4250be050d01adc92105243319c50a719fcc9f8134ad3f1bad",
+  "arms": ["standard", "direct_context"]
+}

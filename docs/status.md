@@ -1,9 +1,67 @@
 # Current project status
 
-**3 November 2026 — scope reset to the first biological pilot (slide 7).**
+**12 November 2026 — Direct charge-context comparison ready for the user GPU run.**
 
 [Specification](../spec.md) · [Pilot result](experiments/biological_first_results_2026-10-15.md)
 · [Runbook](runbook.md)
+
+## Current decision
+
+The user completed the [frozen-ProGen IDR baseline](experiments/idr_baseline_2026-11-12.md#completed-results--12-november-2026)
+in 2 min 58 s. Prompted continuations pass the predicted-disorder screen in
+125/192 cases (65.1%), versus 55/192 (28.6%) unprompted. Isolated-tail checks
+remain similar (67.2% versus 28.1%), and both arms pass the predeclared per-seed
+engineering screen. No GFN was trained.
+
+Prompting provides a useful starting prior, but results depend on context. RPB1's
+100% pass rate accompanies motif repetition and only 19/24 unique tails. Excluding
+it in a labeled post-hoc sensitivity check leaves 60.1% success and 100% unique
+tails. V2 agrees in aggregate but is not independent verification. These are
+predicted-disorder results, not experimental validation or proof of global novelty.
+
+**Completed:** the [charge pilot and saved-artifact diagnosis](experiments/idr_charge_2026-11-12.md#completed-results--12-november-2026).
+All three heads reached 400 steps in a total 74 min run. Prior and GFN each pass
+charge on 20/384 outputs (5.2%); joint charge/disorder success is 10/384 versus
+11/384. Selection gives 79 charge / 33 joint passes; swaps give 142 / 66.
+Disorder is largely retained, but charge steering is not learned meaningfully.
+
+The policy stays close to ProGen on sampled paths. Lower TB residual largely
+reflects learned log-normalizer shifts in a post-hoc algebraic diagnostic; every
+training update clips gradients. A finite prior-pool importance estimate indicates
+headroom in the fixed target, but is not exact distribution verification. RPB1
+repetition worsens, and removing it does not restore a GFN advantage.
+
+**Diagnosis complete:** [checkpoint and tiny CPU controls](experiments/idr_charge_diagnosis_2026-11-12.md).
+No missing-gradient/reward-sign/token-alignment bug was found. The trained head
+barely responds to explicit block context under fixed synthetic features. The same
+head/TB mechanism fits a tiny exact target with low-noise updates; eight-sample
+updates are less accurate, and a tenfold rate increase performs worse on that toy.
+These support weak/noisy policy learning as the leading explanation, not a proven
+single cause or an optimal hyperparameter prescription.
+
+**Completed:** the [real-state learning diagnostic](experiments/idr_learning_diagnostic_2026-11-12.md#completed-results--12-november-2026)
+captured 768 continuations in 4 min 46 s. All final heads slightly push charge
+negative in both halves instead of learning the requested opposing directions.
+Explicit-context response is tiny; frozen-feature contributions to the hidden
+preactivation have much larger norms. Gradient averaging and one-step head updates
+show mixed results, so a larger batch is not an established fix. CPU replay verifies
+the captures and reproduces the conclusions without ProGen or GPU execution.
+
+**Ready:** the user authorized the [direct-context comparison](experiments/idr_context_2026-11-12.md).
+A zero-initialized, bias-free 5-to-20 linear map adds the existing task context
+directly to residue logits (100 new parameters). Both arms train from scratch
+with identical shared initialization, seeds 0/1/2, the original reward/TB loss,
+400 updates and eight trajectories per update. No learning-rate, batch-size or
+backbone changes are combined with this intervention.
+
+The runner uses one shared prior pool and evaluates 384 raw outputs per head,
+including charge/disorder success, diversity and block-specific token corrections.
+Full comparison: six fits and 21,504 ProGen continuations including evaluation.
+Run `scripts/run.sh idr-context --output runs/idr-context-v1 --device cuda` after
+choosing CUDA_VISIBLE_DEVICES and activating `.venv`; evaluation is automatic.
+All 76 CPU tests and real-input preflight pass. No real comparison outcomes exist yet.
+The assistant has not executed pretrained ProGen or used a GPU. The protocol owns
+all settings, interpretation limits, provenance and CPU-only evaluation recovery.
 
 ## Retained starting point
 
@@ -115,10 +173,10 @@ uniformly increasing, and split 45 still reaches reference stability only about
 25% of the time. These are finite, known-candidate results on one parent protein,
 not broad generation or new biological measurements.
 
-## Ready: multi-protein stability predictor benchmark
+## Completed: multi-protein stability predictor benchmark
 
 The [fixed protocol](experiments/multiprotein_2026-11-10.md) and
-[user command](runbook.md#multi-protein-stability-predictors) are ready. CPU data
+[user command](runbook.md#multi-protein-stability-predictors) define the completed run. CPU data
 preparation retained 414 eligible parents, grouped them into 115 components, and
 excluded 9 components matching known historical identities. From 106 remaining
 components, a fixed identity-only rule selects 64 parents, each with 65 sequences:
@@ -138,6 +196,77 @@ primal/dual ridge solving. Real-input preflight passes. No real predictor fittin
 backbone execution or GPU work was run by the assistant. Historical exposure
 inventory is incomplete by nature; this remains developmental evidence. Broad
 generation still needs an explicit sequence space and independent assessment.
+
+The user completed runs/multiprotein-v1 in **57.875 seconds** (46.231 seconds
+loading/extracting frozen features). Test ridge RMSE is 1.202 versus constant
+1.442; its within-parent top-10% selection lift averages +0.371 kcal/mol, positive
+on 9/10 test parents. MLP test lifts range from -0.008 to +0.227, though seed 2
+has lower test RMSE (1.083). These lifts compare against uniform candidates,
+not ProGen sampling.
+
+All four learned predictors have worse validation RMSE than constant (1.447)
+and fail the reported validation gate. Ridge's validation pooled Spearman is
+-0.118 despite positive within-parent ranking (mean 0.285). No model is promoted
+to a reliable broad-generation reward. The follow-up diagnosis and regularization
+protocol are described below. The test panel is now inspected
+development data. [Full results and verification](experiments/multiprotein_2026-11-10.md#completed-results--10-november-2026)
+include exact CPU replay and saved-checkpoint verification without retraining.
+
+The [follow-up diagnosis](experiments/multiprotein_2026-11-10.md#follow-up-diagnosis--10-november-2026)
+is complete. Ridge's parent-mean errors account for 64.4% of validation MSE;
+its entire net disadvantage versus constant is in that component, partly offset
+by better within-parent prediction. Removing any single validation parent does
+not reverse the failure. Saved normalization uses training-only moments and
+checkpoint/identity checks pass. Recommended next user-run experiment: five-fold
+grouped validation within the 44 training parents to assess stronger ridge
+regularization and constant baselines, with existing validation parents retained
+as a separate transfer check. No new fits were performed during this diagnosis.
+
+## Completed: regularization only, fixed protein coverage
+
+The user requested regularization and training-set expansion as separate
+experiments. [Regularization protocol](experiments/regularization_2026-11-10.md)
+is implemented: compare penalties 1000 through 10000000 in five fixed group folds
+within the existing 44 training proteins. Refit the CV-selected ridge and compare
+with the original ridge and constant on the same ten validation proteins. Test
+labels are not used. No additional proteins or backbone execution. Source caches
+and checkpoints are pinned. [Run command](runbook.md#ridge-regularization-only).
+The user completed runs/regularization-v1 in 2.003 seconds. CV selects penalty
+1000000. Validation RMSE improves from 1.63899 to 1.43303, only slightly better
+than constant (1.44731). Within-parent selection lift deteriorates from +0.29065
+to -0.30086 kcal/mol; selected CV lift is also negative (-0.1248). Shrinkage reduces
+parent-level errors but harms the reward's candidate ranking. Do not promote the
+selected ridge to a generation reward on RMSE alone. Saved CV/validation metrics
+and checkpoints pass CPU verification. [Results and next-step rationale](experiments/regularization_2026-11-10.md#completed-results--10-november-2026).
+
+## Completed: more training proteins, fixed ridge rule
+
+The user authorized the separate [coverage experiment](experiments/coverage_2026-11-10.md).
+CPU preparation adds 42 eligible unused groups, with 65 sequences each, to the
+original 44 training parents. Nested stages have 44/64/86 parents and
+2,860/4,160/5,590 sequences. The ten validation and ten test parents/identities
+remain unchanged. New groups and sequences are disjoint from both held-out sets.
+
+Reuse original frozen features and extract only the 2,730 added training features.
+Fit three ridge models using the original regularization per training example;
+raw penalties scale as 1000 times stage rows divided by 2,860. No tuning or
+stronger-regularization model is carried forward. Report all stages on the same
+validation proteins, with both accuracy and measured selection lift; do not
+evaluate test labels. A baseline reproduction check protects comparability.
+The [user command](runbook.md#training-protein-coverage) completed in 32.321 seconds.
+At 44/64/86 parents, validation selection lift is +0.29065/+0.37826/+0.31406
+kcal/mol; RMSE is 1.63899/1.67489/1.58750. All three still trail their constant
+prediction-error baselines (about 1.447). Baseline reproduction and all saved
+predictions/metrics pass CPU checks. No real fitting or backbone execution was
+performed by the assistant.
+
+The selection gain is modest and non-monotonic, with much of the aggregate
+improvement attributable to one validation protein. Do not select 64 as a general
+optimum or claim broad-generation readiness. [Full results](experiments/coverage_2026-11-10.md#completed-results--10-november-2026)
+record the parent-level sensitivity and verification. The initial follow-up
+question was whether coverage benefits repeat across held-out groups. The subsequent
+literature review prioritizes a controlled representation comparison while retaining
+that robustness requirement; see the current decision above.
 
 ## Evaluation boundaries
 

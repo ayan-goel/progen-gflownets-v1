@@ -1,5 +1,17 @@
 # Hyperparameters and numerical choices
 
+All values below belong to existing stability/synthetic experiments. The IDR baseline
+settings and rationale live in its [protocol](experiments/idr_baseline_2026-11-12.md)
+and `configs/idr-baseline.json`. The new [charge-pilot protocol](experiments/idr_charge_2026-11-12.md)
+and `configs/idr-charge.json` own charge reward scales, training and comparison budgets.
+The [real-state diagnostic protocol](experiments/idr_learning_diagnostic_2026-11-12.md)
+owns its fixed capture and gradient-averaging budget; it inherits the pilot reward.
+The [direct-context comparison](experiments/idr_context_2026-11-12.md) adds only a
+zero-initialized 20-by-5 bias-free matrix under the same head optimizer group.
+`configs/idr-context.json` pins the completed pilot configuration; all reward,
+training and evaluation settings are inherited. Six fresh fits share one prior
+pool; no batch, rate or loss tuning is bundled with the architecture test.
+
 [exact.json](../configs/exact.json) and [biological.json](../configs/biological.json)
 are the executable settings. These values define the historical initial pilots. Subsequent changes and
 real-run outcomes are recorded in dated sections below. Changes require a new configuration/run and
@@ -224,3 +236,21 @@ and scorer architecture, extends ridge penalties through 1000 and MLP budget to
 2,000 updates, batch 128, validation every 50. All other scorer optimizer settings
 are inherited. MLP seeds 0/1/2; deterministic ridge once. Top 10% selection is
 compared with uniform candidates, without beta or GFN training.
+
+## Fixed-coverage ridge regularization
+
+The [protocol](experiments/regularization_2026-11-10.md) owns the grid and selection
+rules: raw ridge penalties 1000/10000/100000/1000000/10000000; five group folds,
+seed 42, within the same 44 training groups. Every fold normalizes on its own
+training subset. Choose parent-balanced out-of-fold RMSE, refit once on all
+training rows, and retain the original validation set for reporting. No optimizer
+iterations, new feature extraction, new proteins or GFN hyperparameters.
+
+## Training-protein coverage
+
+[Protocol](experiments/coverage_2026-11-10.md): nested 44/64/86 training parents,
+65 sequences each; original selection seed 20261110 and fixed outer splits.
+Use the original ridge rule, with penalty `1000 * training_rows / 2860` to hold
+strength per training example fixed. Refit normalization on each stage's training
+rows. Frozen float32 ProGen features, batch eight for the added sequences only.
+No selection sweep, MLP, GFN or test-label evaluation.

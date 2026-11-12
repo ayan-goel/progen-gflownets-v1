@@ -176,3 +176,99 @@ for 2,860 training examples. An explicit equivalence test covers this change.
 Biopython 1.86 was already installed and is pinned for reproducible alignment.
 All 47 CPU tests pass, including grouping/exposure/label independence, mixed-length
 features, synthetic complete execution, exact metric replay and input guards.
+
+## 2026-11-10 — Cached-feature grouped regularization comparison
+
+regularization.py reuses fit_scorer with one fixed penalty per fit, preserving
+the existing ridge objective and solver. Its selection function receives only
+original training rows; deterministic whole-group folds recompute normalization
+and constant baselines separately. OOF predictions select a strength before a
+single full-data refit and fixed-validation comparison. Reuse the original saved
+ridge rather than silently replacing the comparator. Source/data hashes and row
+identities are verified, and all outputs go to a new directory. Synthetic checks
+cover validation-label perturbation invariance, fold-local normalization and
+constant predictions, checkpoint replay, and input/CPU/output guards. The
+[protocol](experiments/regularization_2026-11-10.md) specifies scientific choices.
+
+## 2026-11-10 — Nested training coverage without changing evaluation support
+
+coverage_data.py consumes the pinned original component inventory and selects
+unused groups before processing measurements. audit_table gains an optional parent
+filter before label parsing; existing callers retain identical behavior.
+coverage.py extracts only added training features and reuses the fixed-penalty
+ridge solver. It saves every stage before validation evaluation and requires the
+44-parent refit to reproduce original predictions. New rows, memberships and
+checkpoints live in separate artifacts. Tests exercise deterministic preparation,
+group/sequence boundaries, training-only fitting, constant per-example penalty,
+missing test labels, saved-model replay and original-baseline reproduction.
+
+
+## 2026-11-12 — IDR baseline sampling and prefix-safe evaluation
+
+Added a separate `stability_gfn.idr` package, reusing the frozen ProGen tokenizer
+and incremental decoder rather than modifying the completed stability trainer.
+Canonical masking, fixed-length stopping and sampled-token likelihoods are explicit.
+A matched tail region prevents the supplied natural prefix from inflating the main
+success score; isolated-tail scoring checks contextual dependence. No deduplication
+or score filtering changes raw sample denominators.
+
+Prepared references retain source annotation/coordinate provenance and are pinned
+by hashes. Runs snapshot data, record package/code/weight provenance, flush samples
+batchwise and mark failures. Saved-sample reevaluation requires a completed,
+checksum-matching generation stage and matching scorer files; it does not load ProGen.
+The tiny CPU integration test uses actual V3/V2 scorers and a random tiny ProGen,
+not the pretrained checkpoint. See the [protocol](experiments/idr_baseline_2026-11-12.md).
+
+## 2026-11-12 — Open continuation guidance without a sequence-tree cache
+
+The stability implementation cached an enumerable mutation tree. Open 64-residue
+continuations cannot use that representation. The new `idr/charge.py` samples
+on-policy with the existing frozen ProGen KV adapter, retaining detached hidden
+states, canonical logits and actions for only one update. Recomputing the head's
+path likelihood on those states is equivalent to a fresh backbone pass because
+backbone weights are fixed; CPU teacher-forcing comparisons check token alignment.
+Only head parameters and eight prompt-specific log-normalizers receive gradients.
+
+`idr/charge_experiment.py` owns orchestration and evaluation, reusing baseline
+reference validation and disorder/descriptor scoring. Generation and charge-only
+selection are kept separate; selection does not inherit a misleading output-policy
+density from its proposal. Swaps/shuffles retain source identities and omit
+uncomputed transformed-sequence likelihoods. Generation completion hashes allow
+CPU evaluation recovery without ProGen; output directories cannot be reused.
+Per-seed and per-prompt reports expose collapse hidden by pooled metrics. The
+[charge protocol](experiments/idr_charge_2026-11-12.md) owns the settings and budgets.
+
+
+## 2026-11-12 — Reusable real-state diagnostic captures
+
+`idr/learning_diagnostic.py` reuses the unchanged pilot rollout and path-likelihood
+functions. It snapshots each head on CPU, stores detached balanced feature batches,
+and computes head/normalizer gradients separately. Gradient averages equal the
+combined-batch derivative; clipping occurs after averaging for the disposable
+Adam probes. Source heads/normalizers remain unchanged, with CPU tests checking
+file and weight preservation.
+
+Capture hashes cover config, references, head states and all batches; analysis
+source hashes prevent silently reinterpreting captures under different code. The
+CLI provides a separate CPU replay route. No historical pilot code is modified,
+so its provenance checks continue to pass. See the
+[diagnostic protocol](experiments/idr_learning_diagnostic_2026-11-12.md) for what the
+measurements mean and which comparisons are deliberately not causal training tests.
+
+
+## 2026-11-12 — Paired context-path experiment with preserved pilot code
+
+`idr/context_experiment.py` subclasses the original guidance head with a zero
+20-by-5 Parameter, avoiding extra RNG draws and keeping every shared parameter
+identically initialized. The paired runner calls the original rollout, TB update
+and scorer directly; historical modules are unchanged. The tiny fixture verifies
+that the standard arm reproduces the original trainer's weights and samples.
+
+Generate one shared prior pool per seed, use independent named generators for
+training/evaluation, and retain detached evaluation states only long enough to
+measure block corrections. Save architecture-tagged checkpoints, stepwise losses,
+raw samples, token probes, costs and source/model/scorer provenance. CPU-only
+replay validates saved input hashes and scorer/source compatibility before scoring;
+no ProGen load is needed. Both complete and partial runs refuse overwriting.
+The [protocol](experiments/idr_context_2026-11-12.md) owns the research rationale
+and fixed experimental choices.

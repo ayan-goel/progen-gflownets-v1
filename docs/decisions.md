@@ -446,3 +446,256 @@ better predictor accuracy. Extend the ridge grid to 1000 and MLP budget to 2,000
 updates for this larger panel; validation alone selects checkpoints. The
 [protocol](experiments/multiprotein_2026-11-10.md) owns all choices, rationale,
 primary-source links and limitations. No old workflows or outcomes are restored.
+
+## 2026-11-10 — Separate regularization from protein-coverage expansion
+
+At the user's direction, vary ridge strength first while retaining all existing
+data identities, frozen features and outer partitions. The earlier validation
+failure was dominated by parent-mean prediction errors; the chosen penalty 1000
+was at the grid boundary. Extend strength by four decades and select with grouped
+CV only inside the 44 training parents, then report against the original saved
+ridge and constant on outer validation. This is an engineering diagnostic of
+shrinkage, not an established remedy. No test evaluation, MLP changes or additional
+training proteins. Constant winning CV or loss of within-parent ranking remains a
+negative finding, even if one metric improves. [Protocol and rationale](experiments/regularization_2026-11-10.md).
+
+## 2026-11-10 — Expand training coverage after the shrinkage tradeoff
+
+Stronger shrinkage lowered error but reversed average selection lift. At the
+user's direction, return to original ridge as a fixed development comparator and
+test more protein groups separately. Preserve evaluation identities, the original
+44 training parents, sequence counts per parent, and original grouping/exclusions.
+Add unused groups by the prior identity-only hash order, producing 44/64/86-parent
+nested sets. Scale summed-loss penalty with training rows to preserve the original
+strength per example, rather than silently weakening regularization as data grows.
+Refit training-only normalization and reuse all original features. Report all
+stages and both error/ranking metrics; do not select a favorable expansion from
+validation. One expansion does not establish a universal learning curve. The
+[protocol](experiments/coverage_2026-11-10.md) records controls and limitations.
+
+
+## 2026-11-10 — Investigate the scorer representation before broader guidance
+
+After coverage expansion left absolute errors above constant, the user requested
+literature on improving the predictor. The [focused review](../literature/STABILITY_PREDICTOR_REVIEW_2026-11-10.md)
+finds relevant precedents for stability-specific encoders and structural inputs,
+while distinguishing absolute stability from mutation-effect prediction.
+
+Recommend a frozen ESM-2/ridge comparison against ProGen/ridge on identical data,
+followed by a separate scorer-adaptation experiment. The 35M generic ESM-2 base is
+an inexpensive diagnostic choice supported by the EsmTherm author's training
+example, not a claim of optimal capacity or a reproduction of fine-tuned ESMtherm.
+Retain all 86 training parents; do not select the favorable observed 64-parent
+stage. Preserve the original ridge rule for the initial representation comparison;
+any subsequent tuning must be fair to both encoders and use training groups.
+
+This revises the proposed next improvement from coverage resplits alone to a
+representation test with group-robustness checks. Require both useful selection and
+absolute transfer. Published stability checkpoints need supervised-overlap review,
+and current inspected panels remain development. ProGen generation stays frozen;
+GFN objective changes do not repair reward errors. This is a recommendation only:
+no architecture, configuration, split or completed artifact changes in this review.
+The [plan](../literature/EXPERIMENT_PLAN.md) owns the proposed sequence of work.
+
+
+## 2026-11-12 — Pivot from stability to IDP/IDR property guidance
+
+Source: the user's [meeting transcript](</nethome/agoel320/.codex/attachments/da1c453b-9d01-4172-9fff-e5df1ae4ab60/Pasted text.txt>)
+and explicit request to analyze and document the pivot without implementation.
+The [review](../literature/IDP_IDR_REVIEW_2026-11-12.md) records the supporting sources
+and candidate tools; the [specification](../spec.md) now owns the active direction.
+
+**Why stop the stability branch here:** Tom framed the central problem as guiding
+an evolutionary sequence prior with a reliable property reward, not establishing
+the limits of ridge/MLP regression. Folding stability depends on a completed
+sequence's collective interactions and conformational behavior; attributing its
+terminal signal to early token decisions may require substantial data/model
+capacity. Building a general cross-protein stability predictor was becoming a
+separate research problem that obscured the guidance question. The local GFN
+checks already provide a useful foundation for changing the biological task.
+
+**What our evidence establishes:** the local GFNs learned their targets accurately;
+reward quality and cross-protein prediction were the demonstrated bottlenecks.
+The additional long-range credit-assignment explanation is a plausible difficulty,
+not a diagnosed cause of a GFN failure in our completed runs. Terminal-reward
+GFlowNets are not inherently unable to optimize stability. A prefix-tree policy
+can use full-prefix PLM representations, and normalized sequence probabilities,
+not unnormalized flow, sum to one. Preserve this distinction in future slides.
+
+Tom's desire for a highly accurate reward model (roughly 0.9 Spearman in the
+conversation) is an aspiration for a useful proxy, not a universal justified gate
+or evidence that such performance is available. Our fixed-score Gaussian-noise
+study perturbed predicted rewards; it did not perturb DMS labels and refit scorers.
+It showed that noisy targets can remain accurately sampled while losing biological
+utility, not robustness to every measurement-noise process.
+
+**New direction:** select IDP/IDR properties with transparent sequence scoring and
+potential local profiles. Investigate IDiom's data and post-training, reuse author
+scoring tools, and compare against direct design. Do not choose flexibility for
+the first experiment: Tom explicitly used it as an example and preferred another
+property. Start with isolated IDRs rather than assume all whole IDPs are covered
+by the same dataset. No final functional property was selected in the meeting.
+
+**Proposed first test:** local charge-profile matching, followed by an ordering
+comparison at fixed composition. The score is exact under declared conventions,
+removing fitted-reward error from the first question. It is not an exact biological
+function label. Disorder/function predictions require separate evaluation. GOOSE
+is an essential baseline because descriptor-targeted IDR design already exists.
+Acidic activation-domain activity is a later measured-data lead, not yet selected.
+
+The previous ESM stability-representation proposal is superseded as immediate work.
+Historical specifications/results remain accessible; no completed run or code is
+modified by this decision. The current authorization covers literature, scientific
+framing and a plan only. Implementation and a GPU command follow a fixed protocol,
+not this meeting analysis.
+
+
+## 2026-11-12 — Implement the generation-only IDR feasibility baseline
+
+The user authorized implementation after agreeing on baseline IDR generation,
+charge-profile guidance, then a functional target. Begin with 80-residue outputs,
+16-residue natural prefixes and matched 64-residue evaluation tails. Three seeds
+and eight distinct prompts help expose dependence on one convenient prefix. Use
+fixed-length canonical ancestral sampling with no outcome filtering or tuning.
+
+Prepare experimentally annotated DisProt windows with source statements and NMR/CD
+evidence; exclude missing-density-only evidence and the audited apo-calsequestrin
+case. Identity-only selection precedes predictor scoring. The assay context remains
+part of the evidence; cropped windows are not individually measured synthetic IDRs.
+
+Pin metapredict 3.0.2 to preserve the existing numerical environment. V3 is primary;
+V2 is a related sensitivity check because IUPred3 requires academic acquisition.
+Do not label V2 independent verification. Both full-context and isolated-tail
+predictions expose prompt/context dependence. No stability predictor or GFN is fit.
+The [pre-run protocol](experiments/idr_baseline_2026-11-12.md) owns every fixed budget,
+threshold, source and decision rule. Charge guidance depends on baseline results.
+
+
+## 2026-11-12 — Baseline supports charge-guidance planning, with prompt-level checks
+
+The [completed baseline](experiments/idr_baseline_2026-11-12.md#completed-results--12-november-2026)
+shows usable predicted-IDR yield without backbone adaptation. Proceed to specifying
+charge-profile guidance on the prompted prior; preserve unguided and generate-and-select
+comparators. Fix numeric guidance choices before implementation/training rather
+than infer them from a favorable outcome. This is a proposed next experiment.
+
+The RPB1 prompt shows why pooled uniqueness and homopolymer checks are insufficient:
+repeated multi-residue motifs can score highly without long identical-residue runs.
+Retain per-prompt motif/diversity diagnostics and the full baseline panel instead
+of selecting only high-scoring contexts. The post-hoc non-RPB1 calculation supports
+that the aggregate prompting gain is not entirely due to this case; it does not
+replace the predefined main analysis. Predicted disorder remains a proxy, and
+this pilot establishes no GFN advantage or biological function.
+
+## 2026-11-12 — Authorize a coarse charge-profile guidance pilot
+
+The user approved implementing the next step after understanding the baseline and
+its disorder screen. Reuse all eight prefixes and the same frozen, locally masked
+ProGen prior. Use a two-block signed-charge target with a soft charged-content term;
+this isolates sequence ordering at modest charge before fine sliding-window targets.
+Numeric targets/scales and the inspection of existing development profiles are
+recorded in the [pre-run protocol](experiments/idr_charge_2026-11-12.md), not presented
+as literature defaults or independent confirmation.
+
+Keep disorder outside the training reward and candidate selection. The next question
+is whether direct descriptor guidance preserves disorder, not whether a generator
+can maximize its evaluation predictor. Reuse TB first and change the sequence space
+from finite mutation candidates to open continuations, without simultaneously
+unfreezing ProGen or switching losses. Use one learned normalizer per prompt.
+
+Retain raw prior and raw GFN outputs, and compare charge-only top-quarter selection.
+Keep generation/training budgets explicit rather than claim equal compute from equal
+output counts. Include cheap composition-preserving swaps and shuffles: matching
+this simple target is not enough to establish a need for GFlowNets. Fixed final
+checkpoints and all-prompt reporting guard against selecting an easy/repetitive
+context. The protocol owns inference limits and next-decision branches.
+
+
+## 2026-11-12 — Diagnose charge policy learning before expanding the task
+
+The [completed charge pilot](experiments/idr_charge_2026-11-12.md#completed-results--12-november-2026)
+shows no aggregate charge-pass gain for GFN over prior (20/384 each), while selection
+and composition-preserving editing improve charge success. Preserve this negative
+result. Do not proceed to a learned functional reward or claim charge-guidance success.
+
+Saved-path diagnostics show small policy corrections and large residual reductions
+associated with normalizer shifts; all updates trigger clipping. These motivate
+controlled optimization diagnosis, not a causal claim against clipping or learned
+normalizers. Approximate prior-pool reweighting suggests that the fixed target has
+headroom, with finite-sample limitations. Keep the objective and comparison data
+fixed while isolating learning behavior; change optimization and horizon separately.
+No new experiment configuration is selected in this analysis. Evidence and exact
+post-hoc calculation definitions are recorded with the experiment.
+
+
+## 2026-11-12 — Measure real gradient behavior before changing charge training
+
+The [CPU diagnosis](experiments/idr_charge_diagnosis_2026-11-12.md) finds that the
+same residual head learns an exact tiny target with low-noise updates, while eight
+sampled trajectories learn less accurately and a tenfold rate increase worsens
+that control. All real updates clip, but Adam makes clipping fractions insufficient
+to infer effective update size. Saved heads also respond weakly to explicit block
+context when synthetic features are held fixed; real states were not retained.
+
+Recommend a small instrumented real-feature diagnostic before selecting a new rate,
+context path or clipping rule. Keep objective/support fixed, measure gradient
+variance and actual context dependence, then change one factor. Do not claim that
+normalizer learning caused the failure, that removing clipping is established as
+better for ProGen, or that a synthetic exact solve proves real convergence. The
+original pilot and production code remain unchanged.
+
+
+## 2026-11-12 — Capture real gradient evidence without another full fit
+
+The user approved the short diagnostic. Keep all original prompts, charge settings
+and sequence support, and inspect both initialized and final heads for every seed.
+Six fixed-policy cases with sixteen balanced microbatches each provide separate
+proposal/reference halves and 8/16/32-example gradient comparisons at a modest
+768-trajectory capture cost. The [protocol](experiments/idr_learning_diagnostic_2026-11-12.md)
+owns grouping, seeds, resource estimates and interpretation limits.
+
+Average raw gradients before clipping; compare against a disjoint finite reference
+rather than the same samples' pooled mean. Preserve optimizer moments/rates for
+one-step copied updates, and decompose head/normalizer effects on fixed reference
+trajectories. Do not claim improved generation from lower fixed-data residuals or
+select a production setting automatically. Counterfactual context checks hold
+actual ProGen features fixed but need not be reachable sequence histories.
+
+Keep original source heads and code intact. Save detached batches and hashes so
+analysis can be repeated without another GPU sampling run. No biological scorer,
+new reward, backbone fine-tuning or sustained training is introduced.
+
+
+## 2026-11-12 — Test context routing after mixed gradient diagnostics
+
+The [completed real-state diagnostic](experiments/idr_learning_diagnostic_2026-11-12.md#completed-results--12-november-2026)
+shows nearly identical-sign charge corrections across the two blocks, tiny explicit
+context response and much larger feature than task-context preactivation norms.
+Larger gradient groups improve independent-reference alignment in only three of
+six cases, and one-step head effects are mixed. Do not promote gradient accumulation
+as a demonstrated fix or interpret normalization progress as better generation.
+
+Propose a controlled task-context output branch against the unchanged head, holding
+the scientific target and training budget fixed. This isolates one plausible
+intervention before changing loss, batch size or ProGen weights. Routing and added
+capacity remain intertwined; results must be judged on generation and not solely
+on TB loss. This is a local engineering hypothesis, not an externally established
+remedy. Implementation and its exact parameter choices remain pending.
+
+
+## 2026-11-12 — Minimal direct task-context path, matched fresh fits
+
+The user approved the architecture comparison. Add a bias-free 20-by-5 matrix to
+the original residual logits, using the existing five scalar task inputs and no
+prompt-identity shortcut, rescaling or extra hidden layer. Zero initialization
+preserves the prior and shared initialization without consuming new random draws.
+Use the original head optimizer group and schedule: a separate branch rate would
+confound the architecture test with tuning. The added path changes capacity as
+well as routing, and success would not isolate a unique causal mechanism.
+
+Run fresh standard/direct-context fits at all three seeds with equal update and
+trajectory budgets. Share the prior pool and evaluate all raw final-head samples,
+including disorder, diversity and block-specific corrections. Reuse unchanged
+rollout, reward, update and scorer functions to protect comparability and historical
+replay. No results are available yet; the [protocol](experiments/idr_context_2026-11-12.md)
+owns settings, evidence, costs and decision criteria.

@@ -145,8 +145,213 @@ def main():
     )
     multi_eval.add_argument("--run", required=True)
     multi_eval.add_argument("--output", required=True)
+    regularization = commands.add_parser(
+        "regularization",
+        help="Grouped ridge-strength comparison on saved protein features",
+    )
+    regularization.add_argument("--config", default="configs/regularization.json")
+    regularization.add_argument("--output")
+    regularization.add_argument("--device", default="cuda")
+    regularization.add_argument("--check-only", action="store_true")
+    coverage_prepare = commands.add_parser(
+        "prepare-coverage",
+        help="Add training proteins while preserving existing holdouts",
+    )
+    coverage_prepare.add_argument("--config", default="configs/coverage-data.json")
+    coverage_prepare.add_argument("--output", required=True)
+    coverage = commands.add_parser(
+        "coverage", help="Compare fixed-ridge training coverage"
+    )
+    coverage.add_argument("--config", default="configs/coverage.json")
+    coverage.add_argument("--output")
+    coverage.add_argument("--device", default="cuda")
+    coverage.add_argument("--check-only", action="store_true")
+    idr = commands.add_parser(
+        "idr-baseline", help="Frozen-ProGen IDR generation and automatic evaluation"
+    )
+    idr.add_argument("--config", default="configs/idr-baseline.json")
+    idr.add_argument("--output")
+    idr.add_argument("--device", default="cuda")
+    idr.add_argument("--check-only", action="store_true")
+    idr_prepare = commands.add_parser(
+        "prepare-idr",
+        help="Prepare an experimental IDR reference panel from a local DisProt snapshot",
+    )
+    idr_prepare.add_argument("--source", default="data/raw/disprot-2026-11-12.json")
+    idr_prepare.add_argument("--output", required=True)
+    idr_eval = commands.add_parser(
+        "evaluate-idr",
+        help="CPU disorder evaluation of saved IDR samples; no ProGen loading",
+    )
+    idr_eval.add_argument("--run", required=True)
+    idr_eval.add_argument("--output", required=True)
+    charge = commands.add_parser(
+        "idr-charge",
+        help="Train frozen-ProGen charge guidance and evaluate comparisons",
+    )
+    charge.add_argument("--config", default="configs/idr-charge.json")
+    charge.add_argument("--output")
+    charge.add_argument("--device", default="cuda")
+    charge.add_argument("--check-only", action="store_true")
+    charge_eval = commands.add_parser(
+        "evaluate-idr-charge", help="CPU evaluation of completed charge-pilot samples"
+    )
+    charge_eval.add_argument("--run", required=True)
+    charge_eval.add_argument("--output", required=True)
+    learning = commands.add_parser(
+        "idr-diagnose", help="Capture real states and diagnose charge-learning updates"
+    )
+    learning.add_argument("--config", default="configs/idr-learning-diagnostic.json")
+    learning.add_argument("--output")
+    learning.add_argument("--device", default="cuda")
+    learning.add_argument("--check-only", action="store_true")
+    learning_replay = commands.add_parser(
+        "analyze-idr-diagnostic",
+        help="CPU analysis of saved diagnostic feature batches",
+    )
+    learning_replay.add_argument("--run", required=True)
+    learning_replay.add_argument("--output", required=True)
+    context = commands.add_parser(
+        "idr-context", help="Compare standard and direct charge-context guidance"
+    )
+    context.add_argument("--config", default="configs/idr-context.json")
+    context.add_argument("--output")
+    context.add_argument("--device", default="cuda")
+    context.add_argument("--check-only", action="store_true")
+    context_eval = commands.add_parser(
+        "evaluate-idr-context", help="Replay context-comparison scoring on CPU"
+    )
+    context_eval.add_argument("--run", required=True)
+    context_eval.add_argument("--output", required=True)
     args = parser.parse_args()
-    if args.command == "prepare-multiprotein":
+    if args.command == "idr-context":
+        from .idr.context_experiment import check_context_inputs, run_context
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            config, _, manifest = check_context_inputs(settings)
+            print(
+                json.dumps(
+                    {
+                        "arms": settings["arms"],
+                        "seeds": config["seeds"],
+                        "steps_per_fit": config["steps"],
+                        "training_trajectories": 2
+                        * len(config["seeds"])
+                        * config["steps"]
+                        * manifest["prompt_count"],
+                        "added_parameters": 100,
+                        "model_execution": False,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if not args.output:
+                parser.error("idr-context requires --output unless --check-only")
+            print(run_context(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-context":
+        from .idr.context_experiment import reevaluate_context
+
+        print(reevaluate_context(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-diagnose":
+        from .idr.learning_diagnostic import check_source, run_learning_diagnostic
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            _, _, references = check_source(settings)
+            prompts = sum(r["role"] == "prompt" for r in references)
+            print(
+                json.dumps(
+                    {
+                        "seeds": settings["seeds"],
+                        "cases": 2 * len(settings["seeds"]),
+                        "trajectories": 2
+                        * len(settings["seeds"])
+                        * settings["batches_per_case"]
+                        * prompts,
+                        "model_execution": False,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if not args.output:
+                parser.error("idr-diagnose requires --output unless --check-only")
+            print(
+                run_learning_diagnostic(
+                    settings, project_path(args.output), args.device
+                )
+            )
+    elif args.command == "analyze-idr-diagnostic":
+        from .idr.learning_diagnostic import replay_learning_diagnostic
+
+        print(
+            replay_learning_diagnostic(
+                project_path(args.run), project_path(args.output)
+            )
+        )
+    elif args.command == "idr-charge":
+        from .idr.charge_experiment import check_charge_inputs, run_charge
+
+        config = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            _, manifest = check_charge_inputs(config)
+            print(
+                json.dumps(
+                    {
+                        "prompts": manifest["prompt_count"],
+                        "seeds": config["seeds"],
+                        "steps_per_seed": config["steps"],
+                        "reward": config["reward"],
+                        "model_execution": False,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if not args.output:
+                parser.error("idr-charge requires --output unless --check-only")
+            print(run_charge(config, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-charge":
+        from .idr.charge_experiment import reevaluate_charge
+
+        print(reevaluate_charge(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-baseline":
+        from .idr.baseline import check_inputs, run_baseline
+
+        config = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            references, manifest = check_inputs(config)
+            print(
+                json.dumps(
+                    {
+                        "references": len(references),
+                        "manifest": manifest,
+                        "model_execution": False,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if not args.output:
+                parser.error("idr-baseline requires --output unless --check-only")
+            print(run_baseline(config, project_path(args.output), args.device))
+    elif args.command == "prepare-idr":
+        from .idr.data import prepare_references
+
+        print(
+            prepare_references(
+                project_path(args.source),
+                project_path(args.output),
+                "https://disprot.org/api/search?format=json",
+            )
+        )
+    elif args.command == "evaluate-idr":
+        from .idr.baseline import reevaluate
+
+        print(reevaluate(project_path(args.run), project_path(args.output)))
+    elif args.command == "prepare-multiprotein":
         from .multiprotein_data import prepare_multiprotein
 
         manifest = prepare_multiprotein(
@@ -170,6 +375,69 @@ def main():
                 indent=2,
             )
         )
+    elif args.command == "prepare-coverage":
+        from .coverage_data import prepare_coverage
+
+        config = json.loads(project_path(args.config).read_text())
+        manifest = prepare_coverage(config, project_path(args.output))
+        print(
+            json.dumps(
+                {
+                    key: manifest[key]
+                    for key in [
+                        "training_parent_counts",
+                        "additional_parents",
+                        "additional_sequences",
+                        "validation_and_test_unchanged",
+                    ]
+                },
+                indent=2,
+            )
+        )
+    elif args.command == "coverage":
+        from .coverage import check_coverage, run_coverage
+
+        config = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            _, _, manifest, files, _, _, _ = check_coverage(config)
+            print(
+                json.dumps(
+                    {
+                        "training_parent_counts": manifest["training_parent_counts"],
+                        "additional_sequences": manifest["additional_sequences"],
+                        "validation_sequences": len(files["validation.json"]),
+                        "test_evaluated": False,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if args.output is None:
+                parser.error("coverage requires --output unless --check-only")
+            run_coverage(config, project_path(args.output), args.device)
+    elif args.command == "regularization":
+        from .regularization import check_regularization, run_regularization
+
+        config = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            _, _, _, rows = check_regularization(config)
+            print(
+                json.dumps(
+                    {
+                        "rows": {
+                            split: len(partition) for split, partition in rows.items()
+                        },
+                        "folds": config["folds"],
+                        "ridge_penalties": config["ridge_penalties"],
+                        "test_evaluated": False,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if args.output is None:
+                parser.error("regularization requires --output unless --check-only")
+            run_regularization(config, project_path(args.output), args.device)
     elif args.command == "multiprotein":
         from .multiprotein import check_multiprotein, run_multiprotein
 

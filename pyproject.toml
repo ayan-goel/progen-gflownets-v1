@@ -11,6 +11,7 @@ dependencies = ["numpy==1.26.4", "torch==2.6.0", "transformers==4.27.4", "tokeni
 
 [project.optional-dependencies]
 dev = ["ruff==0.14.0"]
+idr = ["metapredict==3.0.2", "protfasta==0.1.26", "getSequence==3.0.1"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

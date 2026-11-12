@@ -1,5 +1,102 @@
 # Experiment commands
 
+## Direct charge-context comparison — current
+
+```bash
+source .venv/bin/activate
+export CUDA_VISIBLE_DEVICES=0  # choose your GPU
+scripts/run.sh idr-context --output runs/idr-context-v1 --device cuda
+```
+
+Runs the unchanged head and the direct-context head from scratch for all three
+seeds, then evaluates both automatically. Uses one shared prior pool. The
+[protocol](experiments/idr_context_2026-11-12.md) owns the matched budgets and
+interpretation. Preflight only: `scripts/run.sh idr-context --check-only`.
+
+If generation completed but scoring failed, replay scoring on CPU:
+
+```bash
+scripts/run.sh evaluate-idr-context --run runs/idr-context-v1 --output runs/idr-context-v1-evaluation
+```
+
+All outputs need new directories; source runs remain unchanged. Training does
+not automatically resume after interruption.
+
+## Real-state charge-learning diagnostic — completed
+
+Completed in 4 min 46 s. Commands are retained for reproducibility; use a new
+output directory for a deliberate rerun. The current training command is above.
+
+```bash
+source .venv/bin/activate
+export CUDA_VISIBLE_DEVICES=0
+scripts/run.sh idr-diagnose --output runs/idr-learning-diagnostic-v1 --device cuda
+```
+
+Captures 768 continuations from initial/final heads; automatically analyzes gradient
+variability, token corrections and disposable updates. No sustained training.
+[Protocol and rationale](experiments/idr_learning_diagnostic_2026-11-12.md).
+Preflight without inference: `scripts/run.sh idr-diagnose --check-only`.
+
+If capture finished, replay analysis on CPU without ProGen:
+
+```bash
+scripts/run.sh analyze-idr-diagnostic --run runs/idr-learning-diagnostic-v1 --output runs/idr-learning-diagnostic-v1-analysis
+```
+
+Use fresh output directories. Source models and completed experiments are unchanged.
+
+## IDR charge guidance — completed pilot
+
+The pilot and its diagnostic are complete. The command below is
+retained for reproducibility; choose a new output directory for any deliberate rerun.
+From the project root:
+
+```bash
+source .venv/bin/activate
+export CUDA_VISIBLE_DEVICES=0
+scripts/run.sh idr-charge --output runs/idr-charge-v1 --device cuda
+```
+
+This trains only the GFN head, then automatically generates comparisons and scores
+charge/disorder/diversity on CPU. [Protocol and budgets](experiments/idr_charge_2026-11-12.md).
+Read-only preflight: `scripts/run.sh idr-charge --check-only`. If all generation
+completed but scoring failed, recover without loading ProGen:
+
+```bash
+scripts/run.sh evaluate-idr-charge --run runs/idr-charge-v1 --output runs/idr-charge-v1-evaluation
+```
+
+Existing output directories are refused. Partial-training automatic resume is not
+implemented; intermediate head/optimizer/RNG checkpoints remain available for diagnosis.
+
+## IDR baseline generation and evaluation
+
+The reference panel and pinned metapredict package are prepared in this workspace.
+Activate the existing `.venv`, select your GPU, then run:
+
+```bash
+source .venv/bin/activate
+export CUDA_VISIBLE_DEVICES=0
+scripts/run.sh idr-baseline --output runs/idr-baseline-v1 --device cuda
+```
+
+No training: 384 fixed-length ProGen samples, automatic CPU disorder/descriptor
+scoring, and `report.md` plus raw sequences and detailed metrics. The
+[protocol](experiments/idr_baseline_2026-11-12.md) owns settings and interpretation.
+CPU-only readiness check: `scripts/run.sh idr-baseline --check-only`.
+
+If generation completed but evaluation failed, or to replay evaluation:
+
+```bash
+scripts/run.sh evaluate-idr --run runs/idr-baseline-v1 --output runs/idr-baseline-v1-evaluation
+```
+
+This verifies saved samples/scorer provenance and uses CPU only. It never loads
+ProGen. Existing output directories are refused; use a fresh output name.
+
+## Retained stability commands
+
 Run from the project root. The launcher uses the existing .venv and preserves
 your CUDA_VISIBLE_DEVICES selection. Outputs must be new directories.
 
@@ -218,7 +315,8 @@ scripts/run.sh multiprotein --output runs/multiprotein-v1 --device cuda
 The command extracts frozen ProGen features for 4,160 sequences, fits ridge and
 three MLP seeds plus the constant control, and evaluates automatically. See
 runs/multiprotein-v1/report.md and evaluation/results.json. No GFlowNet training
-or generation is included. Existing output paths are rejected. Runtime is unmeasured.
+or generation is included. Existing output paths are rejected. The first completed
+run took 57.875 seconds on the user's GPU.
 
 CPU preflight:
 
@@ -236,4 +334,54 @@ Data re-preparation into a fresh directory (original pinned panel stays unchange
 
 ```bash
 CUDA_VISIBLE_DEVICES='' scripts/run.sh prepare-multiprotein   --output data/processed/multiprotein-recheck
+```
+
+## Ridge regularization only
+
+[Protocol](experiments/regularization_2026-11-10.md). Activate .venv and select
+CUDA_VISIBLE_DEVICES yourself, then run:
+
+```bash
+scripts/run.sh regularization --output runs/regularization-v1 --device cuda
+```
+
+Reuses the completed multi-protein feature cache; no ProGen execution. Performs
+25 ridge fits across five training-group folds and one selected-strength refit,
+then evaluates on the existing validation proteins. No test evaluation or protein
+set expansion. Results: runs/regularization-v1/report.md, cross_validation.json,
+selection.json and validation_results.json. Each output directory must be new.
+The first completed run took 2.003 seconds on the user's GPU using cached features.
+
+Optional CPU preflight, with no fitting:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh regularization --check-only
+```
+
+## Training-protein coverage
+
+[Protocol](experiments/coverage_2026-11-10.md). Activate .venv and select your GPU:
+
+```bash
+scripts/run.sh coverage --output runs/coverage-v1 --device cuda
+```
+
+Compares nested 44/64/86-parent training sets on the same validation sequences,
+using the original ridge strength per training example. Reuses the original
+features and extracts only added training features. Evaluation is automatic;
+report.md, validation_results.json and validation_predictions.json are in the
+new output directory. No test evaluation or GFN training. The first completed run
+took 32.321 seconds, including 31.959 seconds for loading/extracting added features.
+
+CPU preflight, with no inference or fitting:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh coverage --check-only
+```
+
+CPU preparation is already complete. To reproduce it without changing inputs:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh prepare-coverage \
+  --output data/processed/coverage-recheck
 ```

@@ -1,0 +1,22 @@
+{
+  "source_run": "runs/idr-charge-v1",
+  "source_config_sha256": "1cda219dc7e0fd4250be050d01adc92105243319c50a719fcc9f8134ad3f1bad",
+  "checkpoint_step": 400,
+  "checkpoint_sha256": {
+    "0": "b707f4f6c3edbb808277c1b53df079e75162aa65d13a79bb4158d3e94fb33be8",
+    "1": "dcd9250ab2df292e8086992cdff7092a3e651d8f309d397d810c94869fa1b61f",
+    "2": "906b7a2301fc60dd6d000a969f8a938cba7f8135ac2400a4e84cd8edee53525b"
+  },
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "batches_per_case": 16,
+  "gradient_group_sizes": [
+    1,
+    2,
+    4
+  ],
+  "capture_seed_base": 80000
+}

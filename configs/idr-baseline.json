@@ -1,0 +1,20 @@
+{
+  "data": "data/processed/idr-reference-v1",
+  "manifest_sha256": "8d8f214f6fbe1d5d8808e68d8acf04fa4badc755adb3b41d006bcc473576610b",
+  "checkpoint": "../progen-gflownets-test/progen/checkpoints/progen2-medium",
+  "precision": "float32",
+  "length": 80,
+  "prefix_length": 16,
+  "samples_per_prompt": 8,
+  "batch_size": 8,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "temperature": 1.0,
+  "charge_window": 9,
+  "disorder_cutoff": 0.5,
+  "minimum_disordered_fraction": 0.8,
+  "cpu_threads": 1
+}

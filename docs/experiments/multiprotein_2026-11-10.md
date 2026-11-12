@@ -187,10 +187,147 @@ available and is now declared as a dependency. Prior completed runs remain uncha
 
 Verification: [CPU tests](../verification/multiprotein-cpu-tests-2026-11-10.txt)
 and [readiness](../verification/multiprotein-readiness-2026-11-10.json). Real
-prediction performance is unknown until the user runs the experiment. No real
-training, backbone inference or GPU work was performed in implementation.
+prediction performance was unknown at implementation time; completed results are
+below. No real training, backbone inference or GPU work was performed by the assistant.
 
 Source-access note (10 November): the journal full-text fetch was blocked by its
 redirect. The assay discussion here uses the indexed primary-paper abstract/methods
 excerpt and the author release listing, not a new full-paper review. The Biopython
 1.86 alignment documentation was directly accessible.
+
+## Completed results — 10 November 2026
+
+The user completed runs/multiprotein-v1 in **57.875 seconds**. Loading and frozen
+feature extraction took 46.231 seconds: 553 forward calls, 4,160 sequences and
+248,690 input tokens. This is predictor fitting, not a GFlowNet experiment.
+
+| Predictor | Test RMSE | Test pooled Spearman | Mean within-parent Spearman | Mean within-parent selection lift | Parents with positive lift |
+|---|---:|---:|---:|---:|---:|
+| Constant | 1.442 | undefined | undefined | 0.000 | 0/10 |
+| Ridge | 1.202 | 0.545 | 0.383 | +0.371 | 9/10 |
+| MLP seed 0 | 1.342 | 0.339 | 0.195 | -0.008 | 4/10 |
+| MLP seed 1 | 1.170 | 0.620 | 0.174 | +0.113 | 6/10 |
+| MLP seed 2 | 1.083 | 0.641 | 0.188 | +0.227 | 6/10 |
+
+RMSE and lift are kcal/mol. Within each test parent, rank its 65 measured
+candidates by prediction and select seven (ceil of 10%); compare their measured
+mean with uniform selection of those same 65. Average the ten lifts equally.
+This is not improvement over ProGen and does not establish novel protein design.
+Ridge's per-parent lift ranges from -0.0105 to +1.1515. MLP seed 2 has the lowest
+test error, but was not selected as a winner by validation.
+
+**Validation prevents promoting any model to a reliable broad-generation reward.**
+The constant validation RMSE is 1.447. Selected ridge/MLP 0/1/2 RMSEs are
+1.639 / 1.627 / 1.515 / 1.617; pooled Spearman correlations are
+-0.118 / -0.065 / 0.158 / 0.159. All four fail the existing reported validation
+gate. Ridge selects penalty 1000, the grid's upper boundary. MLP checkpoints
+are selected at steps 50 / 50 / 100 out of 2,000; later training does not improve
+the selected validation RMSE. These findings suggest generalization/regularization
+problems, but do not identify their cause.
+
+A post-hoc CPU diagnostic on the selected checkpoints separates pooled from
+within-parent behavior: validation ridge has mean within-parent Spearman 0.285
+and selection lift +0.291 despite negative pooled Spearman. Thus useful local
+ranking can coexist with poor prediction across parents. The validation/test
+discrepancy must not be hidden by reporting test metrics alone. Only ten parents
+occupy each partition; hundreds of variants are not independent parent replicates.
+
+Next proposed step: diagnose between-parent bias versus within-parent ranking
+using the cached features and training/validation labels; then predefine grouped
+cross-validation and a stronger regularization comparison before another user-run
+fit. Do not tune to the displayed test table or automatically promote ridge/MLP
+to broad generation. The current test panel is now inspected development data.
+The immediate bottleneck is reward transfer across proteins, not evidence that
+the previously validated GFlowNet optimizer needs changing.
+
+Verification: CPU metrics replay in runs/multiprotein-v1-recheck exactly matches
+saved results; feature-cache SHA matches provenance. All four saved checkpoints
+reproduce test predictions on CPU within 1.20e-6 kcal/mol. See
+[verification evidence](../verification/multiprotein-results-2026-11-10.json).
+No training or backbone inference was rerun during analysis; original artifacts
+remain unchanged.
+
+## Follow-up diagnosis — 10 November 2026
+
+Question: why do selected models rank variants usefully while failing overall
+validation? This is a post-hoc analysis of cached **training and validation**
+features and saved checkpoints. No new test analysis, fitting, backbone execution
+or GPU job is involved. Full output: runs/multiprotein-diagnostics-v1-verified.
+
+For each protein, split prediction error into its mean error and the remaining
+variant errors after subtracting that mean. The two weighted squared-error terms
+sum exactly to total MSE. The weights are sequence counts, so unequal group sizes
+would also be handled correctly. Centering uses observed labels only to diagnose
+errors; it is **not** an available correction for newly generated proteins.
+
+| Model | Training RMSE | Validation RMSE | Validation MSE from parent mean errors | Validation centered-variant RMSE |
+|---|---:|---:|---:|---:|
+| Constant | 1.366 | 1.447 | 50.6% | 1.017 |
+| Ridge | 0.854 | 1.639 | 64.4% | 0.979 |
+| MLP seed 0 | 0.903 | 1.627 | 62.1% | 1.002 |
+| MLP seed 1 | 0.908 | 1.515 | 55.0% | 1.016 |
+| MLP seed 2 | 0.883 | 1.617 | 61.7% | 1.001 |
+
+All errors are in kcal/mol except squared-error shares. For ridge, the parent-mean
+error term rises from the constant's 1.0605 to 1.7287 squared units, while the
+centered-variant term improves from 1.0342 to 0.9576. Thus **the entire net MSE
+disadvantage versus constant comes from parent-mean errors**, partly offset by
+better within-parent predictions. This describes the error, not its causal origin.
+
+Ridge's predicted/measured parent means have Spearman 0.994 on the 44 training
+parents but -0.261 on the ten validation parents. This is consistent with poor
+transfer of learned between-parent patterns; 2,860 training sequences still
+represent only 44 distinct parent groups. It does not prove that the backbone
+lacks useful features or that more regularization alone will solve the problem.
+
+Examples use the **mean over each parent's 65 candidates**, not the reference
+protein's own stability:
+
+| Validation parent | Measured mean | Ridge predicted mean | Prediction bias |
+|---|---:|---:|---:|
+| 2MC5.pdb | 0.866 | 3.072 | +2.206 |
+| 2KVT.pdb | 2.891 | 1.141 | -1.749 |
+| 2PFU.pdb | 3.291 | 1.583 | -1.709 |
+
+These biases have opposite signs: a single global offset cannot fix them. The
+two largest positive excess-MSE contributions sum to 0.575 of a net 0.592,
+but other proteins contribute both positive and negative terms. Removing any
+**single** validation parent still leaves ridge worse than constant (remaining
+excess MSE ranges 0.290–0.751). Ridge beats constant prediction MSE on only 4/10
+validation parents. Do not remove difficult parents to improve the result.
+
+Checks found no feature/identity ordering mismatch or saved-checkpoint mismatch.
+All models' normalization buffers match training-only moments within floating-point
+tolerance. This rules out those specific bookkeeping failures, not every possible
+model or dataset issue. Two synthetic tests verify the decomposition, unequal-size
+weighting and leave-one-parent-out calculation. Repeated diagnostics reproduce the
+same model metrics exactly. [Verification](../verification/multiprotein-diagnostics-2026-11-10.json).
+
+### Recommended next experiment (not run)
+
+Focus on ridge first. Use five fixed group folds within the existing 44 training
+parents to compare stronger regularization (extend beyond the selected boundary
+1000) with the constant baseline. Fit normalization separately inside each fold;
+keep all variants of a parent together. Select settings by aggregate held-out-fold
+prediction error and report parent-mean error and within-parent ranking/selection
+alongside it. Retain the existing ten validation parents as a separate transfer
+check, rather than selecting settings from the already inspected test table.
+
+This isolates whether the apparent benefit is robust across proteins and whether
+shrinking the predictor reduces unreliable between-parent predictions. It is a
+proposal, not evidence that shrinkage will work. If it fails, revisit training
+protein coverage and representation before training a broad-generation GFlowNet.
+Do not introduce measured-parent corrections as a claimed de novo solution.
+
+Reproduce the CPU-only diagnosis into a new directory:
+
+```bash
+CUDA_VISIBLE_DEVICES='' PYTHONPATH=src OMP_NUM_THREADS=1 .venv/bin/python \
+  -m stability_gfn.predictor_diagnostics \
+  --run runs/multiprotein-v1 --output runs/multiprotein-diagnostics-recheck
+```
+
+The diagnostic saves input hashes and its source alongside the report. Existing
+run directories are never overwritten. The initial diagnostic output in
+runs/multiprotein-diagnostics-v1 has identical model metrics; the verified output
+also includes the source snapshot.

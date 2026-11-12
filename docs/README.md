@@ -6,8 +6,9 @@ Start with [current status](status.md) and the [scientific specification](../spe
 |---|---|
 | What happened in the original biological pilot? | [Pilot results](experiments/biological_first_results_2026-10-15.md) |
 | What was established before it? | [Experiment history](experiments/README.md), [standalone results](prior_results.md) |
-| What do we do next? | [Predictor/reward study](experiments/predictor_reward_study_2026-11-03.md), [current status](status.md) |
-| How does the implementation work? | [Architecture](architecture.md) |
+| What do we do next? | [Direct charge-context comparison](experiments/idr_context_2026-11-12.md), [current status](status.md) |
+| Why did the biological task change? | [Pivot rationale](decisions.md#2026-11-12--pivot-from-stability-to-idpidr-property-guidance), [historical stability spec](stability_spec_2026-11-10.md) |
+| How does the retained stability implementation work? | [Architecture](architecture.md) |
 | What data and split are used? | [Data contract](data.md) |
 | Which parameters were chosen and why? | [Hyperparameters](hyperparameters.md), [decisions](decisions.md) |
 | What substantive implementation decisions were made? | [Implementation record](implementation_log.md) |

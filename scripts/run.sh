@@ -5,4 +5,5 @@ project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 export PYTHONPATH="$project_root/src${PYTHONPATH:+:$PYTHONPATH}"
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
 export TOKENIZERS_PARALLELISM=false
+export MPLCONFIGDIR="${MPLCONFIGDIR:-$project_root/.cache/matplotlib}"
 exec "$project_root/.venv/bin/python" -m stability_gfn "$@"

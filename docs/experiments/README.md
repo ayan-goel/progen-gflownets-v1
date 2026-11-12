@@ -1,6 +1,17 @@
-# Retained experiment history
+# Experiment history and current pilot
 
-The active project returns to the first biological pilot. See [current status](../status.md).
+Ready: [direct charge-context comparison](idr_context_2026-11-12.md), with fresh
+matched fits of both heads and automatic evaluation.
+
+Completed: [real-state charge-learning diagnostic](idr_learning_diagnostic_2026-11-12.md#completed-results--12-november-2026).
+Weak block-specific steering motivated the comparison above.
+
+Completed: [IDR charge-guidance pilot](idr_charge_2026-11-12.md#completed-results--12-november-2026).
+Guidance did not improve charge matching; selection and swaps performed better.
+The [CPU learning diagnosis](idr_charge_diagnosis_2026-11-12.md) records checkpoint
+checks, exact toy controls and the next evidence needed.
+
+These completed studies are groundwork for the IDP/IDR pivot. The [IDR generation baseline](idr_baseline_2026-11-12.md) is complete, with prompted generation improving predicted-disorder yield; see [current status](../status.md).
 
 | Stage | Evidence |
 |---|---|
@@ -17,9 +28,9 @@ comparators, data boundaries and decision rules before real execution. The old
 pilot's proposed follow-ups are historical recommendations, not implemented
 current workflows. The [current scope](../status.md) controls next work.
 
-Completed: [local predictor/reward study, arithmetic audit and results](predictor_reward_study_2026-11-03.md). Next is the [ridge-reward GFN rerun](ridge_gfn_2026-11-09.md), prioritized after Tom's follow-up meeting.
+Completed: [local predictor/reward study, arithmetic audit and results](predictor_reward_study_2026-11-03.md). It motivated the subsequently completed [ridge-reward GFN rerun](ridge_gfn_2026-11-09.md).
 
-Completed: [ridge-reward GFN results](ridge_gfn_2026-11-09.md). All three seeds realize the modest target gain; next is a controlled reward-noise protocol.
+Completed: [ridge-reward GFN results](ridge_gfn_2026-11-09.md). All three seeds realize the modest target gain; this motivated the completed noise study.
 
 Completed: [fixed reward-noise study](reward_noise_2026-11-09.md), all 18 fits closely match noisy targets; some corrupted targets lose biological utility.
 
@@ -33,4 +44,8 @@ Completed: [GFN on position-held-out ridge rewards](position_gfn_2026-11-09.md),
 all nine fits closely match their targets and realize measured stability gains.
 
 
-Ready for user execution: [multi-protein stability predictor benchmark](multiprotein_2026-11-10.md).
+Completed: [multi-protein stability predictor benchmark and error diagnosis](multiprotein_2026-11-10.md).
+
+Completed: [ridge regularization with fixed protein coverage](regularization_2026-11-10.md); lower prediction error but worse stable-candidate selection.
+
+Completed: [more training proteins with a fixed ridge rule](coverage_2026-11-10.md); modest, non-monotonic selection gains and persistent absolute-prediction errors.

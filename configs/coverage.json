@@ -1,0 +1,7 @@
+{
+  "data": "data/processed/coverage-v1",
+  "manifest_sha256": "dd42214169b3fdc2458b35e8dd93bdfbbae49bb0a3c330388e2d9891154e2e34",
+  "reference_penalty": 1000,
+  "feature_batch_size": 8,
+  "selection_fraction": 0.1
+}

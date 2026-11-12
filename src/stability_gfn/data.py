@@ -30,7 +30,7 @@ def finite_number(value):
     return number if math.isfinite(number) else None
 
 
-def audit_table(path, min_length=40, max_length=72):
+def audit_table(path, min_length=40, max_length=72, parent_names=None):
     """Stream the release and retain only valid absolute-stability observations."""
     parents = defaultdict(list)
     counts = Counter()
@@ -42,6 +42,11 @@ def audit_table(path, min_length=40, max_length=72):
             )
         for row in reader:
             counts["input_rows"] += 1
+            # Coverage studies select new training identities before processing
+            # measurements; skip other parents before parsing their labels.
+            if parent_names is not None and row["WT_name"].strip() not in parent_names:
+                counts["outside_requested_parents"] += 1
+                continue
             sequence = row["aa_seq"].strip()
             label = finite_number(row["dG_ML"])
             if label is None:

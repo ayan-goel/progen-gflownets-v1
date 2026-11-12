@@ -1,28 +1,34 @@
-# Frozen ProGen2 stability guidance
+# Property-guided IDR generation with frozen ProGen2
 
-Learn a small GFlowNet guidance head on frozen ProGen2 using whole-sequence
-stability rewards. Local experiments established accurate reward-target sampling
-and measured stability gains on known variants of one protein.
+Learn a small GFlowNet guidance head that steers frozen ProGen2 toward specified
+properties of intrinsically disordered regions (IDRs).
 
-The current step tests whether the stability predictor generalizes across protein
-groups. A [64-group benchmark](docs/experiments/multiprotein_2026-11-10.md) compares
-constant, ridge and MLP predictors on frozen ProGen features, with automatic
-evaluation. It is [ready to run](docs/runbook.md#multi-protein-stability-predictors).
+**Ready: a matched charge-context experiment.** Compare the original guidance
+head with one that gives charge instructions a separate path to its output.
+Both use the same frozen ProGen, reward and training budget. The completed
+diagnostic motivated this change; whether it improves generation remains to test.
+See the [experiment plan](docs/experiments/idr_context_2026-11-12.md).
 
-- [Current status and next work](docs/status.md)
+Completed stability experiments established accurate local reward-target sampling
+and showed how reward errors limit biological utility. They remain the foundation
+for this pivot; a general cross-protein stability predictor is no longer the
+immediate objective.
+
+- [Current status](docs/status.md)
 - [Scientific specification](spec.md)
-- [Original biological result](docs/experiments/biological_first_results_2026-10-15.md)
-- [Commands](docs/runbook.md)
+- [Pivot rationale](docs/decisions.md#2026-11-12--pivot-from-stability-to-idpidr-property-guidance)
 - [Research documentation](docs/README.md)
+- [Completed experiment records](docs/experiments/README.md)
+- [Existing commands](docs/runbook.md)
 
 ## Running
 
-Activate the existing environment and choose the GPU yourself before a real run:
+Activate the environment, choose your GPU, and run both heads and evaluation:
 
 ~~~bash
 source .venv/bin/activate
 export CUDA_VISIBLE_DEVICES=0
-scripts/run.sh --help
+scripts/run.sh idr-context --output runs/idr-context-v1 --device cuda
 ~~~
 
 Real experiments and all GPU execution are user initiated. Development checks
@@ -32,21 +38,6 @@ are CPU-only:
 scripts/test_cpu.sh
 ~~~
 
-The [ridge-reward GFlowNet](docs/experiments/ridge_gfn_2026-11-09.md) realizes a
-modest measured-stability gain on the original candidate set. The
-[noise study](docs/experiments/reward_noise_2026-11-09.md) shows that accurate
-sampling can persist even when corrupted rewards erase that gain.
-
-The [completed three-split comparison](docs/experiments/split_robustness_2026-11-09.md)
-finds modest target gains for both ridge and MLP. Ridge is not consistently
-better. These are exact target evaluations on known single mutants, not new
-GFN training or evidence of stable novel proteins.
-
-The [completed position-held-out study](docs/experiments/position_holdout_2026-11-09.md)
-finds useful targets for both predictors, with larger ridge gains on all three
-splits. Its candidate sets and baseline probabilities differ from the random-split
-experiment. The [completed GFN follow-up](docs/experiments/position_gfn_2026-11-09.md)
-closely matches all three ridge targets across nine fits and realizes their
-measured stability gains. This establishes the local sampling mechanism, not
-generation of new stable proteins. The multi-protein predictor benchmark now tests that next question with related
-sequences kept in the same partition.
+The run writes `report.md` with the comparison and detailed results for each head.
+See the [protocol](docs/experiments/idr_context_2026-11-12.md) for choices,
+interpretation limits, and CPU evaluation recovery.
