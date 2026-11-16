@@ -1,0 +1,13 @@
+{
+  "source_run": "runs/idr-continuous-v1",
+  "source_generation_sha256": "2f4dfc3296b4d72b8eba7f8bb57a5f1a9832677d488bcbdbe6923d1ff85c0c11",
+  "training_steps": 400,
+  "evaluation_samples_per_prompt": 128,
+  "bank_sampling_seed": 98000,
+  "evaluation_seed": 113000,
+  "penalty": 2.5,
+  "conditioning_maximum_gain": 32,
+  "draws_per_prompt": 32,
+  "snapshot_interval": 20,
+  "microbatch_size": 16
+}

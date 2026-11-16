@@ -1,0 +1,9 @@
+{
+  "source_run": "runs/idr-replay-v1",
+  "source_generation_sha256": "3beef0bb80d58ac1579ee454cb381fc165fd442c69f448bf4cd673e1ab986547",
+  "training_steps": 400,
+  "evaluation_samples_per_prompt": 128,
+  "training_seed": 92000,
+  "evaluation_seed": 93000,
+  "bank_sampling_seed": 95000
+}

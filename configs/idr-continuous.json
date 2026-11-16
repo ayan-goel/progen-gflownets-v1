@@ -1,0 +1,14 @@
+{
+  "source_run": "runs/idr-replay-v1",
+  "source_generation_sha256": "3beef0bb80d58ac1579ee454cb381fc165fd442c69f448bf4cd673e1ab986547",
+  "training_steps": 400,
+  "evaluation_samples_per_prompt": 128,
+  "training_seed": 92000,
+  "evaluation_seed": 103000,
+  "bank_sampling_seed": 95000,
+  "control_run": "runs/idr-warmstart-v1",
+  "control_generation_sha256": "eab5e8066d85ebe8244aa26b5b3d87ac0def8fd3dd4aa3d3990cf9f9473b2312",
+  "penalty": 2.5,
+  "reward_audit": "docs/verification/idr-continuous-reward-audit-2026-11-15.json",
+  "reward_audit_sha256": "4bbc35af08d90ad03c819a04c890e3f6311d5943233e3493a9e4e86860e267a5"
+}

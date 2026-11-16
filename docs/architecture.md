@@ -1,5 +1,25 @@
 # Implementation architecture
 
+`idr/replay_data.py` verifies the completed source, partitions a training-only bank
+by tail and reconstructs detached causal ProGen features. `idr/replay_experiment.py`
+uses the same head and inherited TB implementation for matched-budget online and
+replay fits, plus a separate supervised token-likelihood control.
+`idr/replay_evaluation.py` reports raw generation, copying, per-prompt metrics and
+fixed-bank fit diagnostics. Snapshots support CPU scoring recovery without loading
+ProGen. The [protocol](experiments/idr_replay_2026-11-13.md) owns budgets and limits.
+
+`idr/acceptance_reward.py` is the new, separately versioned joint charge/disorder
+scorer. It consumes complete generated tails and supplied per-residue disorder
+scores, returning a bounded log property factor and component diagnostics. It
+does not load a model. `idr/acceptance_experiment.py` supplies this factor to TB
+with beta 1, scores generated tails on CPU, and trains only the head/normalizer.
+It reuses completed old heads and samples all controls afresh.
+`idr/acceptance_evaluation.py` reports raw outcomes, selection, target estimates
+and method-specific residuals, with CPU evaluation recovery. Historical runners
+still use their original reward. The
+[reward contract](../spec.md#revised-reward-contract-joint_acceptance_v1) describes
+the change from evaluation-only disorder to an optimized predictor proxy.
+
 This describes the retained stability implementation. The IDR generation-only baseline is
 implemented separately in `stability_gfn.idr`; its
 [protocol](experiments/idr_baseline_2026-11-12.md) owns the new data flow.
@@ -16,6 +36,23 @@ A paired runner shares the prior sample pool, initializes both heads identically
 and saves final token-response diagnostics alongside raw samples. The
 [context protocol](experiments/idr_context_2026-11-12.md) owns exact architecture,
 budgets and interpretation. `evaluate-idr-context` replays scoring on CPU.
+
+`idr/branch_rate.py` reuses that architecture, creates disjoint Adam groups for the
+original head, task matrix and log-normalizers, and changes only the matrix rate.
+It trains three fresh heads while reusing pinned controls/prior samples, preserving
+all earlier source files. Evaluation verifies shared control counts/rates exactly and continuous metrics
+within the documented roundoff tolerance. Its copied evidence supports CPU replay without the old run directory.
+The [branch-rate protocol](experiments/idr_branch_rate_2026-11-12.md) owns details.
+
+`idr/subtb.py` implements prior-factored scalar flows and normalized all-segment
+SubTB on detached cached prefix states. `idr/subtb_experiment.py` pairs fresh TB
+and SubTB fits with identical policy initialization and trajectory budgets,
+separate training/evaluation RNGs and a shared new prior pool. SubTB adds a
+separate scalar MLP only for interior states; root normalizers remain trainable
+and terminal values are fixed by the unchanged reward. Pairwise residuals reuse
+cumulative log-ratios, requiring no additional ProGen passes. See the
+[protocol](experiments/idr_subtb_2026-11-13.md) for equations and clipping choices.
+CPU replay verifies saved samples, logs, checkpoints and source/scorer identity.
 
 ## Data flow
 
@@ -145,3 +182,14 @@ training-only; ridge selects primal versus dual by matrix size. Evaluation uses
 separate held-out labels after fitting, fixed candidate identities, and explicit
 uniform-selection baselines. Source/data/model hashes and complete fitting reports
 are saved. The [protocol](experiments/multiprotein_2026-11-10.md) defines interpretation.
+
+## Supervised-start comparison
+
+`idr/warmstart_data.py` verifies the completed supervised checkpoint and cached
+bank, and defines training-only normalizer initialization. `warmstart_experiment.py`
+loads identical starting weights for unchanged, continued-supervision and TB/replay
+arms. Adam is reset in both continuation arms; ProGen remains frozen.
+`warmstart_evaluation.py` compares fresh outputs against both controls, includes
+inherited training in copy checks and reports normalizer-independent relative-target
+fit on the fixed bank. The [protocol](experiments/idr_warmstart_2026-11-15.md)
+owns budgets, choices and limitations; this adds no new architecture or reward.

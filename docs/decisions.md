@@ -699,3 +699,566 @@ including disorder, diversity and block-specific corrections. Reuse unchanged
 rollout, reward, update and scorer functions to protect comparability and historical
 replay. No results are available yet; the [protocol](experiments/idr_context_2026-11-12.md)
 owns settings, evidence, costs and decision criteria.
+
+
+## 2026-11-12 — Test the direct branch's update scale after weak generation
+
+The [completed direct-context comparison](experiments/idr_context_2026-11-12.md#completed-results--12-november-2026)
+shows greater explicit-context sensitivity and correctly signed target coefficients,
+but only 17/384 charge and 9/384 joint passes versus the standard head's 20/384
+and 11/384. No seed improves either pass count. The direct matrix learned small
+weights; it is neither disconnected nor an established generation improvement.
+
+Propose one tenfold rate increase for the added matrix alone, keeping the original
+head rate, normalizer, clipping, 400-step budget, reward and frozen ProGen fixed.
+This tests update scale without treating a synthetic whole-head rate experiment
+as equivalent. The multiplier is an engineering hypothesis, not a paper optimum.
+TB/SubTB comparison remains a separate follow-up, with primary motivation linked
+in the result record. The new rate test is not implemented or run at this stage.
+
+
+## 2026-11-12 — One bounded branch-rate follow-up with reused controls
+
+The user authorized the [branch-rate protocol](experiments/idr_branch_rate_2026-11-12.md).
+Train three fresh direct-context heads with an added-matrix rate of 0.001 and
+retain the original head's 0.0001 and normalizers' 0.01. All rates decay tenfold
+after step 300. Use separate nonduplicated Adam groups and the existing joint
+norm clipping; retain seeds, initialization, support and reward. No warm start.
+
+Reuse checksum-pinned completed standard/lower-rate controls and the prior pool:
+those deterministic fits already supply the intended comparison. Save copied
+evidence for CPU replay and distinguish reused proposal costs from new generation.
+Judge raw charge/joint success, disorder and diversity across all seeds/prompts;
+larger weights or lower loss alone are insufficient. A mixed/negative result ends
+this branch-specific test and motivates reconsidering learning, potentially in a
+separate training-objective investigation. No further rate sweep or budget extension
+is authorized by this protocol. No real follow-up outcomes have been observed.
+
+
+## 2026-11-13 — Verify the small branch-rate gain without further tuning
+
+The [completed bounded test](experiments/idr_branch_rate_2026-11-12.md#completed-results--verified-13-november-2026)
+raises charge passes from 17 to 23 and joint passes from 9 to 13 out of 384, with
+charge increases in every seed and no joint-count decreases. Mean score improves
+on all eight prompts; disorder/diversity remain similar. This satisfies the
+qualitative rationale for further verification, not a claim of statistical or
+biological success. The margin over ProGen is only three passes on either endpoint.
+
+Freeze checkpoints/settings and propose larger fresh-sample evaluation of both
+branch rates and ProGen, using all three heads and newly fixed random streams.
+This isolates sampling variability without more training or a 100× rate sweep.
+The comparison remains on the inspected prompt panel and cannot establish new
+protein generalization. If the gain does not repeat or remains unhelpfully small,
+stop branch-specific tuning and revisit credit assignment separately. The new
+evaluation protocol/command remains pending; this is a decision from local
+experimental evidence, not a new literature claim.
+
+
+## 2026-11-13 — Prioritize a training-method comparison over sampling-only verification
+
+The user questioned whether more samples would improve the model. They would not:
+the earlier proposal measured uncertainty around a small gain. Retain that reasoning
+as history, but defer the standalone sampling run because the active objective is
+substantially better guidance. The [targeted SubTB review](../literature/IDP_IDR_REVIEW_2026-11-12.md#8-training-method-priority-after-the-branch-rate-result--13-november-2026)
+supports a controlled TB/SubTB comparison as the next proposal, not a guarantee.
+
+Keep the current token policy and reward fixed, add the state-flow estimator needed
+for partial-trajectory constraints, and match trajectory/update budgets. Existing
+400-step TB results do not establish convergence or an inherent failure of TB.
+Use fresh evaluation and learning curves to separate useful generation from lower
+training loss. Resolve exact parameterization/weighting/budgets and test correctness
+on CPU before any user GPU run. Do not simultaneously fine-tune ProGen, change beta,
+or perform another branch-rate sweep. No implementation was started in this review.
+
+
+## 2026-11-13 — Fix and implement the matched SubTB charge protocol
+
+The user authorized the training-method comparison. The
+[protocol](experiments/idr_subtb_2026-11-13.md) fixes all choices before real results:
+800 updates in both arms, identical high-rate direct-context token heads, separate
+scalar interior flows, prior-factored constraints, uniform segment weighting and
+fresh evaluation. The extra budget is matched because 400 steps did not establish
+TB convergence. Prior factoring avoids asking a new network to reproduce known
+prefix log likelihoods. Separate flow clipping preserves the policy's existing
+clipping budget. Neither choice changes the terminal distribution.
+
+This is a bounded test of a plausible training-signal improvement, motivated by
+our weak/noisy learning evidence and the primary SubTB paper. The new practical
+continuation screen demands useful charge and joint gains, preserved disorder/
+diversity and seed consistency. A lower loss or a handful of extra passes is not
+sufficient. No automatic extension, rate/lambda sweep or ProGen unfreezing follows.
+Tiny CPU correctness checks passed; no real outcome has been observed.
+
+
+## 2026-11-13 — Stop the SubTB branch; propose training-data reuse
+
+The [matched result](experiments/idr_subtb_2026-11-13.md#completed-results-and-next-decision--13-november-2026)
+favors TB over SubTB in every seed and fails the predeclared SubTB screen.
+Do not extend that method or sweep its weighting/rate by default. TB still moves
+the charge profile weakly, while selection and a finite-pool target estimate
+suggest useful outputs and remaining target-fitting headroom.
+
+Propose replay-assisted TB: reuse informative trajectories alongside fresh draws,
+with prompt balance, fixed reward/prior/head and fresh final evaluation. This
+addresses the current one-update-per-batch training rule; it does not assume the
+backbone must be unfrozen. GFlowNet LM replay literature motivates the mechanism,
+but replay's benefit here is untested. The result record owns diagnostics and the
+next protocol requirements. No new training method was implemented or run.
+
+
+## 2026-11-13 — Resolve reward alignment before implementing replay
+
+The user interrupted the replay implementation to question whether the reward
+itself fits the objective and supplied an RL theory monograph. No replay code had
+been written. The [CPU reward audit](experiments/idr_reward_audit_2026-11-13.md)
+finds same-prompt score/pass inversions in 21/24 pools, no disorder reward, and a
+fixed-target estimate that remains far from mostly passing outputs. It also
+retains evidence of imperfect fitting: TB trails the current target estimate.
+Replay may address the latter, but not the former.
+
+Defer replay and specify acceptance-aware utility before another training run.
+The [reading note](../literature/RL_THEORY_REWARD_AUDIT_2026-11-13.md) distinguishes
+target choice, KL regularization and data coverage; it does not claim a recipe or
+guarantee for our neural sampler. Beta/bonus calculations are post-hoc target
+sensitivity, not selected settings. Keep any future reward comparison on TB with
+the same direct-context head, without simultaneous unfreezing or replay changes.
+Current executed reward/configuration and historical evidence remain unchanged.
+
+## 2026-11-13 — Replace center matching with bounded joint acceptance
+
+The user authorized investigating and fixing the reward. Adopt a versioned
+candidate that prioritizes all charge tolerances plus the existing V3 isolated-tail
+screen, with full credit inside the joint acceptable set and positive graded
+credit outside it. This resolves the demonstrated score/pass inversion and the
+missing disorder objective. It changes the scientific target; it is not a fix to
+a charge-calculation bug. Historical commands/runs retain their original reward.
+
+The [reward record](experiments/idr_reward_audit_2026-11-13.md#adopted-candidate-joint_acceptance_v1)
+owns every term, default and alternative. The pass/near-failure ratio 20 and
+failure floor fraction 0.25 bound the property multiplier to [1/80, 1]; they are
+engineering choices fixed before evaluating this candidate, not tuned optima.
+Passes preserve relative ProGen probabilities. V3 becomes an optimized proxy,
+so it loses independent-evaluation status; V2 remains sensitivity only.
+
+Saved proposals suggest a better aligned target (47.86% joint versus 11.35%),
+with a smaller log-factor range but limited proposal coverage. This does not
+demonstrate trained improvement. The [targeted literature update](../literature/IDP_IDR_REVIEW_2026-11-12.md#11-bounded-joint-acceptance-reward--13-november-2026)
+supports separating objective choice from imperfect fitting and cautions against
+assuming stronger rewards solve learning. Implement the scorer and reproducible
+CPU audit now; next integrate a bounded TB comparison with the same frozen head
+architecture. Keep replay, SubTB and unfreezing out of that comparison.
+
+## 2026-11-13 — Train the revised reward; reuse old fits with fresh evaluation
+
+The user authorized the [joint-acceptance TB comparison](experiments/idr_acceptance_2026-11-13.md).
+Train three new heads under the inherited 800-update budget, rates, clipping and
+initialization. Reuse the completed old TB heads rather than refitting unchanged
+controls. Generate fresh evaluation from both policies and a new prior pool so
+the reward-design samples are not reused as final outputs. This remains the same
+inspected development prompt panel and reuses old training replicates.
+
+V3 scores only generated tails during training and never receives gradients.
+Record its added CPU cost and per-trajectory reward inputs, since bounded rewards
+may still fail through scarce successful trajectories. Each policy's residual
+uses its own target. A fresh selection baseline uses the new property factor with
+stable ties; selection density is not reported as the original proposal density.
+Fix the prior audit's practical screen before execution: +5 points joint success,
+two improved seeds, no more than 5 points lost uniqueness. The protocol owns all
+RNG streams, budgets and limitations. The completed outcome is recorded below.
+
+## 2026-11-13 — Reward alignment alone fails; test reuse of rare successes next
+
+The [completed comparison](experiments/idr_acceptance_2026-11-13.md#completed-results-and-next-decision--13-november-2026)
+fails the predeclared practical screen: new TB 3.13% joint success versus old TB
+3.65%, with only one improved seed. Fresh prior-pool estimates still favor the
+new target, but limited coverage prevents treating them as exact achievable rates.
+Do not promote this reward intervention as successful guidance or extend its
+training automatically.
+
+Post-hoc saved-trajectory analysis finds 480 successful encounters in 19,200
+trajectories; 81.83% of batches contain none, and each example receives one update.
+The final model fits failures far better than successes. This supports a bounded
+replay pilot as a more targeted intervention than another small rate change:
+reuse informative training trajectories alongside fresh draws, holding reward and
+architecture fixed. The completed experiment record owns the proposed progression
+screen and the previously reviewed Hu/Shen sources. Replay is not implemented;
+its mixture, budget and control must be fixed before a new run. Do not use final
+evaluation outputs as replay data or confuse memorizing stored successes with
+improved generation. A negative pilot should trigger reassessment, not a sweep.
+
+This does not prove replay will work, that head capacity is sufficient, or that
+the acceptance reward is easy to learn. The terminal acceptance jump and failure
+floor remain potential contributors. V3 remains an optimized proxy, and no
+biological validation follows from these results.
+
+## 2026-11-13 — Compare alternatives before committing to replay
+
+**Recommendation refined:** replay remains the best next GFlowNet intervention,
+but use a bounded pilot with a simple supervised control on the same frozen-ProGen
+guidance architecture. This is a proposal, not implementation authorization. The
+question is whether better exposure to useful examples makes TB steer fresh
+generation, and whether that head can learn useful steering under simpler training.
+
+The [completed result](experiments/idr_acceptance_2026-11-13.md#completed-results-and-next-decision--13-november-2026)
+shows scarce successful encounters and poor fit on successful outputs. It does
+not establish that scarcity is the sole cause. Training already exposes position,
+accumulated block charge and charged fraction to the head; the missing feature is
+not simply a charge counter. Earlier synthetic fitting checks do not establish
+capacity on real open-ended continuations. Heavy gradient clipping and a nearly
+constant failure reward remain competing optimization explanations.
+
+| Option | What it addresses | Decision |
+|---|---|---|
+| TB with success-aware replay plus fresh draws | Rare successful trajectories receive repeated training instead of one update | First GFN intervention; directly tests the observed imbalance without changing the scientific target |
+| Supervised imitation of successful training sequences, same head | Gives explicit next-residue targets without trajectory-level TB credit assignment | Include as a small diagnostic control, not as a replacement GFN or exact target sampler |
+| Another smoother reward / curriculum | Acceptance discontinuity, weak distinctions between failures, difficult early learning | Plausible, but changes the target or training schedule again; reserve until informative examples have actually been learned from |
+| Bigger or nonlinear task branch; unfreeze final ProGen layers / LoRA | Representation or policy expressivity could limit steering | Serious alternative if simpler learning also fails; first test the existing head. Backbone adaptation changes scope and must keep a separate frozen reward prior |
+| Another SubTB setting, larger batch, learning-rate/clipping sweep, or longer TB | Variance, optimization and credit assignment | Lower priority: earlier loss/rate interventions gave little practical gain; clipping alone does not identify the cause |
+| Prefix-success/value predictor, following FUDGE or controlled decoding | Predict whether each partial sequence can lead to a desirable completion and use it to guide decoding | Strong alternate formulation, but introduces another estimator and calibration/coverage problem; broader than the first replay test |
+| Generate-and-select or explicit charge constraints | Obtain acceptable candidates directly | Keep practical controls. Selection already achieves 10.42% joint success at four proposals/output, but neither establishes learned sampling of the specified soft target |
+
+Replay has unusually relevant precedent: [Jain et al.](https://proceedings.mlr.press/v162/jain22a/jain22a.pdf),
+the original biological-sequence paper, uses TB with mixed offline and fresh
+trajectories (§3.2, Algorithm 2). [Shen et al.](https://proceedings.mlr.press/v202/shen23a/shen23a.pdf)
+specifically studies oversampling low-reward objects and prioritized replay;
+benefits are task-dependent. [Hu et al.](https://proceedings.iclr.cc/paper_files/paper/2024/file/bc667ac84ef58f2b5022da97a465cbab-Paper-Conference.pdf)
+uses replay in autoregressive language-model GFlowNets. These support a test, not
+a promise of improvement. The [literature update](../literature/IDP_IDR_REVIEW_2026-11-12.md#12-alternatives-after-the-joint-acceptance-result--13-november-2026)
+records reading limits and the prefix-guidance alternative.
+
+### What the proposed comparison must distinguish
+
+Keep the reward, frozen backbone and head architecture fixed. Start with one
+preselected training seed. Use only that seed's training examples to seed replay
+and the supervised control, balanced across prompts where possible. Never put
+final evaluation outputs into either training set. The supervised arm maximizes
+the likelihood of residues in successful training sequences using the same head;
+it is deliberately an easier learning objective, not a target-matching claim.
+Do not combine it with TB as an auxiliary loss in this first comparison.
+
+Replayed TB must recompute **current** policy probabilities, preserve the original
+terminal reward and mix stored data with fresh full-support draws. Uniform replay
+of the predominantly failed buffer would not address the proposed mechanism;
+explicit success/near-miss coverage and prompt diversity matter. Prioritizing by
+success is our choice, not literal ranking by the full prior-times-property reward.
+
+Fix replay composition, data split, update/example budgets, checkpoints and matched
+control before execution. The historical on-policy run is a reference, not a
+compute-matched control if this adds updates or training examples. Account for
+feature extraction/reconstruction too: saved reward rows are not a complete cache
+of frozen per-token features. Cached states may be reused only while ProGen is
+frozen. Preserve a training-only holdout for fit diagnostics and use fresh final
+generations; this remains development on the same eight prompts.
+
+- **Replay improves fresh success and diversity is retained:** proceed to seed
+  confirmation using the existing practical +5-point progression screen.
+- **Supervised control improves fresh success, replay does not:** the existing
+  head can support useful steering, so prioritize TB optimization/credit assignment
+  or a supervised warm start. This does not prove capacity for exact target fitting.
+- **Both only fit stored sequences, without improving fresh generation:** the
+  failure is generalization/coverage, not solved by low training loss. Reassess the
+  state representation and available useful data before increasing compute.
+- **Neither fits even its training examples:** inspect head capacity and optimizer
+  behavior on the fixed data. It does not by itself prove unfreezing is necessary.
+
+This is one bounded mechanism comparison, not a new sweep. Its numerical budget
+and settings remain to be fixed in an implementation protocol. Do not launch it
+or change completed code/configuration as part of this literature reassessment.
+
+## 2026-11-13 — Implement a bounded replay comparison with a matched fresh control
+
+The user authorized the [replay/supervised pilot](experiments/idr_replay_2026-11-13.md).
+Fix seed 0 and train three fresh heads for 800 updates, with the acceptance reward
+and architecture unchanged. Use batch 16 so replay can include eight fresh examples,
+four successes and four near-misses while preserving prompt balance. Refit ordinary
+TB at batch 16; comparing only with the earlier batch-eight run would confound the
+replay intervention with the number of examples per update. Updates and trajectory
+presentations match, but fresh generation, historical data exposure and cost do not.
+
+Use a fixed bank from earlier seed-0 training trajectories. This deliberately tests
+repeated exposure to a shared informative dataset before adding adaptive buffer
+replacement. A tail-grouped hash holdout prevents duplicate leakage. Select near-
+misses only after splitting; reserve final generated samples for evaluation. Saved
+V3 scores define the same reward without rescoring the historical training data.
+The supervised control draws the same successful bank rows and updates only the
+same head with mean token NLL; it neither trains a predictor nor unfreezes ProGen.
+
+The protocol owns the bank limits, split repair, random streams, numerical defaults
+and cost accounting. Add a predeclared +5-point gain in joint success excluding exact
+training copies alongside the existing +5-point raw gain and uniqueness guard.
+This protects the mechanism screen from pure memorization; near-copy and per-prompt
+checks still matter. One seed can justify confirmation, not establish robustness.
+No real outcome was used to choose these settings and no real execution was run
+by the assistant. CPU fixtures and read-only preflight establish readiness only.
+
+## 2026-11-14 — Stop replay-only tuning; retain supervised steering as the next control
+
+The [completed comparison](experiments/idr_replay_2026-11-13.md#completed-results--14-november-2026)
+shows a small replay gain (+0.88 percentage points) and a larger supervised gain
+(+4.79 points) over matched on-policy TB. Both miss the predeclared +5-point
+screen. Do not relabel the supervised near-miss as a pass or extend evaluation
+until it crosses the threshold. Its fresh success, high uniqueness and absence
+of exact training copies nevertheless establish useful steering with the same
+frozen backbone/head. Different objectives and successful-example exposure prevent
+attributing the entire difference to TB alone.
+
+Every replay batch already contained successes, yet policy changes remained small;
+the held-out signed-residual decomposition mostly reflects normalizer differences.
+This weakens the case for more replay-only tuning. The next candidate is a bounded
+supervised initialization followed by TB with replay, against the unchanged
+supervised checkpoint. It asks whether TB can preserve and improve existing
+steering. This is an anticipated protocol branch and local hypothesis, not a new
+literature-backed guarantee or evidence of exact target matching.
+
+Before implementation, specify the update budget, normalizer initialization and
+success/diversity rule. If TB removes the gain or adds no useful steering, revisit
+the objective/parameterization rather than extend training. No new experiment is
+implemented or launched by this result analysis; ProGen remains frozen. One seed,
+previously inspected prompts and optimized disorder proxies limit the conclusion.
+
+
+## 2026-11-14 — Compare alternatives to supervised initialization
+
+The user asked whether the proposed next step is actually preferable to other
+options. The [completed result](experiments/idr_replay_2026-11-13.md#completed-results--14-november-2026)
+supports useful supervised steering, not a claim that TB will improve it. Neither
+arm passed the prior progression screen. The [source review](../literature/IDP_IDR_REVIEW_2026-11-12.md#13-alternatives-after-replay-and-supervised-control--14-november-2026)
+records new reading and its limits.
+
+| Alternative | Mechanism and limitation | Priority |
+|---|---|---|
+| Supervised initialization, then unchanged TB/replay objective | Starts with more useful generation; cannot itself fix poor TB credit assignment and may lose the gain | One bounded next diagnostic, with continued supervision as a control |
+| Continue supervised learning alone | Builds on the best observed steering; still imitation of selected successes, not our soft target or a GFN | Required comparator, not evidence that GFN training works |
+| Prefix expected-property guidance | Predict completion quality at each residue and steer locally; new estimator needs representative data and calibration | Strongest structural alternative if warm-start TB adds no value |
+| Reward-weighted likelihood / distributional fitting | Fit the same target using direct token likelihood signals; needs correct proposal weighting and adequate coverage | Strong non-GFN reference, not silently a GFlowNet replacement |
+| Log-partition variance loss | Avoid jointly fitting prompt normalizers; needs within-prompt samples, and our normalizer is not proven causal | Reserve for evidence of a specific normalizer failure |
+| Unfreeze ProGen / enlarge the head | May improve expressivity; changes scope and does not fix a poor objective | Not first: existing frozen features already support some steering, though exact-target capacity remains unknown |
+| Another reward, rate sweep or longer replay run | Could change optimization, but lacks a newly identified failure mechanism | Do not prioritize |
+
+**Recommendation:** retain the warm-start idea as a small test of GFN value, not
+as the most confidently effective generator improvement. Start from the same
+completed supervised head and compare (1) leaving it unchanged, (2) continuing
+supervised training, and (3) TB with replay. Evaluate all three afresh. Match the
+two continuation arms' update/example budgets, report different success exposure,
+fresh sampling and wall time, and preserve reward, backbone and head architecture.
+A gain over the starting checkpoint alone cannot establish that TB adds value.
+
+Before implementation, fix a short budget, optimizer/normalizer initialization,
+checkpoint selection, meaningful gain threshold and diversity/copying guards.
+Record the full optimizer reset/continuation choice. Assess success-stratified
+residuals and policy changes as well as fresh property success; matching the soft
+target and maximizing pass rate are different claims. A weaker pass rate would
+not prove TB has no possible distributional benefit, but absent independently
+supported target-fit benefit it would not justify continued development here.
+
+If TB damages the useful policy or provides no practical advantage over continued
+supervision, stop this warm-start route and reconsider prefix-level guidance.
+Do not automatically extend training or start another loss sweep. This updates
+only the proposal: no experiment code, configurations or completed artifacts change.
+
+## 2026-11-15 — Implement the controlled supervised-start comparison
+
+The user authorized the [three-arm continuation](experiments/idr_warmstart_2026-11-15.md).
+Use the completed supervised head in every arm; compare no updates, continued
+supervision and TB/replay. Preserve the fixed bank, frozen backbone, architecture
+and acceptance reward. A 400-update budget is half the preceding pilot, with no
+checkpoint selection or automatic extension. Match example/update counts and
+explicitly disclose unequal successful-example exposure and computation.
+
+Reset Adam and restart the inherited rate schedule for both trained arms. Carrying
+supervised moments into TB would confound the objective switch; asymmetrically
+keeping them only in the control would introduce another difference. This is an
+intentional restart, not exact optimizer resumption. The supervised head has no
+normalizer: initialize TB's prompt offsets by least squares on equally weighted
+positive/negative training-bank strata, then train them normally. This avoids an
+arbitrary zero offset without treating the selected bank as an unbiased estimate
+of the true target normalizer. It is an initialization choice, not a claimed fix
+for the previous failures; holdout data are excluded.
+
+Require meaningful raw and noncopy joint gains over **both** fresh controls, with
+uniqueness preserved. The protocol fixes the numerical screen and seeds before
+real execution. Include inherited training examples in copying checks; compare
+fixed-bank relative-target discrepancies without a normalizer as a complementary,
+limited diagnostic. This distinguishes useful generation from fitted scalar offsets
+without claiming exact distribution matching. Sources and alternatives remain in
+the [14 November review](../literature/IDP_IDR_REVIEW_2026-11-12.md#13-alternatives-after-replay-and-supervised-control--14-november-2026).
+
+## 2026-11-15 — Reassess reward design separately from credit assignment
+
+The [RL/GFN review](../literature/RL_REWARD_DESIGN_2026-11-15.md) identifies a concrete
+tradeoff in the current acceptance reward: bounded failure weights limit extremes
+but compress failure discrimination; the pass bonus aligns the target but creates
+a large boundary jump. The earlier redesign did not improve generation, so target
+alignment must not be described as a solved learning problem. Replay's limited
+gain despite successes in every batch also weakens a pure lack-of-examples account.
+
+Keep the user-running supervised-start experiment unchanged. After its result,
+inspect reward discrimination/concentration on designated training artifacts.
+If failure weights are largely saturated and a continuous outside-tolerance
+candidate preserves useful target mass, consider one matched terminal-weight test.
+Otherwise, if TB fails to retain/add steering, prioritize local prefix-flow credit
+with the terminal target preserved. Forward-looking GFlowNets and soft-RL/GFN
+equivalence provide specific mechanisms; merely adding telescoping bonuses to
+full-trajectory TB does not provide them. Do not bundle these changes, promise
+improvement, or substitute another loss/rate sweep. The review owns sources,
+mathematical distinctions, limitations and stopping logic; no follow-up trainer
+or hyperparameter is selected by this research update.
+
+## 2026-11-15 — End warm-start TB; isolate the reward question
+
+The [completed comparison](experiments/idr_warmstart_2026-11-15.md#completed-results--15-november-2026)
+gives 9.38% joint success unchanged, 16.11% continued supervision and 7.03% warm TB.
+The predeclared TB screen fails. Do not extend this training or confirm more seeds;
+retain the supervised continuation as the best observed generation baseline.
+Matched starting weights do not remove differing success exposure or objectives.
+
+Unlike earlier normalizer-shift diagnostics, the selected-bank relative-target
+error improves independently of the normalizer. Thus this is not evidence that
+TB learned nothing. It is evidence that improved limited target fitting failed
+to improve the desired generation criterion; exact global target matching remains
+unverified. Do not automatically attribute the result to capacity or credit alone.
+
+Post-hoc training reward inspection supports a specific alternative: many fresh
+failures lie near the floor, although selected replay near misses do not. Assess
+one continuous outside-tolerance candidate for target preference and concentration
+on designated training proposals before committing to a matched reward-only test.
+The selected/nonstationary bank is not an unbiased prior sample. The [review](../literature/RL_REWARD_DESIGN_2026-11-15.md)
+supplies mechanisms and limitations; local prefix-flow learning remains the
+structural alternative. No new penalty, trainer or GPU run is selected by this
+result analysis. Keep the two interventions separate and preserve all results.
+
+
+## 2026-11-15 — Isolate continuous terminal reward under unchanged TB
+
+The user explicitly retained GFlowNet training and authorized the reward-only
+comparison. The [protocol](experiments/idr_continuous_2026-11-15.md) owns design,
+calibration, exact parameters and stopping. Remove the failure floor and pass
+bonus using log factor `-2.5 V`; retain outside-tolerance penalties and every
+acceptance criterion. This changes the target, not its differentiability to TB.
+
+Calibrate on unselected historical training proposals with prior/behavior ratios,
+not selected replay or generated evaluation samples. A one-dimensional matching
+calculation gives 2.5099; round to 2.5. A separate training seed gives similar
+aggregate target preference, but one scarce prompt has low effective coverage.
+Retain that limitation rather than claim a reliable attainable success rate.
+Larger negative log weights are an explicit optimization risk of removing the floor.
+
+Reuse the completed current-TB checkpoint and original common starting head;
+train only one new candidate. Matching the original initialization, training seed,
+replay order, optimizer and budget isolates the reward intervention. Fresh common
+sampling of all arms avoids comparing new outcomes against old sample estimates.
+Use the same normalizer initialization rule with each reward's labels; equal
+numeric offsets would not have the same meaning across targets. Require gains
+over both controls, not merely recovery from a degraded TB head. Keep local-flow
+changes separate, and stop after the declared comparison if it fails.
+
+
+## 2026-11-15 — Stop reward-only tuning after the continuous comparison
+
+The [completed comparison](experiments/idr_continuous_2026-11-15.md#completed-results--15-november-2026)
+finds 9.57% joint success versus 9.86% at initialization and 7.52% for previous TB.
+It fails the prespecified practical screen. Better results than a degraded control
+are insufficient; neither another penalty sweep nor more of the same training has
+credible support from this result. Limited target-fit improvement is not useful
+generation improvement or proof of exact target matching.
+
+Retain the GFlowNet goal. Next assess prefix-flow/local-credit parameterization
+under a fixed terminal target, with a small exact CPU check before a real run.
+The mechanism must differ explicitly from the prior unsuccessful generic SubTB
+comparison. The [existing review](../literature/RL_REWARD_DESIGN_2026-11-15.md)
+supplies motivation, not a performance guarantee. Representation, exploration,
+optimization and target coverage remain competing explanations; the observed
+failure does not prove reward correctness or uniquely identify credit assignment.
+No new experiment implementation or GPU command follows automatically.
+
+
+## 2026-11-16 — Diagnose a representable finite task before another full run
+
+The user authorized separating target quality, head capacity and learning. The
+[exact cached-IDR diagnosis](experiments/idr_exact_diagnosis_2026-11-16.md) replaces
+an immediate prefix-flow proposal with a controlled failure to investigate.
+Actual cached features and the unchanged reward define a selected finite tree;
+its exact target improves success. The ordinary teacher and both TB procedures
+underfit after the fixed budget. A post-hoc algebraic same-architecture fit reaches
+mean TV 1.90e-6, establishing representation on these states without relying on
+optimizer convergence. This is a capacity witness, not a new generator.
+
+Prioritize explaining update/conditioning behavior on this fixed CPU task before
+another full-length GPU experiment. Expected TB also underfits, so sampling noise
+is not sufficient; most tree decisions are early, so a purely long-horizon account
+is insufficient here. Do not infer a unique production failure cause. Local masking,
+selected support and forced suffixes preclude treating these as open-generation
+results. Sources are the linked protocol/results and implementation, not a new
+literature claim. No additional sweep or production change was executed.
+
+
+## 2026-11-16 — Repair finite-task optimization before returning to generation
+
+The user authorized inspecting why exact-task learning fails. The
+[update diagnosis](experiments/idr_update_diagnosis_2026-11-16.md) measures highly
+correlated inputs, output-layer-dominated gradients and sensitivity to update scale.
+A fixed full-support TB objective isolates optimizer behavior from changing proposals.
+Removing clipping alone is worse. L-BFGS improves but misses the local gate; a
+subsequent explicitly post-hoc invertible input-coordinate change preserves the
+starting function and lets the same bounded L-BFGS fit pass on all eight prompts.
+The transform uses initial training features, not oracle next-token targets.
+
+Retain the GFlowNet/TB objective. Treat the repair as a finite deterministic
+optimization result, not improved IDR generation or proof of a unique failure cause.
+Next test conditioning under sampled TB on the same small task before a short
+fully branching ProGen capture. Do not port fixed-batch line search to noisy changing
+batches or launch another full-length run yet. The linked protocol owns parameters,
+controls, stopping criteria, sources and measured outcomes; no sweep was performed.
+
+
+## 2026-11-16 — Conditioning alone does not repair sampled Adam
+
+The [bounded paired comparison](experiments/idr_sampled_conditioning_2026-11-16.md)
+finds lower error in all three conditioned seeds, but none passes the local gate.
+Keep the positive deterministic-TB evidence separate from stochastic fitting and
+open generation. Before a new GPU run, the proposed next control averages the
+same TB update exactly under conditioned Adam. This separates finite-sample noise
+from update behavior without changing reward or supervising next-token targets.
+Do not infer a noise-only cause from the L-BFGS-versus-sampled-Adam gap or extend
+this result into an unplanned rate/budget sweep. The protocol owns numbers and
+conditional decisions; sources are the linked local controls.
+
+
+## 2026-11-16 — Exact gradient averaging identifies a useful sampled-learning direction
+
+The [expected-gradient control](experiments/idr_expected_conditioning_2026-11-16.md)
+passes the finite gate under the same conditioned head, Adam and 400-step budget.
+Removing draw noise while retaining the current-policy/replay weighting rule is
+sufficient here. Prioritize a bounded sampled gradient-averaging approximation;
+account for extra trajectories rather than claiming equal compute. This is stronger
+motivation than another reward change or blind longer fit. Keep local success
+separate from open generation, and do not attribute it solely to clipping or
+assume an adequate batch size without testing. The protocol owns metrics and
+limitations; the proposed sampled approximation is not yet implemented.
+
+
+## 2026-11-16 — Assess variance sources before increasing rollout cost again
+
+The [16-pair sampled comparison](experiments/idr_averaged_sampling_2026-11-16.md)
+shows substantial consistent improvement but fails the local gate at 16-fold
+sample cost. Keep the successful exact expectation as a reference and stop the
+predeclared fits. Next propose a fixed-checkpoint decomposition of fresh/replay
+raw-gradient variance, to decide whether cached replay can reduce noise without
+proportional new rollouts. The current results do not identify that source or
+establish sample efficiency; do not automatically enlarge batches or launch GPUs.
+
+
+## 2026-11-16 — Correct sampled gradients and stop tuning the solved finite task
+
+The [variance audit and repair](experiments/idr_variance_repair_2026-11-16.md)
+finds substantial fresh and replay noise. A fixed-proposal TB control with ordinary
+Adam still underfits, while a snapshot gradient correction passes in three seeds
+and three predeclared fresh confirmation seeds. This supports the correction as a
+local repair beyond merely changing visitation. Keep the GFlowNet objective;
+record the change to fixed-bank proposals and extra gradient cost explicitly.
+The protocol links the SVRG primary source and limits of applying it to Adam.
+
+Stop CPU tuning on the known task. The next meaningful boundary is new-state,
+fully branching transfer with fresh generated evaluation and coverage checks.
+Neither fixed-bank success nor a folded checkpoint establishes that transfer.
+All GPU execution remains user-run; no production model was changed.

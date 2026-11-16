@@ -1,0 +1,13 @@
+{
+  "source_run": "runs/idr-context-v1",
+  "source_files": {
+    "generation.json": "d5c76e5dd10824b3552d322c99c34f4de174d4eadb96b87f46fab3b41836aa55",
+    "standard/metrics.json": "5ec5cd57f2123459889b471d22bf585ef59ea833f2f39e6c129f4cfb6c817343",
+    "direct_context/metrics.json": "b68dfbfdc538dcec932535f611bd0ad6eb70c1fab293a8862002ff94223de80d"
+  },
+  "branch_rate_multiplier": 10,
+  "training_steps": 800,
+  "evaluation_samples_per_prompt": 64,
+  "subtb_lambda": 1.0,
+  "flow_learning_rate": 0.001
+}

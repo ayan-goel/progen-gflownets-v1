@@ -1,6 +1,6 @@
 # Direct charge-context path: matched architecture comparison
 
-**12 November 2026 — implemented; awaiting the user's GPU experiment.**
+**12 November 2026 — completed; no generation benefit demonstrated.**
 
 ## Question and motivation
 
@@ -164,3 +164,108 @@ Real-input preflight passes without model execution. All 76 CPU tests pass,
 including the four new checks. Formatting/lint checks pass, and historical pilot
 and diagnostic implementation hashes remain unchanged. The assistant ran no real
 training or GPU operations.
+
+
+## Completed results — 12 November 2026
+
+The user completed all six fits and evaluations in **8,029.40 seconds
+(2 h 13 min 49 s)**. Each fit reached its fixed step 400. The run generated
+19,200 training trajectories and 2,304 evaluation proposals (shared prior plus
+both guided arms). [Generated comparison](../../runs/idr-context-v1/report.md)
+and [detailed metrics](../../runs/idr-context-v1/metrics.json) preserve results.
+
+| Method | Charge passes / 384 | Isolated disorder passes / 384 | Joint passes / 384 | Unique tails | Mean charge score |
+|---|---:|---:|---:|---:|---:|
+| Frozen prior | 20 (5.21%) | 247 (64.32%) | 10 (2.60%) | 97.14% | -1.935 |
+| Standard head | 20 (5.21%) | 254 (66.15%) | 11 (2.86%) | 95.05% | -1.882 |
+| Direct-context head | 17 (4.43%) | 247 (64.32%) | 9 (2.34%) | 95.05% | -1.850 |
+| Charge-only selection | 79 (20.57%) | 207 (53.91%) | 33 (8.59%) | 98.70% | -0.741 |
+
+Selection uses four times as many prior proposals per output and is not a sampler
+from the specified tilted target. Its larger gain cannot be interpreted as proof
+of an exact attainable target success rate.
+
+The new head does **not** improve the primary generation metrics. Differences of
+three charge passes and two joint passes are small and do not establish reliable
+harm. Its charge-pass counts by seed are 7/5/5, versus standard 8/5/7; joint counts
+are 4/2/3, versus 6/2/3. No seed improves either pass count. At the prompt level,
+charge passes fall by one on DP01299, DP01538 and DP01109 and are unchanged on
+five others; joint passes fall by one on DP01538 and DP01109. There is no hidden
+broad prompt-level gain. RPB1 still has 29/48 unique tails; all other prompts have
+48/48 in both learned arms.
+
+Continuous score improves slightly (−1.882 to −1.850), and pooled fresh-sample
+TB residual RMSE decreases from 3.1785 to 3.1056. These are not improvements in the
+predeclared pass criteria. Mean block charges change from (+0.00765, +0.00781) to
+(+0.00977, +0.00659), still far from (+0.125, −0.125). FCR stays around 0.165–0.166
+against target 0.25. Diversity is similar, not rescued by the added path.
+
+### Mechanistic result: responsive, but weak
+
+The fixed-feature context contrast increases from approximately
+0.000012 / 0.000051 / 0.000050 to 0.000957 / 0.001088 / 0.001365 nominal charge
+per residue for seeds 0/1/2: roughly 20–80 times larger, **but still small in
+absolute terms**. This intervention holds ProGen features fixed and may not describe
+reachable sequence histories; its relative increase is not a success-rate gain.
+
+Actual conditional charge corrections remain negative in both halves for all
+three new heads: (−0.002954, −0.003603), (−0.003172, −0.004496), and
+(−0.000645, −0.002029). They weakly distinguish the two blocks but do not produce
+the intended positive-first correction on average. These are effects at each
+head's own sampled prefixes, not matched-prefix causal differences between arms.
+
+Post-hoc CPU inspection of the saved direct-branch matrices shows the correct
+sign on the block-target input in every seed: K/R coefficients positive, D/E
+coefficients negative. The final matrix norms are 0.03562 / 0.03645 / 0.04414;
+maximum absolute entries are 0.01335 / 0.01477 / 0.01848. The matrix is connected
+and learned; it has not remained at zero.
+
+For a switch in target from −0.125 to +0.125, the direct target-column contribution
+to the mean K/R-versus-D/E logit contrast changes by only 0.00628 / 0.00664 /
+0.00820. This is `0.25 * (mean(K/R coefficients) - mean(D/E coefficients))`,
+using `head.task_weight[:, 4]` in each final checkpoint and the fixed canonical
+alphabet. It excludes progress and accumulated-charge effects and the original
+head, and does not equal an entire-sequence density change. The same contrast
+at steps 100/200/300/400 grows in every seed; growth slows after the inherited
+rate decay. This is descriptive evidence of a small learned effect, not proof of
+an optimal rate, insufficient training duration, or a single causal bottleneck.
+
+Every training update clips the joint gradient in both arms. As before, that alone
+does not establish clipping as the cause or convert the multiplier into an Adam
+learning rate. The current TB/schedule still produces weak policy steering.
+
+### Next decision (proposed; not implemented)
+
+The added route responds in the right direction but did not improve generation
+under the inherited small head rate and fixed budget. The next narrow test should
+therefore isolate **the added branch's update scale**: compare its existing 1e-4
+rate with a 1e-3 rate, keeping the original head rate, normalizer rate, clipping,
+400-step budget, schedule, reward, prompts and frozen ProGen unchanged. The tenfold
+factor is an explicit engineering test, not a literature-selected optimum or a
+demonstrated remedy. Apply the same final-quarter decay to each branch rate.
+Specify the matched execution/reuse plan before running; do not alter these
+completed checkpoints or amplify their outputs at evaluation to claim a trained
+improvement. No new command or production setting has been selected here.
+
+This follows the predeclared question of whether a responsive path is too weak.
+It does not promote the direct-context architecture as better. If a stronger
+branch update still fails to improve raw charge and joint success, revisit
+credit assignment/optimization with a controlled TB/SubTB comparison.
+[Madan et al., ICML 2023](https://proceedings.mlr.press/v202/madan23a.html) motivate
+SubTB through a gradient bias/variance tradeoff and partial-trajectory constraints,
+with reported convergence benefits on longer action sequences. This does not prove
+TB is wrong for our tree or that SubTB will fix this run. Its required intermediate
+flow estimator also needs a separate, explicit design. Do not bundle loss changes,
+backbone fine-tuning and branch-rate changes into one test.
+
+### Verification after completion
+
+CPU replay to `runs/idr-context-v1-evaluation` validates saved input and source/scorer
+hashes and **exactly reproduces** all top-level, grouped and per-sequence metrics
+for both arms. No ProGen inference or training is performed during replay.
+The standard head's final weights and log-normalizers match the original pilot
+bit-for-bit for all three seeds, and its full metrics dictionary is identical.
+This verifies preservation of the baseline, not independent experimental replication:
+the seeds, inputs and initialization were intentionally reused. All original
+artifacts remain untouched. Checkpoint/step-log inspection was CPU-only; the
+assistant performed no GPU operation or real training.

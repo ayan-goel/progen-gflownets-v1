@@ -272,3 +272,209 @@ replay validates saved input hashes and scorer/source compatibility before scori
 no ProGen load is needed. Both complete and partial runs refuse overwriting.
 The [protocol](experiments/idr_context_2026-11-12.md) owns the research rationale
 and fixed experimental choices.
+
+
+## 2026-11-12 — Isolated task-matrix rate and self-contained control reuse
+
+`idr/branch_rate.py` reuses `DirectContextHead`, rollout, TB updates, final sampling
+and charge/disorder scoring while leaving prior experiment modules unchanged.
+Three disjoint Adam groups isolate the matrix's multiplier; clipping still acts
+jointly and the decay boundary matches the original. Tiny CPU parity at multiplier
+one checks that the separate group and loop do not change the original algorithm.
+
+The runner pins the completed comparison manifest and metric files, verifies
+references/packages/source/scorer/model identity, and copies controls needed for
+analysis. It records zero new prior generation and retains original costs as
+reused evidence. CPU evaluation checks shared control counts/pass rates exactly (continuous metrics
+allow 1e-6 relative / 1e-7 absolute scorer roundoff), and can be
+replayed after the source directory is unavailable. Training logs/checkpoints name
+all rates and the multiplier, preventing a base-config rate from obscuring the
+matrix's actual update setting. The [protocol](experiments/idr_branch_rate_2026-11-12.md)
+owns rationale, budgets and the bounded continuation rule.
+
+
+## 2026-11-13 — Prior-factored SubTB with a matched frozen-policy comparator
+
+New `idr/subtb.py` computes all partial-trajectory residuals from cumulative
+policy/prior log-ratios. Cached pre-action features index interior states; root
+log-normalizers and terminal beta-times-score replace network outputs at the two
+boundaries. This preserves the original terminal target and avoids extra ProGen
+passes. A separate zero-output scalar MLP learns interior flows; independent
+initialization cannot consume the token policy or sampling RNG stream.
+
+`idr/subtb_experiment.py` reuses historical rollout, TB optimizer/update and
+charge/disorder evaluation unchanged. Both arms get fresh identical policy
+initialization, matched budgets and new shared prior controls. Artifacts record
+per-group rates, both objective and common TB residuals, flow/policy gradients,
+raw final sequences, token effects, checkpoints, learning curves and computation
+counts. CPU replay checks provenance and works without the source run or model.
+The [protocol](experiments/idr_subtb_2026-11-13.md) owns hyperparameters and rationale.
+Exact-tree value/gradient tests and tiny optimization protect the changed loss;
+a random CPU-backbone fixture verifies the complete run/replay and freezing.
+
+## 13 November 2026 — Versioned joint-acceptance scorer and offline audit
+
+`idr/acceptance_reward.py` computes a bounded property log factor from complete
+tails and supplied V3 residue scores, exposing each constraint violation and pass
+flag. It runs no predictor and detaches rewards from autograd. Separating it from
+historical charge modules preserves completed run hashes and avoids silently
+changing old replay/evaluation semantics. Its output replaces the old beta-times-
+score term in TB; tests reject the conceptual error of applying beta 2 again.
+
+`scripts/audit_idr_acceptance_reward.py` pins the already inspected prior pool,
+checks recomputed flags, uses proposal-correct importance weights, and reports
+per-group coverage plus a paired within-group bootstrap. A proximity-only ablation
+checks whether the acceptance step is consequential. These are saved-data checks,
+not real fitting. The [reward record](experiments/idr_reward_audit_2026-11-13.md#adopted-candidate-joint_acceptance_v1)
+owns the design and interpretation; integration into a training runner is pending.
+
+## 13 November 2026 — Integrate acceptance scoring into TB and recoverable evaluation
+
+`idr/acceptance_experiment.py` reuses frozen rollout, the direct-context head and
+the three-group Adam schedule. It scores completed tails on CPU, passes the
+detached log property factor to TB with beta 1, and saves per-sequence reward
+inputs alongside update logs. Completed TB checkpoints are copied and verified;
+fresh samples from those heads provide the old-reward comparator without refitting.
+Historical implementations/configurations are unchanged.
+
+`idr/acceptance_evaluation.py` computes raw outcomes, new-reward selection,
+prompt-balanced importance estimates with coverage diagnostics, and each policy's
+residual under its own reward. Exact pairwise mean Hamming distance uses residue
+counts rather than a quadratic pair loop, avoiding unnecessary evaluation cost
+for the prior pool. A pre-scoring generation manifest supports CPU-only recovery
+without the source run or pretrained model. The [protocol](experiments/idr_acceptance_2026-11-13.md)
+owns the experimental choices and limitations; no real training was run here.
+
+## 13 November 2026 — Replay bank, matched TB control and supervised capability check
+
+The new `idr/replay_data.py` selects only prior training trajectories, partitions
+identical tails together and caches causally aligned teacher-forced frozen features.
+Cached float32 states let repeated head updates avoid repeated ProGen execution;
+prior-probability agreement and a tiny incremental-versus-teacher-forced test guard
+alignment. Saved behavior likelihoods are provenance, never the current-policy
+likelihood used in a replay loss. The fixed bank and fresh rollouts keep the first
+intervention limited to training-example reuse rather than buffer-refresh design.
+
+`idr/replay_experiment.py` fits fresh on-policy TB, mixed replay TB and supervised
+heads with equal updates/trajectory-example counts. Reusing the existing head,
+optimizer grouping, rate schedule and TB update preserves their definitions.
+The supervised arm removes the normalizer optimizer group and uses mean token NLL.
+Per-trajectory IDs and fresh reward inputs expose actual training membership and
+copying. Initial/final fixed-bank fits separate successful and failed examples;
+fresh encounters of reserved tails invalidate those holdout rows explicitly.
+
+`idr/replay_evaluation.py` evaluates unfiltered generation, common-bank similarity,
+actual training copies, per-prompt success and fit diagnostics. A captured snapshot
+supports CPU scoring recovery even after removing the source run/data from view.
+Historical scientific modules/configurations remain unchanged; new CLI commands
+select this separate protocol. [Protocol and rationale](experiments/idr_replay_2026-11-13.md).
+
+## 2026-11-15 — Supervised-start continuation with preserved source artifacts
+
+New `warmstart_data`, `warmstart_experiment` and `warmstart_evaluation` modules
+implement the [protocol](experiments/idr_warmstart_2026-11-15.md) while reusing the
+existing head updates, sampling and metric primitives. Historical source modules
+stay unchanged because completed manifests pin their hashes. The new driver loads
+the same source weights independently for every arm and reuses its frozen-feature
+cache; it does not refit or reconstruct the original bank.
+
+Capture original supervised training IDs along with the initial checkpoint so
+memorization checks include pre-continuation exposure. Fit diagnostics exclude
+online-exposed holdout tails across all arms/stages, and the relative-target spread
+is calculated within each prompt rather than across different normalizers. Final
+scoring recovery uses a self-contained manifest without source/data directories.
+The training budget, optimizer reset and normalizer rationale live in the protocol.
+
+
+## 15 November 2026 — Versioned continuous-reward TB comparison
+
+Added separate scorer, input validation, training, evaluation and driver modules
+under `idr/continuous_*`. Historical source modules are hash-pinned by completed
+runs, so their functions are reused without modifying them or introducing runtime
+patching. The new scorer reuses the exact existing violations and acceptance labels,
+then replaces the terminal log factor. Cached replay features and row identities
+stay unchanged; only candidate training factors and normalizer targets are relabeled.
+
+The driver verifies the matched control's initial weights/settings and reuses its
+checkpoint. Evaluation asserts replay order/rate equality, includes inherited
+training in copy checks, and compares each policy against both reward definitions
+on a common bank excluding all exposed diagnostic tails. Its snapshot supports
+CPU-only evaluation recovery without original sources/data. The [protocol](experiments/idr_continuous_2026-11-15.md)
+owns scientific choices; [verification](verification.md#continuous-reward-gflownet--15-november-2026)
+records tests and preflight.
+
+
+## 2026-11-16 — Exact cached-state diagnostic and capacity witness
+
+Two standalone CPU scripts reuse saved states, the production head, reward and
+optimizer without changing hash-pinned production modules. A prefix trie removes
+forced edges from computation and checks shared cached states; exact leaf sums
+and an independent tabular oracle verify normalization. Exact and sampled TB use
+the same alternating replay strata. A separate post-hoc SiLU-inversion/linear-solve
+construction tests finite-state representability without changing the architecture
+or relying on gradient fitting. It is never deployed. The
+[protocol/results](experiments/idr_exact_diagnosis_2026-11-16.md) own settings,
+conditioning distinctions, controls and the limits of this deliberately easier task.
+
+
+## 2026-11-16 — Controlled update audit and input-coordinate repair
+
+Standalone CPU scripts inspect exact-task gradients and compare fixed-weight TB
+optimizers while preserving production modules and prior outputs. Closure calls
+count against a hard gradient budget; interrupted line-search trials restore the
+last accepted weights. The subsequent input transform reparameterizes the hidden
+affine layer invertibly, including its bias, so model class, parameter count and
+initial function are preserved. It uses feature geometry only, and final weights
+fold back into the ordinary head for a numerical equivalence check. All resulting
+checkpoints are diagnostic-only. The [protocol/results](experiments/idr_update_diagnosis_2026-11-16.md)
+own choices, reasoning and the distinction from noisy open-generation training.
+
+
+## 2026-11-16 — Matched sampled conditioning diagnostic
+
+A standalone CPU script reuses the existing finite trees, conditioning transform
+and Adam/replay helpers, preserving hash-pinned production code. Each fit starts
+from the original supervised weights with fresh optimizer state. Separate paired
+RNGs preserve replay draws while allowing current-policy samples to diverge.
+Checkpoints, sample indices and source/protocol snapshots support reconstruction;
+all saved heads remain diagnostic-only. Tests verify legacy-control equivalence,
+residual-only differentiation and no training dependence on exact target weights.
+[Protocol/results](experiments/idr_sampled_conditioning_2026-11-16.md) own settings,
+partial improvement, failure gate and next-control rationale.
+
+
+## 2026-11-16 — Expected sampled-TB gradient control
+
+A standalone CPU script averages squared residual gradients with detached normalized
+current-policy weights and the unchanged alternating replay stratum. It applies
+clipping and Adam afterward; it does not differentiate through proposal weights or
+train against oracle next-token targets. Independent sample-pair enumeration tests
+that distinction. Source snapshots and reconstructed conditioned/folded checkpoints
+preserve reproducibility without editing pinned production modules.
+[Protocol/results](experiments/idr_expected_conditioning_2026-11-16.md) own the
+fixed budget, local pass and practical sampling follow-up.
+
+
+## 2026-11-16 — Sample averaging before the optimizer update
+
+A standalone cached-state diagnostic draws 16 fresh and 16 replay leaves per
+prompt with replacement, averages residual losses, and clips/steps once per
+aggregate batch. Duplicate multiplicity is retained. Separate RNG streams and
+saved indices support reconstruction; one-draw mode exactly matches the prior
+trainer in a fixture test. Source snapshots and input/control hashes protect
+completed experiments. [Protocol/results](experiments/idr_averaged_sampling_2026-11-16.md)
+own the bounded budget, additional sample cost and limits of the partial gain.
+
+
+## 2026-11-16 — Variance attribution and corrected fixed-bank TB
+
+The audit enumerates raw leaf gradients in actual conditioned coordinates and
+combines fresh/replay covariance traces using squared prompt/group weights.
+A separate trainer uses a fixed full-support proposal, refreshing a snapshot every
+20 updates; current-minus-snapshot sampled gradients plus the full snapshot mean
+are clipped once before inherited Adam. All terms include log-normalizers.
+Matched controls share exact sampled indices. Tests enumerate unbiasedness and
+verify zero estimator noise at the snapshot; checkpoints remain diagnostic-only.
+A standalone verifier reconstructs all fits and checks pairing, folding, source
+hashes and input preservation. [Protocol/results](experiments/idr_variance_repair_2026-11-16.md)
+own budgets, source rationale, cost accounting, successful confirmation and limits.

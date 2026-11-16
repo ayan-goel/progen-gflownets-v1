@@ -1,0 +1,20 @@
+{
+  "source_run": "runs/idr-subtb-v1",
+  "source_generation_sha256": "be0de4d692d324f20c677b133de02717af5ca865147658dc10831c6f07c41634",
+  "reward_version": "joint_acceptance_v1",
+  "reward": {
+    "tail_length": 64,
+    "block_targets": [
+      0.125,
+      -0.125
+    ],
+    "block_tolerance": 0.0625,
+    "fcr_target": 0.25,
+    "fcr_tolerance": 0.125,
+    "disorder_cutoff": 0.5,
+    "minimum_disordered_fraction": 0.8,
+    "disorder_deficit_scale": 0.2,
+    "pass_to_near_miss_ratio": 20.0,
+    "failure_floor_fraction": 0.25
+  }
+}

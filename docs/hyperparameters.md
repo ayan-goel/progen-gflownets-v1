@@ -1,5 +1,28 @@
 # Hyperparameters and numerical choices
 
+## Replay TB and supervised pilot
+
+[The protocol](experiments/idr_replay_2026-11-13.md#objective-architecture-and-numerical-settings)
+and `configs/idr-replay.json` own the settings: seed 0, 800 updates, batch 16,
+inherited rates/decay/clipping, 50% fresh / 25% stored success / 25% stored near-miss
+for replay, and 128 final draws per prompt/arm. Its fixed bank uses only historical
+training rows with a tail-grouped diagnostic holdout. The supervised objective is
+mean token NLL on successful examples, with the same head rates and no log Z.
+The protocol records every new RNG, bank limit and progression threshold.
+
+## Joint-acceptance reward comparison — completed
+
+The [reward record](experiments/idr_reward_audit_2026-11-13.md#adopted-candidate-joint_acceptance_v1)
+owns the complete formulation and rationale: inherited charge tolerances and V3
+screen, disorder-deficit scale 0.2, pass/near-failure ratio 20, failure floor fraction
+0.25, and `beta=1` with `S=log(property factor)`. These are declared engineering
+defaults, not optimized values. The audit uses 2,000 paired within-group bootstrap
+resamples with seed 20261113. The [training protocol](experiments/idr_acceptance_2026-11-13.md#fixed-settings-and-rationale)
+inherits 800 updates, seeds 0/1/2, batch eight, rates and clipping from completed TB.
+It fixes fresh prior/evaluation streams and reuses old heads without refitting.
+
+## Historical experiment settings
+
 All values below belong to existing stability/synthetic experiments. The IDR baseline
 settings and rationale live in its [protocol](experiments/idr_baseline_2026-11-12.md)
 and `configs/idr-baseline.json`. The new [charge-pilot protocol](experiments/idr_charge_2026-11-12.md)
@@ -11,6 +34,18 @@ zero-initialized 20-by-5 bias-free matrix under the same head optimizer group.
 `configs/idr-context.json` pins the completed pilot configuration; all reward,
 training and evaluation settings are inherited. Six fresh fits share one prior
 pool; no batch, rate or loss tuning is bundled with the architecture test.
+The subsequent [bounded branch-rate protocol](experiments/idr_branch_rate_2026-11-12.md)
+sets only the added matrix rate to 0.001 (0.0001 after step 300), retaining old-head
+0.0001/0.00001 and log-normalizer 0.01/0.001. `configs/idr-branch-rate.json` pins
+control evidence and multiplier ten. No other setting is tuned; a negative/mixed
+result ends this branch-specific follow-up.
+
+The [matched TB/SubTB protocol](experiments/idr_subtb_2026-11-13.md#fixed-settings-and-rationale)
+and `configs/idr-subtb.json` own the current settings: 800 steps per fit, three
+seeds, unchanged policy/branch/normalizer rates, lambda 1, separate 128-unit flow
+MLP at rate 0.001, common decay after step 600 and 64 evaluation draws per prompt.
+These are bounded engineering choices, not paper-optimal values. Both methods
+are trained afresh; only SubTB has the auxiliary flow network.
 
 [exact.json](../configs/exact.json) and [biological.json](../configs/biological.json)
 are the executable settings. These values define the historical initial pilots. Subsequent changes and
@@ -254,3 +289,66 @@ Use the original ridge rule, with penalty `1000 * training_rows / 2860` to hold
 strength per training example fixed. Refit normalization on each stage's training
 rows. Frozen float32 ProGen features, batch eight for the added sequences only.
 No selection sweep, MLP, GFN or test-label evaluation.
+
+## Supervised-start comparison — 15 November 2026
+
+The [protocol](experiments/idr_warmstart_2026-11-15.md#budgets-optimizer-and-random-streams)
+owns all new choices and rationale. Both continuation arms start from the same
+step-800 supervised head, reset Adam and receive 400 updates of 16 examples.
+Restart inherited head rates (`1e-4`, direct branch `1e-3`), TB normalizer `1e-2`,
+with ×0.1 after update 300 and clipping at 1. TB uses a training-only least-squares
+normalizer initialization. The bank/reward stay unchanged. Evaluate 128 fresh
+outputs per prompt per arm; new RNG seeds and the dual-control progression rule
+are fixed in the protocol. These are engineering defaults, not tuned outcomes.
+
+## Continuous-reward comparison — 15 November 2026
+
+The [protocol](experiments/idr_continuous_2026-11-15.md) owns the full rationale.
+Penalty 2.5 is rounded from 2.5099, calibrated on unselected seed-1 historical
+training proposals to approximately match aggregate target success preference;
+seed 2 is diagnostic only. Importance weighting includes prior/behavior correction.
+Keep TB/replay, 400 updates, all optimizer settings, seeds 92000/95000 and the
+same starting head/bank as the completed control. Evaluation seed 103000 is fresh;
+128 outputs per prompt per arm. Only one new TB fit; no curriculum or sweep.
+
+
+## Exact-task update diagnosis — 16 November 2026
+
+The [diagnostic protocol](experiments/idr_update_diagnosis_2026-11-16.md) owns
+fixed leaf weighting, 400-gradient-evaluation budgets, Adam/clipping controls,
+L-BFGS choices and the post-hoc invertible input transform. These settings apply
+to a selected finite CPU problem only; production generation parameters remain
+unchanged. The successful fit does not select a stochastic training configuration.
+
+
+## Sampled conditioning — 16 November 2026
+
+The [protocol](experiments/idr_sampled_conditioning_2026-11-16.md) owns three paired
+RNG seeds and the inherited 400-update sampled Adam/replay budget. It fixes the
+same starting function, reward and rates across ordinary/conditioned inputs;
+no hyperparameter sweep follows the failed progression gate.
+
+
+## Expected-gradient conditioning control — 16 November 2026
+
+The [protocol](experiments/idr_expected_conditioning_2026-11-16.md) owns one
+400-update deterministic fit, inheriting all sampled-comparison rates, clipping
+and initialization. Only the finite-sample gradient estimator changes to its exact
+conditional mean. No sampling-seed repetitions or settings search are needed.
+
+
+## Averaged sampled TB — 16 November 2026
+
+The [protocol](experiments/idr_averaged_sampling_2026-11-16.md) preselects 16 draws
+per fresh/replay group, three fixed seeds and 400 inherited Adam updates. This
+spends 16 times as many trajectories to approximate the successful expectation;
+no additional batch size or training length was selected after observing results.
+
+
+## Variance-reduced fixed-bank TB — 16 November 2026
+
+The [adaptive CPU protocol](experiments/idr_variance_repair_2026-11-16.md) owns the
+variance audit, fixed proposal, 32 draws per prompt, snapshot refresh every 20
+steps and inherited 400-update Adam schedule. Three matched development seeds
+are followed by three predefined fresh confirmation seeds without retuning.
+No reward or gate is changed. Counts include snapshot samples and full-bank passes.

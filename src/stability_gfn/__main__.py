@@ -223,8 +223,339 @@ def main():
     )
     context_eval.add_argument("--run", required=True)
     context_eval.add_argument("--output", required=True)
+    rate = commands.add_parser(
+        "idr-branch-rate", help="Test a tenfold charge-branch learning rate"
+    )
+    rate.add_argument("--config", default="configs/idr-branch-rate.json")
+    rate.add_argument("--output")
+    rate.add_argument("--device", default="cuda")
+    rate.add_argument("--check-only", action="store_true")
+    rate_eval = commands.add_parser(
+        "evaluate-idr-branch-rate", help="CPU replay of branch-rate evaluation"
+    )
+    rate_eval.add_argument("--run", required=True)
+    rate_eval.add_argument("--output", required=True)
+    subtb = commands.add_parser(
+        "idr-subtb", help="Matched TB/SubTB charge guidance with frozen ProGen"
+    )
+    subtb.add_argument("--config", default="configs/idr-subtb.json")
+    subtb.add_argument("--output")
+    subtb.add_argument("--device", default="cuda")
+    subtb.add_argument("--check-only", action="store_true")
+    subtb_eval = commands.add_parser(
+        "evaluate-idr-subtb", help="CPU replay of the TB/SubTB comparison"
+    )
+    subtb_eval.add_argument("--run", required=True)
+    subtb_eval.add_argument("--output", required=True)
+    acceptance = commands.add_parser(
+        "idr-acceptance", help="Train TB with the joint charge/disorder reward"
+    )
+    acceptance.add_argument("--config", default="configs/idr-acceptance.json")
+    acceptance.add_argument("--output")
+    acceptance.add_argument("--device", default="cuda")
+    acceptance.add_argument("--check-only", action="store_true")
+    acceptance_eval = commands.add_parser(
+        "evaluate-idr-acceptance",
+        help="CPU evaluation recovery for acceptance training",
+    )
+    acceptance_eval.add_argument("--run", required=True)
+    acceptance_eval.add_argument("--output", required=True)
+    replay = commands.add_parser(
+        "idr-replay", help="One-seed TB replay and supervised same-head comparison"
+    )
+    replay.add_argument("--config", default="configs/idr-replay.json")
+    replay.add_argument("--output")
+    replay.add_argument("--device", default="cuda")
+    replay.add_argument("--check-only", action="store_true")
+    replay_eval = commands.add_parser(
+        "evaluate-idr-replay", help="CPU scoring recovery for the replay comparison"
+    )
+    replay_eval.add_argument("--run", required=True)
+    replay_eval.add_argument("--output", required=True)
+    warmstart = commands.add_parser(
+        "idr-warmstart", help="Supervised-start TB versus continued supervision"
+    )
+    warmstart.add_argument("--config", default="configs/idr-warmstart.json")
+    warmstart.add_argument("--output")
+    warmstart.add_argument("--device", default="cuda")
+    warmstart.add_argument("--check-only", action="store_true")
+    warmstart_eval = commands.add_parser(
+        "evaluate-idr-warmstart",
+        help="CPU scoring recovery for supervised-start comparison",
+    )
+    warmstart_eval.add_argument("--run", required=True)
+    warmstart_eval.add_argument("--output", required=True)
+    continuous = commands.add_parser(
+        "idr-continuous", help="Continuous-reward GFlowNet versus matched completed TB"
+    )
+    continuous.add_argument("--config", default="configs/idr-continuous.json")
+    continuous.add_argument("--output")
+    continuous.add_argument("--device", default="cuda")
+    continuous.add_argument("--check-only", action="store_true")
+    continuous_eval = commands.add_parser(
+        "evaluate-idr-continuous",
+        help="CPU scoring recovery for continuous-reward comparison",
+    )
+    continuous_eval.add_argument("--run", required=True)
+    continuous_eval.add_argument("--output", required=True)
+    transfer = commands.add_parser(
+        "idr-transfer", help="Full-support offline TB variance-repair pilot"
+    )
+    transfer.add_argument("--config", default="configs/idr-transfer.json")
+    transfer.add_argument("--output")
+    transfer.add_argument("--device", default="cuda")
+    transfer.add_argument("--check-only", action="store_true")
+    transfer_eval = commands.add_parser(
+        "evaluate-idr-transfer", help="Recover transfer scoring without ProGen"
+    )
+    transfer_eval.add_argument("--run", required=True)
+    transfer_eval.add_argument("--output", required=True)
     args = parser.parse_args()
-    if args.command == "idr-context":
+    if args.command == "idr-transfer":
+        from .idr.transfer_data import check_transfer_inputs
+        from .idr.transfer_experiment import run_transfer
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            _, config, references, _, _, bank, _, _ = check_transfer_inputs(settings)
+            prompts = sum(row["role"] == "prompt" for row in references)
+            print(
+                json.dumps(
+                    dict(
+                        ready=True,
+                        training_rows=len(bank),
+                        prompts=prompts,
+                        new_fits=2,
+                        updates_per_fit=config["steps"],
+                        fresh_training_rollouts=0,
+                        evaluation_outputs=3 * prompts * config["samples_per_prompt"],
+                        action_support="all 20 canonical residues at every position",
+                        progen="frozen",
+                    ),
+                    indent=2,
+                )
+            )
+        else:
+            if args.output is None:
+                parser.error("idr-transfer requires --output unless --check-only")
+            print(run_transfer(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-transfer":
+        from .idr.transfer_experiment import reevaluate_transfer
+
+        print(reevaluate_transfer(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-continuous":
+        from .idr.continuous_data import check_continuous_inputs
+        from .idr.continuous_experiment import run_continuous
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            inputs, _, _ = check_continuous_inputs(settings)
+            _, config, references, _, _, bank, _, initial = inputs
+            prompts = sum(row["role"] == "prompt" for row in references)
+            print(
+                json.dumps(
+                    {
+                        "ready": True,
+                        "penalty": settings["penalty"],
+                        "starting_checkpoint_step": initial["step"],
+                        "new_tb_fits": 1,
+                        "new_tb_updates": config["steps"],
+                        "fresh_training_trajectories": prompts * config["steps"],
+                        "raw_evaluation_records": 3
+                        * prompts
+                        * config["samples_per_prompt"],
+                        "bank_rows": len(bank),
+                        "current_tb": "reused pinned completed checkpoint",
+                        "progen": "frozen",
+                        "new_supervised_training": False,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if args.output is None:
+                parser.error("idr-continuous requires --output unless --check-only")
+            print(run_continuous(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-continuous":
+        from .idr.continuous_experiment import reevaluate_continuous
+
+        print(reevaluate_continuous(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-warmstart":
+        from .idr.warmstart_data import check_warmstart_inputs
+        from .idr.warmstart_experiment import run_warmstart
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            _, config, references, _, _, bank, _, initial = check_warmstart_inputs(
+                settings
+            )
+            prompts = sum(row["role"] == "prompt" for row in references)
+            print(
+                json.dumps(
+                    {
+                        "ready": True,
+                        "starting_checkpoint_step": initial["step"],
+                        "updates_per_continuation": config["steps"],
+                        "examples_per_update": 2 * prompts,
+                        "fresh_training_trajectories": config["steps"] * prompts,
+                        "bank_rows": len(bank),
+                        "raw_evaluation_records": 3
+                        * prompts
+                        * config["samples_per_prompt"],
+                        "optimizer": "fresh_adam_for_both_continuations",
+                        "normalizer": "equal_pass_fail_training_bank_least_squares",
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if args.output is None:
+                parser.error("idr-warmstart requires --output unless --check-only")
+            print(run_warmstart(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-warmstart":
+        from .idr.warmstart_experiment import reevaluate_warmstart
+
+        print(reevaluate_warmstart(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-replay":
+        from .idr.replay_data import check_replay_inputs
+        from .idr.replay_experiment import run_replay
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            _, config, references, _, _, bank, summary = check_replay_inputs(settings)
+            prompts = sum(row["role"] == "prompt" for row in references)
+            print(
+                json.dumps(
+                    {
+                        "ready": True,
+                        "seed": settings["seed"],
+                        "updates_per_arm": config["steps"],
+                        "examples_per_update": 2 * prompts,
+                        "fresh_on_policy_trajectories": config["steps"] * 2 * prompts,
+                        "fresh_replay_trajectories": config["steps"] * prompts,
+                        "bank_rows": len(bank),
+                        "bank": summary,
+                        "raw_evaluation_records": 4
+                        * prompts
+                        * config["samples_per_prompt"],
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if args.output is None:
+                parser.error("idr-replay requires --output unless --check-only")
+            print(run_replay(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-replay":
+        from .idr.replay_experiment import reevaluate_replay
+
+        print(reevaluate_replay(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-acceptance":
+        from .idr.acceptance_experiment import check_acceptance_inputs, run_acceptance
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            _, config, references, _ = check_acceptance_inputs(settings)
+            prompts = sum(r["role"] == "prompt" for r in references)
+            per_arm = len(config["seeds"]) * config["samples_per_prompt"] * prompts
+            print(
+                json.dumps(
+                    {
+                        "reward_version": settings["reward_version"],
+                        "new_fits": len(config["seeds"]),
+                        "steps_per_fit": config["steps"],
+                        "training_trajectories": len(config["seeds"])
+                        * prompts
+                        * config["steps"],
+                        "fresh_evaluation_per_policy": per_arm,
+                        "fresh_prior_pool": per_arm * config["selection_factor"],
+                        "control": "reuse old TB heads; sample fresh outputs",
+                        "reward_scoring": "metapredict 3.0.2 V3 on CPU, beta=1",
+                        "model_execution": False,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if not args.output:
+                parser.error("idr-acceptance requires --output unless --check-only")
+            print(run_acceptance(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-acceptance":
+        from .idr.acceptance_experiment import reevaluate_acceptance
+
+        print(reevaluate_acceptance(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-subtb":
+        from .idr.subtb_experiment import check_subtb_inputs, run_subtb
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            _, config, references, _ = check_subtb_inputs(settings)
+            prompts = sum(r["role"] == "prompt" for r in references)
+            per_arm = len(config["seeds"]) * config["samples_per_prompt"] * prompts
+            print(
+                json.dumps(
+                    {
+                        "methods": ["tb", "subtb"],
+                        "seeds": config["seeds"],
+                        "steps_per_fit": config["steps"],
+                        "subtb_lambda": settings["subtb_lambda"],
+                        "training_trajectories_total": 2
+                        * len(config["seeds"])
+                        * config["steps"]
+                        * prompts,
+                        "evaluation_trajectories_per_method": per_arm,
+                        "shared_prior_pool_trajectories": per_arm
+                        * config["selection_factor"],
+                        "flow_learning_rate": settings["flow_learning_rate"],
+                        "model_execution": False,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if not args.output:
+                parser.error("idr-subtb requires --output unless --check-only")
+            print(run_subtb(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-subtb":
+        from .idr.subtb_experiment import reevaluate_subtb
+
+        print(reevaluate_subtb(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-branch-rate":
+        from .idr.branch_rate import check_rate_inputs, run_rate
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            _, config, references, _ = check_rate_inputs(settings)
+            prompts = sum(r["role"] == "prompt" for r in references)
+            print(
+                json.dumps(
+                    {
+                        "seeds": config["seeds"],
+                        "steps_per_fit": config["steps"],
+                        "original_head_rate": config["learning_rate"],
+                        "branch_rate": config["learning_rate"]
+                        * settings["branch_rate_multiplier"],
+                        "new_training_trajectories": len(config["seeds"])
+                        * config["steps"]
+                        * prompts,
+                        "new_evaluation_trajectories": len(config["seeds"])
+                        * config["samples_per_prompt"]
+                        * prompts,
+                        "controls": "reused from completed context comparison",
+                        "model_execution": False,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            if not args.output:
+                parser.error("idr-branch-rate requires --output unless --check-only")
+            print(run_rate(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-branch-rate":
+        from .idr.branch_rate import reevaluate_rate
+
+        print(reevaluate_rate(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-context":
         from .idr.context_experiment import check_context_inputs, run_context
 
         settings = json.loads(project_path(args.config).read_text())

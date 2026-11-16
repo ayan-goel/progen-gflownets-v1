@@ -1,0 +1,17 @@
+{
+  "source_run": "runs/idr-acceptance-v1",
+  "source_generation_sha256": "e41c5862633ae964718670e33be33ecfff4a5efdf26a5417d2ae10e76ebb93e3",
+  "seed": 0,
+  "training_steps": 800,
+  "evaluation_samples_per_prompt": 128,
+  "near_misses_per_prompt": 32,
+  "holdout_failures_per_prompt": 8,
+  "success_cap_per_prompt": 64,
+  "holdout_fraction": 0.2,
+  "cache_batch_size": 8,
+  "split_seed": 81000,
+  "training_seed": 82000,
+  "evaluation_seed": 83000,
+  "prior_seed": 84000,
+  "bank_sampling_seed": 85000
+}

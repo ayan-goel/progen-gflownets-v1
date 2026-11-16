@@ -1,11 +1,49 @@
 # Current project status
 
-**12 November 2026 — Direct charge-context comparison ready for the user GPU run.**
+**16 November 2026 — A variance-reduced TB procedure passes the finite learning gate in six sampled fits.**
 
 [Specification](../spec.md) · [Pilot result](experiments/biological_first_results_2026-10-15.md)
 · [Runbook](runbook.md)
 
 ## Current decision
+
+The [CPU variance diagnosis and repair](experiments/idr_variance_repair_2026-11-16.md)
+now meets the local accuracy gate in **six of six sampled fits**, including three
+fresh confirmation seeds. Fixed-bank TB with conditioned inputs and a snapshot
+gradient correction reaches mean TV **0.019–0.021**, worst prompt **0.0348–0.0369**,
+and joint-pass mass **61.63–61.68%**, versus target **62.02%**.
+
+The matched ordinary fixed-bank control still underfits (mean TV **0.11491**,
+joint mass **55.57%**). Both methods use identical sampled trajectories; the
+correction costs extra head-gradient evaluations. The audit found substantial
+noise from both fresh and replay sampling. The correction therefore addresses
+both by using a fixed sampling proposal and reliable snapshot gradients, while
+keeping the GFlowNet/TB reward and finite target unchanged.
+
+**Stop tuning this CPU task.** We have a reproducible local sampled-learning
+repair, not a demonstrated IDR generator. The next boundary is a short fully
+branching transfer test with new frozen-ProGen states, explicit bank coverage,
+off-bank conditioning assessment and fresh generation evaluation. It is not yet
+implemented, and no GPU work was executed or command prepared here.
+
+The task has 408 selected training leaves/168 branch states, with most residues
+forced. Fixed-bank coverage and large-bank efficiency remain untested. The method
+is not cheaper than full enumeration on this tiny bank; the protocol reports all
+costs. Nineteen CPU tests and reconstruction of all nine fits pass. Production
+modules and earlier run artifacts remain unchanged.
+
+The [completed continuous-reward run](experiments/idr_continuous_2026-11-15.md#completed-results--15-november-2026)
+remains the latest unrestricted result: 9.86% unchanged, 7.52% previous TB and
+9.57% continuous TB joint success. It fails the practical screen. No generated
+samples or completed run artifacts were changed by the diagnosis.
+
+The preceding [supervised-start result](experiments/idr_warmstart_2026-11-15.md#completed-results--15-november-2026)
+was 9.38% unchanged, 16.11% continued supervision and 7.03% warm TB. Continued
+supervision remains the best observed generation baseline, but was not freshly
+sampled in the current comparison. It is a diagnostic/reference, not a replacement
+for the GFlowNet project. Protocols retain all historical settings and caveats.
+
+## IDR experiment history
 
 The user completed the [frozen-ProGen IDR baseline](experiments/idr_baseline_2026-11-12.md#completed-results--12-november-2026)
 in 2 min 58 s. Prompted continuations pass the predicted-disorder screen in
@@ -47,21 +85,74 @@ preactivation have much larger norms. Gradient averaging and one-step head updat
 show mixed results, so a larger batch is not an established fix. CPU replay verifies
 the captures and reproduces the conclusions without ProGen or GPU execution.
 
-**Ready:** the user authorized the [direct-context comparison](experiments/idr_context_2026-11-12.md).
-A zero-initialized, bias-free 5-to-20 linear map adds the existing task context
-directly to residue logits (100 new parameters). Both arms train from scratch
-with identical shared initialization, seeds 0/1/2, the original reward/TB loss,
-400 updates and eight trajectories per update. No learning-rate, batch-size or
-backbone changes are combined with this intervention.
+**Completed:** the [direct-context comparison](experiments/idr_context_2026-11-12.md#completed-results--12-november-2026)
+finished all six fits in 2 h 13 min 49 s. The added 100-parameter route learns the
+right sign and increases explicit-context sensitivity, but its absolute effect
+remains small. Charge passes are 17/384 versus standard 20/384; joint passes are
+9/384 versus 11/384. No seed improves either count. Continuous score improves
+slightly, without a generation success benefit. These small count differences
+do not establish reliable harm. The standard arm exactly reproduces the original
+pilot's final heads and metrics; this is matched development evidence, not an
+independent replication. CPU replay reproduces all reported metrics exactly.
 
-The runner uses one shared prior pool and evaluates 384 raw outputs per head,
-including charge/disorder success, diversity and block-specific token corrections.
-Full comparison: six fits and 21,504 ProGen continuations including evaluation.
-Run `scripts/run.sh idr-context --output runs/idr-context-v1 --device cuda` after
-choosing CUDA_VISIBLE_DEVICES and activating `.venv`; evaluation is automatic.
-All 76 CPU tests and real-input preflight pass. No real comparison outcomes exist yet.
-The assistant has not executed pretrained ProGen or used a GPU. The protocol owns
-all settings, interpretation limits, provenance and CPU-only evaluation recovery.
+**Completed:** the [branch-rate follow-up](experiments/idr_branch_rate_2026-11-12.md#completed-results--verified-13-november-2026)
+finished in 1 h 5 min 41 s. Higher-rate charge/joint passes are 23/13 out of 384,
+versus lower-rate 17/9, original-head 20/11 and ProGen 20/10. Charge improves in
+all three trained seeds; joint success improves in two and ties in one. Disorder
+and diversity are roughly retained. Mean charge score improves on all eight
+prompts, but the gain over ProGen is only three extra passes on either endpoint.
+This is encouraging development evidence, not established broad guidance success.
+CPU replay exactly reproduces results and all rate schedules/checkpoints verify.
+
+**Completed:** [matched TB/SubTB charge training](experiments/idr_subtb_2026-11-13.md#completed-results-and-next-decision--13-november-2026)
+finished in 4 h 52 min. Charge/joint passes are 127/66 for TB, 79/42 for SubTB and
+65/28 for raw ProGen, each out of 1,536. TB wins both endpoints in every seed;
+SubTB fails its predeclared practical screen. Disorder and diversity remain similar.
+Saved hashes, schedules and charge/disorder-threshold calculations verify.
+
+Both policies still steer weakly. A post-hoc importance estimate from the fresh
+prior pool suggests approximately 24.6% charge / 11.3% joint success under the
+fixed target, with substantial finite-pool limitations; this is not an exact
+attainable rate. Generate-and-select reaches 17.6% / 8.4%, at four proposals per
+output. These indicate useful examples and possible target-fitting headroom.
+
+**Revised priority after the user's reward question:** defer replay implementation.
+The [reward audit](experiments/idr_reward_audit_2026-11-13.md) finds failing sequences
+with better smooth charge scores than passing ones in 21/24 prior-pool groups.
+Disorder is absent from the objective. The current target estimate is only 24.6%
+charge / 11.3% joint success, despite retaining an apparent fitting gap relative
+to TB. Better learning alone does not guarantee mostly acceptable IDR outputs.
+
+The [attached RL monograph reading](../literature/RL_THEORY_REWARD_AUDIT_2026-11-13.md)
+clarifies this target/learning distinction and the prior-versus-property tradeoff.
+A post-hoc beta/acceptance-bonus sensitivity analysis uses saved proposals only;
+large tilts concentrate weights on very few samples and are not selected settings.
+The user's follow-up authorized a fix. The separate `joint_acceptance_v1` scorer
+now gives full credit to all joint passes, bounded partial credit to failures,
+and no extra credit within tolerance. V3 disorder becomes part of this candidate
+reward; V2 remains sensitivity, not biological verification. Existing commands
+and completed run definitions are unchanged.
+
+The saved-pool target estimate is 49.2% charge / 47.9% joint / 84.3% V3 disorder,
+versus the old target's 24.6% / 11.3% / 56.4%. These are **post-hoc importance
+estimates, not trained GFN results**. Median ESS is only 16.8 of 256, and two
+prompt/seed pools have no observed joint pass. The smaller log-factor range is
+promising for extreme reward signals, but rare-pass discovery remains unresolved.
+The [reward record](experiments/idr_reward_audit_2026-11-13.md#adopted-candidate-joint_acceptance_v1)
+owns the formulation, engineering defaults, caveats, evidence and bounded next step.
+
+The user authorized training integration. The [new comparison](experiments/idr_acceptance_2026-11-13.md)
+trains three fresh heads for 800 updates, reuses the old TB checkpoints, and samples
+all methods afresh. It retains the frozen backbone, direct-context head, rates,
+clipping and training budget. Per-sequence reward inputs expose rare-pass encounters;
+final scoring reports each policy's residual under its own reward. The practical
+screen requires at least a 5-point joint gain over newly sampled old-TB outputs,
+two improved seeds and no more than a 5-point unique-tail loss.
+
+The completed comparison fails that screen; see the current decision above and
+[full results](experiments/idr_acceptance_2026-11-13.md#completed-results-and-next-decision--13-november-2026).
+[Reproduction and recovery](runbook.md#joint-acceptance-tb--completed) remain available.
+Replay would be a separate intervention; unfreezing remains out of scope.
 
 ## Retained starting point
 

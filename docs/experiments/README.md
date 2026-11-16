@@ -1,7 +1,42 @@
 # Experiment history and current pilot
 
-Ready: [direct charge-context comparison](idr_context_2026-11-12.md), with fresh
-matched fits of both heads and automatic evaluation.
+Current: [CPU variance diagnosis and repair](idr_variance_repair_2026-11-16.md).
+Corrected fixed-bank TB passes the local gate in six sampled fits (TV 0.019–0.021),
+including three fresh confirmation seeds. Matched ordinary fixed-bank training
+still fails. Stop local tuning; new-state/full-generation transfer is the next
+boundary, not yet implemented. The [averaged-sampling](idr_averaged_sampling_2026-11-16.md)
+and [exact-expectation](idr_expected_conditioning_2026-11-16.md) controls retain
+preceding evidence and cost limits.
+
+Completed: [continuous-reward GFlowNet comparison](idr_continuous_2026-11-15.md#completed-results--15-november-2026).
+Joint success is 9.86% unchanged, 7.52% previous TB and 9.57% continuous TB.
+The practical screen fails. This motivated the exact-task learning investigation
+above; reward-only follow-ups remain stopped.
+
+Completed: [supervised-start comparison](idr_warmstart_2026-11-15.md#completed-results--15-november-2026).
+Joint success is 9.38% unchanged, 16.11% after more supervision and 7.03% after
+TB/replay. TB fails the progression screen despite improved selected-bank target
+fit. End this continuation route; assess reward design before another GPU run.
+
+Completed: [replay TB and supervised same-head pilot](idr_replay_2026-11-13.md#completed-results--14-november-2026).
+Joint success is 3.91% on-policy TB, 4.79% replay and 8.69% supervised. Neither
+passed its predeclared screen; this motivated the initialization comparison above.
+
+Completed: [joint-acceptance TB reward comparison](idr_acceptance_2026-11-13.md#completed-results-and-next-decision--13-november-2026).
+New TB achieves 3.13% joint success versus old TB's 3.65% and fails the practical
+screen. Saved trajectories motivate the replay pilot above.
+
+Completed: [matched TB/SubTB charge training](idr_subtb_2026-11-13.md#completed-results-and-next-decision--13-november-2026).
+TB beats SubTB in all three seeds, but gains remain modest. The subsequent
+[reward audit](idr_reward_audit_2026-11-13.md) motivated the revised reward;
+the completed training comparison above tests whether it improves raw generation.
+
+Completed: [branch-only learning-rate follow-up](idr_branch_rate_2026-11-12.md#completed-results--verified-13-november-2026).
+Small observed charge/joint gain; this motivates the matched training comparison above.
+
+Completed: [direct charge-context comparison](idr_context_2026-11-12.md#completed-results--12-november-2026).
+Context sensitivity increased, but generation success did not improve; this
+motivates the bounded follow-up above.
 
 Completed: [real-state charge-learning diagnostic](idr_learning_diagnostic_2026-11-12.md#completed-results--12-november-2026).
 Weak block-specific steering motivated the comparison above.
