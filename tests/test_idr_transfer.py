@@ -171,6 +171,47 @@ class TransferTests(unittest.TestCase):
         arms["svrg_tb"]["joint_success_without_seed_bank_copy"] = 0.14
         self.assertFalse(progression_decision(arms)["passes_practical_screen"])
 
+    def test_full_path_correction_is_exact_at_snapshot_and_unbiased_after_update(self):
+        initial, cache, bank = synthetic_cache()
+        snapshot, _ = condition_head(initial, cache)
+        snapshot_z = torch.nn.Parameter(torch.tensor([0.2, -0.3]))
+        weights = torch.tensor([0.1, 0.2, 0.3, 0.4], dtype=torch.float64)
+        _, reference = batch_gradient(
+            snapshot, snapshot_z, bank, cache, list(range(4)), weights, 2
+        )
+        for moved in (False, True):
+            current = copy.deepcopy(snapshot)
+            current_z = torch.nn.Parameter(snapshot_z.detach().clone())
+            if moved:
+                with torch.no_grad():
+                    current.output.weight.add_(
+                        torch.randn_like(current.output.weight) * 0.01
+                    )
+                    current_z.add_(0.15)
+            _, exact = batch_gradient(
+                current, current_z, bank, cache, list(range(4)), weights, 2
+            )
+            expectation = [torch.zeros_like(g) for g in exact]
+            for index in range(4):
+                unit_weight = torch.ones(1, dtype=torch.float64)
+                _, fresh = batch_gradient(
+                    current, current_z, bank, cache, [index], unit_weight, 1
+                )
+                _, old = batch_gradient(
+                    snapshot, snapshot_z, bank, cache, [index], unit_weight, 1
+                )
+                for total, new, previous, mean in zip(
+                    expectation, fresh, old, reference
+                ):
+                    corrected = new - previous + mean
+                    if not moved:
+                        torch.testing.assert_close(
+                            corrected, mean, atol=1e-6, rtol=1e-6
+                        )
+                    total.add_(weights[index] * corrected)
+            for estimated, true in zip(expectation, exact):
+                torch.testing.assert_close(estimated, true, atol=3e-5, rtol=3e-5)
+
     def test_cpu_full_pipeline_frozen_backbone_source_isolation_and_recovery(self):
         backbone = FrozenProGen.tiny(11)
         frozen = {k: v.clone() for k, v in backbone.model.state_dict().items()}

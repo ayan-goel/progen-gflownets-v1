@@ -1,5 +1,25 @@
 # Hyperparameters and numerical choices
 
+## Matched GFN versus weighted supervised training
+
+The [protocol](experiments/idr_objective_2026-11-18.md#fixed-settings-and-data-boundaries)
+and [configuration](../configs/idr-objective.json) own the settings. Two fresh
+repeats, 1,600 updates per arm, unchanged rates/decay and reward, and shared
+GFN/supervised/prior/replay batches. The new baseline weights token likelihood by
+the property factor within each prompt before microbatching. It has the same
+trainable block/head and no unused normalizer. These inherited matched rates are
+not claims of optimal tuning for either objective.
+
+## Full-support IDR transfer pilot
+
+The [protocol](experiments/idr_transfer_2026-11-16.md#fixed-budget-and-rationale)
+and `configs/idr-transfer.json` own the current settings and rationale. They fix
+400 updates, 32 draws per prompt, snapshot refresh every 20 updates, microbatch 16,
+conditioning gain cap 32, and 128 evaluation tails per prompt/arm. The penalty,
+head, optimizer rates and decay are inherited; the full-trajectory conditioning
+adaptation and fixed offline proposal are explicit new choices. This is one
+development seed, with no automatic sweep or extension.
+
 ## Replay TB and supervised pilot
 
 [The protocol](experiments/idr_replay_2026-11-13.md#objective-architecture-and-numerical-settings)
@@ -352,3 +372,37 @@ variance audit, fixed proposal, 32 draws per prompt, snapshot refresh every 20
 steps and inherited 400-update Adam schedule. Three matched development seeds
 are followed by three predefined fresh confirmation seeds without retuning.
 No reward or gate is changed. Counts include snapshot samples and full-bank passes.
+
+## Last-block adaptation — 16 November 2026
+
+The [protocol](experiments/idr_lastblock_2026-11-16.md#fixed-optimization-budget-and-rationale)
+owns the fixed copied-block learning rate, inherited head rates, separate clipping,
+shared refreshed batches, microbatch accumulation and fresh evaluation seeds.
+Both arms use ordinary TB and the original head parameterization. These are
+predeclared engineering choices for one matched comparison, not an optimized
+adaptation recipe. No rate/layer sweep or automatic extension is authorized.
+
+
+## Last-block training-budget comparison — 17 November 2026
+
+The [protocol](experiments/idr_lastblock_budget_2026-11-17.md) and
+`configs/idr-lastblock-budget.json` own two 800-update paired fits. Inherit all
+architecture, reward and initial optimizer settings from the last-block protocol;
+the 75%-of-run tenfold decay moves from after update 300 to after 600. Reuse
+confirmation training/replay seeds, use fresh evaluation seeds 433000/533000 and
+freshly evaluate the preserved original 400-update models. The protocol records
+why this is a budget-plus-schedule comparison, its doubled training exposure,
+12,288 final outputs and predeclared stopping/progression rules. No additional
+reward, layer or rate search is included.
+
+## Last-block 1,600-versus-800 comparison — 18 November 2026
+
+The [protocol](experiments/idr_lastblock_1600_2026-11-18.md) and
+`configs/idr-lastblock-1600.json` own the new bounded doubling. Keep the two
+training/replay streams, reward, model and initial optimizer rates unchanged;
+run 1,600 updates with tenfold decay after 1,200. Use fresh evaluation streams
+633000/733000 and preserved 800-update adapted controls. The protocol records
+training exposure, 12,288 final outputs, the inherited five-point progression
+criteria and the common copy union retaining 400/800/new training histories.
+These are engineering choices motivated by the preceding gains and mixed late
+learning, not an optimized budget or a guarantee of further improvement.

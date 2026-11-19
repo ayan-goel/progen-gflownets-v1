@@ -1262,3 +1262,372 @@ Stop CPU tuning on the known task. The next meaningful boundary is new-state,
 fully branching transfer with fresh generated evaluation and coverage checks.
 Neither fixed-bank success nor a folded checkpoint establishes that transfer.
 All GPU execution remains user-run; no production model was changed.
+
+
+## 2026-11-16 — Test the local repair on full-support generation
+
+Six successful finite fits justify one transfer pilot, not further local tuning.
+The [protocol](experiments/idr_transfer_2026-11-16.md) compares unchanged initialization,
+ordinary offline TB and snapshot-corrected offline TB. Match proposal, sampled
+indices, conditioning and optimizer budget so the trained-arm difference isolates
+the gradient correction; record its extra computation. Reuse the 408 training
+trajectories, frozen backbone and continuous reward. Do not add online replay,
+unfreezing or another reward change before this mechanism is assessed.
+
+Remove every finite-tree action mask and score all 64 decisions over 20 residues.
+Adapt conditioning to dependent full-path states using a training-only second
+moment with a predeclared gain cap; this adaptation is not the original finite
+transform. Require fresh generation, noncopy success and diversity alongside bank
+residuals. The learned normalizer and unobserved paths make offline bank fit
+insufficient to identify the full target. This pilot tests that limitation directly;
+it does not promise transfer or compare against every historical baseline.
+
+The linked protocol owns budgets, practical progression thresholds and the SVRG
+source. If bank fitting improves without fresh success, investigate coverage and
+extrapolation; if full-path bank fitting itself fails, investigate the adaptation.
+Neither outcome automatically justifies longer training or another reward sweep.
+
+
+## 2026-11-16 — Stop fixed-bank transfer after failed fresh generation
+
+The [completed transfer pilot](experiments/idr_transfer_2026-11-16.md#completed-results--16-november-2026)
+fits the training paths almost exactly with both ordinary and corrected TB, yet
+fresh joint success stays below initialization. The common cached holdout improves
+partly but retains a large error gap. This changes the diagnosis: further reduction
+of training-bank loss or draw variance is not a supported next intervention.
+Prioritize coverage/generalization with newly visited prefixes and a held-out
+trajectory gate, retaining the GFN objective. The evidence does not uniquely
+identify the cause or establish globally adequate reward design. Earlier online
+TB failures mean that refreshing data alone is not a proven fix. A new bounded
+protocol is needed before another real experiment; no extension is automatic.
+
+
+## 2026-11-16 — Separate reference search from learning its sampler
+
+Tom's GPA paper motivates a [training-free reference proposal](../literature/GPA_AND_IDR_NEXT_STEPS_2026-11-16.md)
+before another head-training variant. The latest bank fit is already near exact;
+more steps cannot establish useful unseen-path behavior. GPA keeps generator and
+scorer fixed and searches a population; its practical recipes are not all exact
+target samplers, and its DNA results do not establish IDR efficacy. Keep the GFN
+as the eventual amortized sampler, with search as a comparator and possible source
+of refreshed trajectories, not a silent project replacement.
+
+Exact rejection is available for our bounded property factor, but a post-hoc
+saved-prior check suggests poor acceptance for some prompts. The review records
+that alternative, low effective sample sizes and cost uncertainty. A bounded
+reference experiment must distinguish raw outputs from selected designs, assess
+cost/diversity, and not use final evaluation scores for selection. No sampler or
+new training protocol is implemented; existing execution restrictions remain.
+
+
+## 2026-11-16 — Recenter on GFlowNet IDR generation and test representation adaptation
+
+The user clarified that the next intervention must directly advance GFlowNet-based
+IDR generation. The preceding GPA-first proposal is therefore deprioritized;
+GPA remains background/comparator literature, not the prerequisite or main path.
+The user subsequently authorized implementing this bounded comparison; real
+execution remains user-run. Existing completed runs and their frozen-backbone
+contract are intact. The [implementation protocol](experiments/idr_lastblock_2026-11-16.md)
+owns the budget, selected settings and practical gates.
+
+**Recommended next comparison:** retain the continuous charge/disorder reward and
+ordinary TB, and compare the existing frozen-ProGen guidance head against the
+same head trained jointly with **the last ProGen transformer block**. Freeze the
+earlier blocks and original output projection in this first design. Updating the
+last block changes contextual prefix representations, whereas LM-head-only tuning
+mainly changes the readout of the same representations. Full last-block updates
+are the simplest proposed intervention; a low-rank adapter is a memory/regularization
+alternative to specify before implementation, not a simultaneous extra arm or sweep.
+
+This is a testable representation/generalization hypothesis, not a diagnosed
+capacity failure. The 128-unit residual head already fits the bank; the historical
+same-head supervised result also shows some useful steering with frozen features.
+More parameters on the same 408 trajectories could worsen overfitting. Earlier
+continuous TB already used fresh trajectories, so online data alone is not new.
+Use one shared, bounded, refreshed trajectory/replay pool for both comparison
+arms, with declared contributions from their policies and fixed reference; pair
+training examples and budgets. This tests architecture under that common training
+regime, not architecture versus the previous static-bank result.
+
+Keep an immutable original ProGen reference for terminal prior probabilities.
+Only the sampling policy's upper block/head change, so the reward target does not
+move with the policy. Sampling itself can use no-grad; recompute trajectory log
+probabilities with gradients through the trainable block. Detached cached final
+features cannot provide that gradient. No new auxiliary loss, reward change,
+SubTB swap, SVRG extension or whole-backbone unfreezing is bundled into this test.
+
+Use fresh unselected generation as the main gate: joint charge/predicted-disorder
+success, disorder retention, diversity/copies and compute cost. Inspect common
+held-out trajectories and prior drift as diagnostics. Freshly evaluate both the
+unchanged starting head and the saved continued-supervised head (historical16.11%)
+as controls, without retraining them. Training loss alone cannot qualify success.
+Fix the run budget and practical effect threshold before any execution; no automatic
+longer fits or additional layer sweep follows failure.
+
+**Alternatives considered:** structured local prefix-flow learning remains a
+GFN-native option if representation adaptation fails or credit diagnostics motivate
+it. Earlier generic SubTB did not implement forward-looking prefix energies, but
+local constraints alone on the same bank would not resolve unseen-prefix coverage.
+Do not combine this new objective with backbone adaptation in the first test.
+A larger readout is a weaker test of sequence representation; another reward sweep
+or reference-search detour does not directly test the chosen mechanism.
+
+Primary precedent: [Hu et al., Amortizing intractable inference in large language models](https://arxiv.org/html/2310.04363v3),
+§3.3, its LoRA footnote and Appendix B, inspected 16 November. It trains a language
+model policy with a GFN objective, using parameter-efficient adaptation and mixed
+policy/replay trajectories. This supports adapting a PLM within a GFN, not guaranteed
+IDR gains or our last-block-only choice. [Pan et al.](https://proceedings.mlr.press/v202/pan23c.html)
+and the existing [local-credit review](../literature/RL_REWARD_DESIGN_2026-11-15.md#b-keep-the-terminal-target-teach-completion-quality-at-each-prefix)
+own the alternative's evidence and assumptions.
+
+## 2026-11-16 — Confirm the positive last-block generation result
+
+The [completed pilot](experiments/idr_lastblock_2026-11-16.md#completed-results--16-november-2026)
+passes the predefined screen. Adapted TB improves joint success by 8.01 percentage
+points over the matched frozen arm and 6.54 over saved supervision, with all eight
+prompts favoring adaptation over frozen TB. The 209 successful outputs are not
+exact training copies. This supports a useful effect of limited policy adaptation
+under the shared refreshed-data curriculum; comparison to earlier fixed-bank
+experiments does not isolate unfreezing alone.
+
+Propose **two fresh training/replay/evaluation seed sets with the same protocol**,
+each restarting from the original supervised head. Keep RPB1 in the panel despite
+its repetition, and retain the fixed final checkpoint and every outcome. This
+tests whether the material gain survives fresh data-collection randomness, not
+unseen prefixes or different supervised initializations. The two additional runs
+were proposed as a bounded confirmation, not an automatic extension of the
+completed run. The user authorized implementation on 17 November; the
+[confirmation protocol](experiments/idr_lastblock_confirmation_2026-11-17.md)
+fixes both new seed sets and the decision rules before real execution.
+
+Do not change the reward, loss, layer count or learning rates now. The result
+already supplies a credible effect to confirm; more interventions would obscure
+whether it reproduces. The full result record also preserves the contrary
+common-holdout target-fit diagnostic, ongoing clipping and prompt-specific
+repetition. Passing generation criteria is not proof of exact reward sampling,
+experimental disorder or a general biological property.
+
+The user's baseline question also identifies a missing final-evaluation control:
+the unchanged arm was a supervised guidance head, not plain ProGen. Historical
+plain-ProGen evaluation gives 1.66% joint success under the same acceptance and
+generation conventions, but it is not a new matched evaluation. Include a fresh
+plain-ProGen arm in the confirmation, keeping training and original gates fixed.
+The added baseline has its own practical screen, with the same five-point
+improvement and quality-preservation conventions. Require both new repeats to
+pass both screens; do not pool them to conceal a failed replicate. The existing
+frozen-GFN control answers the unfreezing question;
+the saved head-only supervised comparator cannot establish superiority over
+capacity-matched non-GFN last-block fine-tuning. The
+[comparison clarification](experiments/idr_lastblock_2026-11-16.md#plain-progen-comparison--post-hoc-clarification)
+owns sample counts and reuse limits.
+
+
+## 2026-11-17 — Retain last-block adaptation after both confirmations pass
+
+Both [fresh-seed confirmations](experiments/idr_lastblock_confirmation_2026-11-17.md#completed-results--17-november-2026)
+pass the unchanged progression screen and the separate fresh-prior screen.
+Adapted joint success is 20.41% and 23.14%, versus 10.45% and 11.04% matched
+frozen TB and 2.25% and 2.15% plain ProGen. This supplies the missing repeatability
+and current baseline evidence for a useful effect on the fixed task. Preserve both
+results; the old pilot does not count toward this confirmation decision.
+
+Retain the copied-final-block GFN method with its fixed original prior. Propose
+a separately trained second charge profile on the same eight prompts, under a
+bounded protocol that fixes the new target, acceptance criteria, starting head
+and replay bank. This tests transfer of the training recipe to a different request,
+not arbitrary target control by the current checkpoint. The head currently uses
+eight explicit prompt identities, so replacing prefixes is not a clean new-prompt
+test; define unseen-identity handling separately before that experiment.
+
+This follows the successful branch of the predeclared rule and does not authorize
+new real experiments automatically. Further reward/loss/layer sweeps are not the
+next question. Repetition on RPB1, imperfect target fitting, the fixed supervised
+initialization and development prompt reuse constrain the claim. Independent
+biological assessment and a capacity-matched non-GFN adaptation comparator remain
+separate unresolved questions.
+
+## 2026-11-17 — Prioritize improving current charge success before a second profile
+
+The user asked whether the confirmed 20–23% result can improve meaningfully.
+The [post-hoc diagnosis](experiments/idr_lastblock_confirmation_2026-11-17.md#post-hoc-headroom-analysis--17-november-2026)
+finds charge failure, not predicted disorder, dominates. Two of three training
+curves improve late, while one is mixed. This supports one bounded larger-budget
+test of the successful architecture, rather than treating 400 updates as converged.
+
+Propose 800 updates from the original initialization, keeping the same reward,
+architecture and 75%-of-run learning-rate decay convention; freshly compare with
+preserved 400-update controls. This changes time at the initial rates as well as
+total updates. The linked analysis owns rationale, provisional +5-point practical
+screen, quality checks and the stop at 800. No trainer/configuration is changed
+or real experiment authorized by this recommendation.
+
+If that plateaus, consider a separate 2.5-versus-5 property-penalty comparison.
+Stronger penalties can favor accepted sequences but cannot guarantee better
+learning. Diverse adaptive replay is plausible but not an established bottleneck;
+more unfreezing lacks a demonstrated capacity need. A second profile remains a
+later generalization question. This supersedes its priority in the preceding
+decision, preserving the completed evidence and the GFlowNet generation goal.
+
+
+## 2026-11-17 — Authorize one stretched-budget comparison on the working generator
+
+The user accepted the preceding recommendation. The
+[budget protocol](experiments/idr_lastblock_budget_2026-11-17.md) fixes two new
+800-update paired fits, the original confirmation training/replay seeds and fresh
+final-evaluation streams. Keep reward and architecture fixed; stretch the existing
+75%-of-run decay convention to update 600. This tests additional training with
+more time at the initial rates, rather than only extending the low-rate tail.
+
+Use the preserved 400-update adapted checkpoints as fresh-evaluation baselines.
+New update-400 checkpoints cannot replace them because schedules differ after
+300. Restart from the original initialization, since saved weights lack optimizer
+and RNG state for exact resumption. The frozen arm remains necessary as a source
+of the common refreshed data. Give all six evaluation arms one union of original,
+old-run and new-run training tails for copy-aware success, retaining failures in
+the denominator. Require a five-point raw/noncopy gain and bounded quality loss
+in both repeats; stop at 800 even if results disappoint. This is a bounded test
+motivated by the observed late learning, not a claim that more training must help.
+
+## 2026-11-17 — Benchmark the objective and prepare one functional IDR task
+
+The user's research question is novel IDRs with requested properties and an
+advantage over existing methods, not charge success alone. The
+[focused review](../literature/IDR_BENCHMARK_ROADMAP_2026-11-17.md) identifies
+GOOSE direct design and IDiom post-training as substantive alternatives. Our
+successful method already fine-tunes ProGen's final block; its head-only
+supervised control cannot isolate a GFN-objective advantage at equal capacity.
+
+After the authorized budget decision, propose matched final-block supervision and
+costed generate-and-select before more tuning. Follow with one contrasting charge
+target to test reuse of the training recipe, rather than accumulating charge
+variants. One matched KL-regularized RL comparator is needed for the broader
+method claim; a GFN diversity advantage must be measured, not assumed. This
+prioritization replaces the earlier conditional penalty increase as the default
+follow-up without changing the current protocol or authorizing new runs.
+
+Prepare the functional route in parallel: acidic transcriptional activation has
+measured tile assays and public PADDLE/TADA predictors. The review owns source
+citations, input-length constraints and proposed data/scorer checks. Advance only
+after validating the reward's usefulness on appropriately held-out measurements
+and defining evaluation not optimized during generation. No arbitrary charge-pass
+threshold is required. Tool agreement supports predicted function; actual new
+biological function requires measurement. External-reference novelty and diversity
+must also be assessed separately from passing the reward. This is a research
+roadmap, not a functional-task implementation or a claim of method superiority.
+
+## 2026-11-18 — Retain the 800-update recipe after both budget screens pass
+
+The [completed comparison](experiments/idr_lastblock_budget_2026-11-17.md#completed-results--18-november-2026)
+increases raw and common-union noncopy joint success by 9.67 and 6.05 percentage
+points, with disorder/uniqueness changes within the predefined limits. Retain
+800 updates with decay after 600 for the current task, following the protocol's
+successful branch. This improves mean success from 21.78% to 29.64%; it does not
+isolate duration from schedule or establish cost efficiency after doubled training.
+
+The gains are broad across prompts and are not explained by exact training copies.
+Charge remains limiting; RPB1 repetition and imperfect diagnostic target fitting
+remain. No inference of biological function or arbitrary property control follows.
+The user requested evaluating this result before choosing further work, so the
+earlier literature roadmap remains optional rather than a committed experiment
+queue. No automatic longer run, reward change, new property or baseline is selected.
+
+## 2026-11-18 — Consider one further budget test after inspecting late learning
+
+At the user's request, the [late-learning analysis](experiments/idr_lastblock_budget_2026-11-17.md#post-hoc-late-learning-analysis--18-november-2026)
+checks saved fresh adapted-policy draws. Success improves in both final 200-update
+windows, but the final 100-update trends disagree and mean violations flatten.
+Further gains are plausible, not established. Falling TB loss alone is insufficient.
+
+Propose one bounded 1,600-versus-800 comparison rather than assume convergence or
+launch an open-ended extension. The preceding material gain and broad late trend
+motivate this option; doubling and the inherited practical screen are engineering
+choices. Preserve 800-update controls and the reward/architecture, declare the
+stretched schedule and stop if the paired improvement/quality checks fail. This
+proposal awaits authorization and its own protocol; 800 remains the retained
+recipe and no further training or implementation has begun.
+
+## 2026-11-18 — Authorize the bounded 1,600-versus-800 comparison
+
+The user accepted the preceding proposal. The
+[new protocol](experiments/idr_lastblock_1600_2026-11-18.md) fixes two paired fits,
+the original initialization, unchanged reward/architecture and fresh evaluation
+streams. Preserve the relative decay convention, moving it to after update 1,200.
+The completed 800-update checkpoints remain fresh-evaluation controls; no weight-only
+continuation is presented as exact optimizer resumption. Require the same five-point
+raw/noncopy gain and bounded quality losses in both repeats, and stop at 1,600.
+
+Keep the earlier 400-update training tails in the common copy union alongside
+800/new histories. This preserves the previous exposure boundary and avoids giving
+new outputs an easier novelty definition. It is conservative common-exposure
+accounting, not evidence that all models trained on the entire union. 800 remains
+the retained recipe until results justify replacing it; the wider benchmark and
+functional-property roadmap remains deferred.
+
+## 2026-11-18 — Stop extending the budget after modest 1,600-update gains
+
+The [completed comparison](experiments/idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026)
+raises joint success by 4.79 and 1.66 points over freshly evaluated preserved
+800-update controls. Quality checks pass; mean success increases from 29.39%
+to 32.62%, with no successful exact training copies. Both repeats miss the
+predeclared five-point gain. Retain 800 as the default and stop budget extensions,
+while preserving the higher-scoring 1,600-update models and all outcomes.
+
+This is diminishing marginal improvement for doubled training exposure, not zero
+benefit or proof of a hard ceiling. Do not revise the threshold for the first
+repeat's near miss or use mixed post-hoc training windows to choose a checkpoint.
+The next proposed comparison is supervised fine-tuning of the same final block
+and guidance head with equivalent scored-data access; the current head-only
+supervised control confounds objective with capacity. A contrasting profile would
+then test reuse of the recipe. These remain proposals, not authorized new runs.
+
+## 2026-11-18 — Keep 1,600 as the working budget; prioritize the missing objective control
+
+The user chose to retain the completed 1,600-update models and budget and defer
+further budget/checkpoint tests. This supersedes the initial 800-update retention
+recommendation above. Preserve the reported five-point gate failures: choosing the
+best observed models for subsequent work does not make that earlier test pass.
+No additional training or checkpoint selection follows this decision.
+
+Recommend matched supervised fine-tuning on the existing charge target before
+another profile. The current GFN adapts the final ProGen block and guidance head;
+the existing supervised control adapts only the head. Its lower success therefore
+cannot establish an objective advantage. A new comparison should match adaptable
+parameters, initialization and scored-data access, including refreshed examples,
+and predeclare supervised selection/weighting. Report raw joint success, diversity,
+copies and actual scoring/training/generation costs; equal updates alone are not
+equal computation. A retrospective fit to GFN-discovered examples is a useful
+diagnostic but would not establish independent-pipeline efficiency.
+
+The [benchmark roadmap](../literature/IDR_BENCHMARK_ROADMAP_2026-11-17.md#direct-benchmark-design--follow-up-clarification)
+owns these proposed controls. [Hu et al.](https://arxiv.org/html/2310.04363v2)
+provide precedent for comparing GFN language-model adaptation with supervised
+and reward-based objectives, not evidence of an advantage on our IDR task.
+Costed generate-and-select supplies a complementary practical baseline. Then
+one reversed two-block charge profile can test reuse of the recipe under another
+request; it would require retraining and does not establish zero-shot control.
+GOOSE and one audited reward/preference implementation remain broader comparator
+proposals. No new comparator or profile experiment is implemented or authorized
+by the user's request for advice.
+
+## 2026-11-18 — Authorize a capacity- and data-matched objective comparison
+
+The user selected the matched supervised comparison. The
+[protocol](experiments/idr_objective_2026-11-18.md) fixes two new GFN/supervised
+pairs at 1,600 updates, each starting from the original common initialization.
+Sharing discoveries from both policies prevents one objective receiving a better
+or newer scored dataset. Replacing the old frozen-head proposer changes the
+training mixture, so the old 32.62% is historical context, not a matched endpoint.
+
+Use reward-weighted token likelihood for the supervised arm rather than restricting
+it to rare perfect successes. Normalize the existing property factor within prompt
+and before microbatching, maintaining equal prompt weight even when some are harder.
+The proposal distribution is shared and changing; this baseline does not estimate
+the exact prior-weighted target or provide an independent-pipeline cost comparison.
+These are predeclared engineering choices; inherited matched rates do not establish
+optimal tuning for either objective. Keep the full raw-success/diversity/cost tradeoff.
+
+Save the same block/head capacity in both arms, with GFN-only normalizers. Atomic
+replacement of one latest checkpoint per arm limits storage and avoids truncating
+the previous checkpoint on write failure. Retain only final weights when training
+completes; checkpoint sweeps and automatic training resumption are out of scope.
+No new target or external RL/direct-design implementation is bundled into this test.

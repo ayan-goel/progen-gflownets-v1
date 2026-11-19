@@ -310,8 +310,187 @@ def main():
     )
     transfer_eval.add_argument("--run", required=True)
     transfer_eval.add_argument("--output", required=True)
+    lastblock = commands.add_parser(
+        "idr-lastblock", help="Matched frozen versus last-block-adapted GFlowNets"
+    )
+    lastblock.add_argument("--config", default="configs/idr-lastblock.json")
+    lastblock.add_argument("--output")
+    lastblock.add_argument("--device", default="cuda")
+    lastblock.add_argument("--check-only", action="store_true")
+    lastblock_eval = commands.add_parser(
+        "evaluate-idr-lastblock", help="Recover last-block scoring without ProGen"
+    )
+    lastblock_eval.add_argument("--run", required=True)
+    lastblock_eval.add_argument("--output", required=True)
+    lastblock_confirm = commands.add_parser(
+        "idr-lastblock-confirm",
+        help="Two fresh last-block fits with a matched plain-ProGen baseline",
+    )
+    lastblock_confirm.add_argument(
+        "--config", default="configs/idr-lastblock-confirm.json"
+    )
+    lastblock_confirm.add_argument("--output")
+    lastblock_confirm.add_argument("--device", default="cuda")
+    lastblock_confirm.add_argument("--check-only", action="store_true")
+    lastblock_confirm_eval = commands.add_parser(
+        "evaluate-idr-lastblock-confirm",
+        help="Re-score complete confirmation outputs without loading ProGen",
+    )
+    lastblock_confirm_eval.add_argument("--run", required=True)
+    lastblock_confirm_eval.add_argument("--output", required=True)
+    lastblock_budget = commands.add_parser(
+        "idr-lastblock-budget",
+        help="Compare 800-update GFlowNets with preserved 400-update policies",
+    )
+    lastblock_budget.add_argument(
+        "--config", default="configs/idr-lastblock-budget.json"
+    )
+    lastblock_budget.add_argument("--output")
+    lastblock_budget.add_argument("--device", default="cuda")
+    lastblock_budget.add_argument("--check-only", action="store_true")
+    lastblock_budget_eval = commands.add_parser(
+        "evaluate-idr-lastblock-budget",
+        help="Re-score saved budget-comparison generation without ProGen",
+    )
+    lastblock_budget_eval.add_argument("--run", required=True)
+    lastblock_budget_eval.add_argument("--output", required=True)
+    lastblock_1600 = commands.add_parser(
+        "idr-lastblock-1600",
+        help="Compare 1600-update GFlowNets with preserved 800-update policies",
+    )
+    lastblock_1600.add_argument("--config", default="configs/idr-lastblock-1600.json")
+    lastblock_1600.add_argument("--output")
+    lastblock_1600.add_argument("--device", default="cuda")
+    lastblock_1600.add_argument("--check-only", action="store_true")
+    lastblock_1600_eval = commands.add_parser(
+        "evaluate-idr-lastblock-1600",
+        help="Re-score saved 1600-versus-800 generation without ProGen",
+    )
+    lastblock_1600_eval.add_argument("--run", required=True)
+    lastblock_1600_eval.add_argument("--output", required=True)
+    objective = commands.add_parser(
+        "idr-objective", help="Matched final-block GFN versus weighted supervised training"
+    )
+    objective.add_argument("--config", default="configs/idr-objective.json")
+    objective.add_argument("--output")
+    objective.add_argument("--device", default="cuda")
+    objective.add_argument("--check-only", action="store_true")
+    objective_eval = commands.add_parser(
+        "evaluate-idr-objective", help="Recover objective-comparison scoring without ProGen"
+    )
+    objective_eval.add_argument("--run", required=True)
+    objective_eval.add_argument("--output", required=True)
     args = parser.parse_args()
-    if args.command == "idr-transfer":
+    if args.command == "idr-objective":
+        from .idr.objective_data import objective_preflight
+        from .idr.objective_experiment import run_objective
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            print(json.dumps(objective_preflight(settings), indent=2))
+        else:
+            if args.output is None:
+                parser.error("idr-objective requires --output unless --check-only")
+            print(run_objective(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-objective":
+        from .idr.objective_experiment import reevaluate_objective
+
+        print(reevaluate_objective(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-lastblock-1600":
+        from .idr.budget1600_data import budget1600_preflight
+        from .idr.budget1600_experiment import run_budget1600
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            print(json.dumps(budget1600_preflight(settings), indent=2))
+        else:
+            if args.output is None:
+                parser.error("idr-lastblock-1600 requires --output unless --check-only")
+            print(run_budget1600(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-lastblock-1600":
+        from .idr.budget1600_experiment import reevaluate_budget1600
+
+        print(reevaluate_budget1600(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-lastblock-budget":
+        from .idr.budget_data import budget_preflight
+        from .idr.budget_experiment import run_budget
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            print(json.dumps(budget_preflight(settings), indent=2))
+        else:
+            if args.output is None:
+                parser.error(
+                    "idr-lastblock-budget requires --output unless --check-only"
+                )
+            print(run_budget(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-lastblock-budget":
+        from .idr.budget_experiment import reevaluate_budget
+
+        print(reevaluate_budget(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-lastblock-confirm":
+        from .idr.confirmation_data import confirmation_preflight
+        from .idr.confirmation_experiment import run_confirmation
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            print(json.dumps(confirmation_preflight(settings), indent=2))
+        else:
+            if args.output is None:
+                parser.error(
+                    "idr-lastblock-confirm requires --output unless --check-only"
+                )
+            print(run_confirmation(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-lastblock-confirm":
+        from .idr.confirmation_experiment import reevaluate_confirmation
+
+        print(
+            reevaluate_confirmation(project_path(args.run), project_path(args.output))
+        )
+    elif args.command == "idr-lastblock":
+        from .idr.lastblock_data import check_lastblock_inputs
+        from .idr.lastblock_experiment import run_lastblock
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            _, _, config, references, _, _, bank, _, _, _ = check_lastblock_inputs(
+                settings
+            )
+            prompts = sum(r["role"] == "prompt" for r in references)
+            print(
+                json.dumps(
+                    dict(
+                        ready=True,
+                        prompts=prompts,
+                        replay_training_rows=sum(r["split"] == "train" for r in bank),
+                        diagnostic_holdout_rows=sum(
+                            r["split"] == "holdout" for r in bank
+                        ),
+                        updates_per_arm=config["steps"],
+                        shared_examples_per_update=sum(
+                            settings["shared_batch"].values()
+                        ),
+                        fresh_training_trajectories=3
+                        * prompts
+                        * config["steps"]
+                        // settings["refresh_every"],
+                        evaluation_outputs=4 * prompts * config["samples_per_prompt"],
+                        trainable_progen="copied final transformer block in lastblock_tb only",
+                        reward_reference="immutable original ProGen",
+                        new_supervised_training=False,
+                    ),
+                    indent=2,
+                )
+            )
+        else:
+            if args.output is None:
+                parser.error("idr-lastblock requires --output unless --check-only")
+            print(run_lastblock(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-lastblock":
+        from .idr.lastblock_experiment import reevaluate_lastblock
+
+        print(reevaluate_lastblock(project_path(args.run), project_path(args.output)))
+    elif args.command == "idr-transfer":
         from .idr.transfer_data import check_transfer_inputs
         from .idr.transfer_experiment import run_transfer
 

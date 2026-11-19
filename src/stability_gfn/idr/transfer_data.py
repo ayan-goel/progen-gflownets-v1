@@ -38,9 +38,13 @@ def check_transfer_inputs(settings, check_checkpoint=True):
         "bank.json",
         "bank_cache.pt",
         "initial.pt",
+        "initial_training.jsonl",
         "reward.json",
+        "reward_definition.json",
+        "config.json",
         "pilot_config.json",
         "references.json",
+        "provenance.json",
     }
     if not required.issubset(manifest["files"]):
         raise ValueError("Source inputs not protected by manifest")
@@ -86,6 +90,16 @@ def check_transfer_inputs(settings, check_checkpoint=True):
     cache = {key: value[selected] for key, value in cache.items()}
     if not bank or any(not torch.isfinite(v).all() for v in cache.values()):
         raise ValueError("Empty or nonfinite training cache")
+    bank_ids = {row["id"] for row in bank}
+    inherited_ids = {
+        example
+        for line in (source / "initial_training.jsonl").read_text().splitlines()
+        for example in json.loads(line)["replay_ids"]
+    }
+    if len(bank_ids) != len(bank) or not inherited_ids.issubset(bank_ids):
+        raise ValueError(
+            "Training bank IDs duplicate or omit initial training examples"
+        )
     if (
         cache["logits"].shape[-1] != 20
         or cache["actions"].shape[1] != reward.tail_length

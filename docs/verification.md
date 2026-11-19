@@ -1,5 +1,28 @@
 # Verification
 
+## Matched GFN versus supervised comparison — 18 November 2026
+
+[Protocol](experiments/idr_objective_2026-11-18.md),
+[19 focused CPU tests](verification/idr-objective-tests-2026-11-18.txt),
+[real input-only preflight](verification/idr-objective-preflight-2026-11-18.json).
+
+Tiny fixtures verify independent copied-block/head learning with an unchanged
+reference, original-prior TB, stable per-prompt reward-weighted token likelihood,
+microbatch equivalence, replay isolation, matched batches, fixed reward/evaluation
+budgets and corruption rejection. The integration test runs both tiny training
+repeats through fresh generation and evaluation, then removes ancestor folders
+and recovers identical scientific JSON outputs. Cached-array scoring also reproduces
+the report; variable timing is isolated in separate cost records. Simulated write
+failure preserves the preceding atomic checkpoint. No real pretrained model or
+disorder scorer executes, and CUDA stays uninitialized.
+
+CLI preflight verifies existing source/model/scorer hashes and confirms the planned
+1,600 updates per arm, 9,600 fresh training paths per repeat and 6,144 final outputs.
+Ruff and `git diff --check` pass. These checks establish implementation readiness,
+not a real performance result; all real execution remains user-run.
+
+Historical verification records follow.
+
 The preserved source snapshot in runs/biological-first/source is the reference
 for this reset. All 13 top-level Python modules match that snapshot after
 restoring the original command-line interface. The frozen backbone, scorer,
@@ -365,3 +388,227 @@ correction and oracle-independence of fitting. The [artifact audit](verification
 reconstructs all nine fits, normalizers and gates; checks folded policies, exact
 control/treatment sample pairing, source hashes and variance-audit inputs.
 No GPU is initialized. [Protocol and reproduction](experiments/idr_variance_repair_2026-11-16.md#verification-and-reproduction).
+
+
+## Full-support transfer — 16 November 2026
+
+Twenty-nine focused [CPU tests](verification/idr-transfer-tests-2026-11-16.txt)
+pass: six new transfer tests, four continuous-reward tests and nineteen finite
+learning/variance tests. Coverage includes full-support probabilities,
+rank-deficient conditioning/folding, globally weighted microbatch gradients,
+raw-estimator unbiasedness and exactness at the snapshot, matched training draws,
+frozen/source preservation and end-to-end synthetic generation/evaluation recovery.
+Recovery reproduces metrics/decisions after hiding source runs and rejects a
+corrupted generation artifact. CUDA remains uninitialized in the fixture test.
+
+The [read-only preflight](verification/idr-transfer-preflight-2026-11-16.json)
+passes against the real pinned source: 408 training rows, eight prompts, two
+400-update fits and 3,072 planned evaluation outputs. It checks files, checkpoint
+hashes and cached prior arithmetic without loading ProGen or running the disorder
+scorer. Ruff passes for the new modules, CLI and tests. No real training or GPU
+execution was performed. [Protocol](experiments/idr_transfer_2026-11-16.md).
+
+
+## Transfer result audit — 16 November 2026
+
+The [saved-artifact audit](verification/idr-transfer-results-2026-11-16.json)
+verifies all 43 captured manifest files, implementation provenance, paired
+400-update training draws and schedules, reward recomputation from saved scores,
+aggregate metrics and the progression decision. CPU evaluation of saved heads
+reconstructs recorded training log probabilities within 0.005 and evaluates the
+same 95 previously available diagnostic holdout trajectories without refitting.
+No pretrained model or scorer execution occurs, and CUDA stays uninitialized.
+The [result record](experiments/idr_transfer_2026-11-16.md#completed-results--16-november-2026)
+labels this as post-hoc diagnostic evidence, not new sealed validation.
+
+## Last-block adaptation — 16 November 2026
+
+Twelve focused [CPU tests](verification/idr-lastblock-tests-2026-11-16.txt) cover
+initial identity, causal/incremental alignment after adaptation, gradients confined
+to the copied block, exact original-model preservation, fixed reward reference,
+global microbatch accumulation, paired training draws, holdout protection and the
+four-arm success gate. A full tiny random-model pipeline performs four matched
+updates with an injected synthetic scorer, then reproduces evaluation after hiding
+source folders and rejects corrupted outputs. CUDA remains uninitialized.
+
+The [real-input preflight](verification/idr-lastblock-preflight-2026-11-16.json)
+verifies source/control manifests, checkpoint hashes and cached prior arithmetic
+without model/scorer execution. It confirms eight prompts, 408 training replay
+rows, 95 diagnostic rows, 400 updates per arm, 2,400 fresh training trajectories
+and 4,096 planned evaluation outputs. New modules, CLI and tests pass Ruff.
+These checks establish implementation correctness on fixtures, not an expected
+generation gain. [Protocol](experiments/idr_lastblock_2026-11-16.md).
+
+## Last-block result audit — 16 November 2026
+
+The [saved-artifact audit](verification/idr-lastblock-results-2026-11-16.json)
+and its [reproduction script](verification/idr-lastblock-results-2026-11-16.py)
+verify 45 generation-manifest files and 71 provenance files, including the original
+checkpoint file, without loading ProGen. Saved V2/V3 score arrays replace the
+scorer, reconstructing sequence metrics, aggregates, decisions, bank diagnostics,
+training summaries and the report byte-for-byte. Control heads match their pinned
+sources; trained final checkpoints match step 400.
+
+The audit checks all 400 paired batches, schedules and training-only replay, 2,400 fresh
+training paths, 12,800 presentations per arm, frozen-reference arithmetic and no
+holdout exposure. Both practical gates pass. It does not re-evaluate the neural
+scorer or recompute pretrained likelihoods; original-reference consistency is
+checked from saved likelihoods and protected artifacts. CUDA stays uninitialized
+and run outputs remain unchanged. The [result record](experiments/idr_lastblock_2026-11-16.md#completed-results--16-november-2026)
+owns interpretation and post-hoc prompt sensitivity.
+
+
+## Last-block confirmation — 17 November 2026
+
+All 26 focused [CPU tests](verification/idr-lastblock-confirmation-tests-2026-11-17.txt)
+pass. Tiny random-model fixtures with injected synthetic scorers verify fresh
+initialization, unchanged training settings, independent RNG streams, head-free
+plain-ProGen probabilities, shared copy denominators and preservation of every
+repeat/prompt. One failing repeat cannot be hidden by averaging. The integration
+checks also recover after an injected final-scoring failure, with source folders
+removed and no ProGen loading or retraining. Retained last-block checks cover
+original-reference preservation and paired training.
+
+The [read-only real-input preflight](verification/idr-lastblock-confirmation-preflight-2026-11-17.json)
+passes: two paired fits, 400 updates per trained arm and 10,240 planned final
+outputs across five arms. It checks pinned inputs and budgets without executing
+real models or scorers; CUDA remains uninitialized. Ruff passes on the affected
+code/tests. These checks validate implementation behavior, not a generation gain.
+Real confirmation remains user-run. [Protocol](experiments/idr_lastblock_confirmation_2026-11-17.md).
+
+## Confirmation result audit — 17 November 2026
+
+The completed user-run confirmation passes its [saved-artifact audit](verification/idr-lastblock-confirmation-results-2026-11-17.json).
+The [reproduction script](verification/idr-lastblock-confirmation-results-2026-11-17.py)
+checks all 127 enclosing-manifest entries, four child manifests and 74 unique
+provenance files, including the original ProGen checkpoint hash. Package versions
+match. Replacing predictor calls with the run's saved V2/V3 arrays reproduces
+23 result files byte-for-byte: sequence metrics, arm/prompt summaries, copy
+definitions, bank diagnostics, training summaries, decisions and reports.
+
+Both fits preserve every non-seed setting and the original supervised starts.
+The controls' heads match their sources; trained checkpoints match update 400.
+All 400 paired batches per repeat, learning-rate schedules, 2,400 fresh training
+paths and 12,800 presentations per trained arm check out. Plain-ProGen saved
+policy and reference log probabilities agree exactly; continuous reward arithmetic
+reconstructs and neither repeat encountered a held-out bank tail during training.
+Both predefined confirmation screens reproduce as passing.
+
+All 145 completed-run files remain unchanged. No ProGen likelihood or neural
+disorder score was recomputed, and CUDA remains uninitialized. Reported block
+changes and reference-gradient flags are saved diagnostics; the audit does not
+independently reload the full original model to recompute those changes. This
+verifies the recorded computation, not biological validity or global target
+matching. The [result record](experiments/idr_lastblock_confirmation_2026-11-17.md#completed-results--17-november-2026)
+owns the scientific interpretation and next decision.
+
+## Last-block training-budget comparison — 17 November 2026
+
+The [focused test log](verification/idr-lastblock-budget-tests-2026-11-17.txt)
+records **14 passing CPU tests** using tiny injected backbones and deterministic
+fixture disorder scores. No pretrained model or real disorder scorer executes.
+Coverage includes source/provenance rejection, checkpoint dimensions and finite
+values, doubled budgets with only fresh evaluation seeds changed, all six arms,
+both-repeat decision thresholds and symmetric training-copy controls.
+
+The end-to-end fixture reproduces the old training prefix until its earlier
+decay, then verifies that the longer schedule diverges as declared. It checks
+original initialization, unchanged saved-control weights and historical files,
+an untouched frozen reference, and final checkpoint steps. Both normal completion
+and an injected final-scoring failure recover from saved sequences after source
+folders are removed. Corrupt snapshots are rejected. CUDA remains uninitialized.
+
+The [real-input preflight](verification/idr-lastblock-budget-preflight-2026-11-17.json)
+passes through the actual CLI with `CUDA_VISIBLE_DEVICES=''`. It checks saved
+lineage, original model-file hashes and checkpoint tensors on CPU; it does not
+load ProGen or execute a scorer. It confirms two paired 800-update fits, decay
+after 600, 4,800 fresh training paths per repeat, 25,600 presentations per trained
+arm and 12,288 final outputs. This establishes readiness of the implementation,
+not improved scientific performance. All real experiments remain user-run.
+
+## Training-budget result audit — 18 November 2026
+
+The completed user-run experiment passes its
+[saved-score audit](verification/idr-lastblock-budget-results-2026-11-18.json).
+The [reproduction script](verification/idr-lastblock-budget-results-2026-11-18.py)
+uses cached V2/V3 arrays, copied child score records and temporary output to
+reproduce the five parent result files byte-for-byte: sequence metrics, summaries,
+copy definitions, decision and report. All 182 completed-run files remain unchanged;
+CUDA is uninitialized. ProGen loading and real scorer calls are blocked.
+
+The evaluator rechecks protected generation/provenance inputs, preserved 400-step
+controls, support, raw/scored row alignment, continuous-reward arithmetic and the
+common training-tail union. Separate independent saved-data arithmetic agrees on
+all 12,288 rows, charge/disorder/joint flags, copy membership and prompt/arm rates.
+The two primary gains are +9.67 and +6.05 points; both gates pass.
+
+Additional read-only compliance checks verify 160 outer manifest entries, 53 per
+fit, four per prior and 77 provenance files without drift. Both starts match the
+original initialization; the first 300 adapted log entries match the old fits.
+All 800 steps preserve paired example IDs and the declared rates, decaying at
+601. Final checkpoint tensors match step 800, and copied controls match protected
+step 400. No neural disorder score or pretrained likelihood is recomputed, so the
+audit verifies recorded computation, not biological validity or exact target
+sampling. The [result record](experiments/idr_lastblock_budget_2026-11-17.md#completed-results--18-november-2026)
+owns scientific interpretation.
+
+## 1,600-versus-800 comparison — 18 November 2026
+
+All **28 focused CPU tests pass**: 14 for the new comparison and 14 regressions
+for the preserved 800-versus-400 wrapper. The [test output](verification/idr-lastblock-1600-tests-2026-11-18.txt)
+records a 25.710-second run with CUDA hidden and one compute thread. All model
+execution uses the tiny synthetic backbone and injected fixture disorder scores;
+real ProGen loading is blocked in integration tests.
+
+Checks cover unchanged initialization/reference/source artifacts; the 8→16 fixture
+budget with decay after 6→12; paired streams and fresh evaluation seeds; all six
+arms and raw output counts; the common union retaining historical-only training
+copies; both-repeat progression/quality thresholds; and byte-identical scoring
+recovery after ancestor folders become unavailable. An injected final-scoring
+failure retains sealed generation and recovers without training. Corrupt histories,
+checkpoints and settings are rejected. Ruff lint and format checks pass for the
+new modules/tests and changed CLI.
+
+The [real-input CLI preflight](verification/idr-lastblock-1600-preflight-2026-11-18.json)
+passes with 1,600 updates per arm, decay after 1,200, 9,600 fresh training paths
+per repeat, 51,200 trajectory presentations per arm and 12,288 final outputs.
+It validates saved manifests, source identities and checkpoint tensors on CPU;
+`cuda_initialized` and `model_or_scorer_executed` are both false. Completed run
+artifacts and their computational source remain unchanged. These checks establish
+implementation readiness, not a gain from longer training. The
+[protocol](experiments/idr_lastblock_1600_2026-11-18.md) governs the pending user run.
+
+## 1,600-update result audit — 18 November 2026
+
+The user completed `runs/idr-lastblock-1600-v1`: two real 1,600-update paired fits
+and 12,288 final outputs. The saved-array [audit](verification/idr-lastblock-1600-results-2026-11-18.json)
+([script](verification/idr-lastblock-1600-results-2026-11-18.py)) reconstructs the
+five parent report, metric, decision and copy-definition artifacts byte-for-byte.
+It uses saved child score records and cached V2/V3 arrays, blocks ProGen loading
+and neural scorer calls, and confirms all **216 run files** are unchanged.
+CUDA remains uninitialized.
+
+An independent [stdlib-only audit](verification/idr-lastblock-1600-independent-2026-11-18.json)
+([script](verification/idr-lastblock-1600-independent-2026-11-18.py)) recomputes
+charge/disorder/joint acceptance, copy unions, uniqueness, per-prompt counts and
+both-repeat thresholds directly from sequences and saved scores. It confirms
+350/318 versus 301/301 successes, +4.79/+1.66 percentage points, and both budget
+screens failing while quality checks pass. It also records the explicitly post-hoc
+late-training windows without treating them as fixed-checkpoint evaluation.
+
+The [protocol audit](verification/idr-lastblock-1600-protocol-2026-11-18.json)
+([script](verification/idr-lastblock-1600-protocol-2026-11-18.py)) verifies all
+194 root-manifest entries, child manifests, live source/package identities and
+original ProGen file hashes. Saved tensors are loaded on CPU only. Final weights
+match step 1,600; every rate record follows decay after 1,200. The original
+initialization, unchanged head, preserved 800-update controls and historical
+400-update training rows match their pinned sources. The first 600 updates and
+3,600 fresh trajectories per repeat reproduce the corresponding 800-update fit
+exactly. No diagnostic-tail overlap is observed; saved reference-gradient checks
+remain false. This validates the completed run's internal provenance, not the
+unobserved filesystem handling between the failed and completed `v1` attempts.
+
+These checks execute no real model, scorer, training or GPU work. They cannot
+independently validate predicted disorder or prove global target-distribution
+accuracy. The [result record](experiments/idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026)
+owns interpretation and the decision to retain 800 as the default.

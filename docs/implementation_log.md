@@ -478,3 +478,140 @@ verify zero estimator noise at the snapshot; checkpoints remain diagnostic-only.
 A standalone verifier reconstructs all fits and checks pairing, folding, source
 hashes and input preservation. [Protocol/results](experiments/idr_variance_repair_2026-11-16.md)
 own budgets, source rationale, cost accounting, successful confirmation and limits.
+
+
+## 2026-11-16 — Full-trajectory TB transfer and evaluation
+
+The separate `idr/transfer_*` modules reuse frozen cached features and existing
+rollout/scoring helpers. Training evaluates full 20-residue softmax probabilities
+at every cached position; only the example-selection proposal is normalized over
+the finite bank. Training/conditioning exclude historical holdout rows, and
+preflight verifies the pinned manifest, inherited training identities and prior
+probability reconstruction before expensive execution.
+
+A bounded, invertible eigenspace transform handles rank-deficient full-trajectory
+inputs without changing the initial function or trainable parameter count.
+Multiplying the hidden weight by the transform avoids a large transform per token;
+folded heads use ordinary generation code. Equivalence checks and fresh-state
+amplification measurements expose numerical and extrapolation problems.
+
+Current, snapshot and full-reference gradients include the normalizer and use
+global example weights across microbatches; clipping occurs once per optimizer
+step. Matched row IDs, rates and gradient costs are persisted. Self-contained
+snapshots support scoring recovery without source runs or ProGen execution.
+Fresh-prefix coverage, common-bank copies and bank probability mass complement
+raw generation success without presenting finite-bank metrics as global TV.
+[Protocol](experiments/idr_transfer_2026-11-16.md) and
+[verification](verification.md#full-support-transfer--16-november-2026).
+
+## 2026-11-16 — Shared-data GFlowNet training with one adapted ProGen block
+
+The separate `idr/lastblock_*` implementation shares the original frozen lower
+layers and keeps a trainable copy of the final transformer block. Frozen final
+normalization and output weights transmit gradients into that copy; the original
+block still defines the reward reference. Teacher forcing recomputes current
+policy likelihoods after sampling, with causal alignment tested against incremental
+decoding. Adapted rollout base probabilities are explicitly replaced with original
+reference probabilities before recording rewards and drift diagnostics.
+
+Both trainers consume the identical ordered refresh batch. Shared lower-layer
+inference feeds disjoint objectives, globally averaged across microbatches before
+one optimizer step per arm. Separate block clipping preserves the matched head
+clipping rule. Historical cached final features initialize training-only offsets;
+they never substitute for the adapted computation. No conditioning or SVRG
+machinery enters this trainer.
+
+Fresh four-arm evaluation audits common data exposure, excludes accidental online
+holdout overlap consistently, and counts noncopy successes over all raw outputs.
+The original reference, source artifacts and unchanged supervised controls are
+preserved. Source/config/checkpoint snapshots and sequence logs allow scoring
+recovery without loading ProGen. [Protocol](experiments/idr_lastblock_2026-11-16.md)
+owns budgets, choices and limits; [verification](verification.md#last-block-adaptation--16-november-2026)
+owns correctness evidence.
+
+## 2026-11-17 — Preserve the trainer while testing reproducibility
+
+The confirmation orchestrates two fresh invocations of the existing last-block
+trainer and adds separate plain-ProGen final evaluation. It derives settings from
+the pinned completed pilot, permitting only the three declared RNG changes. This
+keeps the successful training mechanism and old source hashes intact, while
+preventing accidental continuation of the adapted checkpoint or drift in budgets.
+The original per-row seed label remains local to each fit; enclosing replicate
+metadata records the actual independent random streams.
+
+Plain-ProGen evaluation uses no guidance head and shares support, prompts, scoring
+and copy definitions with the four existing arms. It cannot reuse plain-ProGen
+training draws as final evidence. The enclosing report preserves every replicate,
+checks the old progression screens plus a separate plain-baseline screen, and
+requires both fresh repeats to pass. This prevents favorable averaging or selecting
+the better run from becoming a confirmation claim. After both fits and both plain
+baseline generation stages finish, seal the enclosing generation manifest before
+final plain-baseline scoring. This preserves recovery after a scorer failure,
+without loading ProGen or repeating completed fits. Training is not resumed
+automatically. The [protocol](experiments/idr_lastblock_confirmation_2026-11-17.md)
+owns seeds, budgets and decision rules.
+
+## 2026-11-17 — Compare training budgets without changing the successful trainer
+
+The `idr/budget_*` wrapper derives both longer fits from the completed confirmation,
+changing only total updates and evaluation seeds. Reusing the unchanged paired
+trainer retains its online frozen/adapted/prior/replay mixture and protects past
+source hashes. The inherited relative decay naturally moves from update 300 to
+600; this is an explicit budget-and-schedule intervention. Saved 400-update copied
+blocks and heads are loaded only for fresh control generation, never as training
+initialization or as optimizer resumptions.
+
+The parent evaluator uses the union of original-bank, old-fit and new-fit training
+tails for every arm's copy-aware success. This avoids asymmetric novelty rules
+when the new model has seen more data. Parent sequence identities include the
+repeat name; child reports preserve their original definitions. The two-repeat
+decision compares final 800-update models directly with freshly sampled original
+400-update controls; inherited architecture screens remain secondary.
+
+All generation and input snapshots are sealed before final control scoring.
+Scoring recovery uses those snapshots without old source folders, ProGen loading
+or training. It cannot recover missing generation or resume incomplete training.
+The [protocol](experiments/idr_lastblock_budget_2026-11-17.md) owns settings and
+stopping rules; [verification](verification.md#last-block-training-budget-comparison--17-november-2026)
+owns correctness evidence.
+
+## 2026-11-18 — Extend the budget comparison while preserving completed provenance
+
+The `idr/budget1600_*` wrapper reuses the existing paired trainer and saved-record
+scoring helpers. Historical budget modules are source-pinned by completed runs;
+changing them into a generic runner would invalidate those provenance checks.
+The new wrapper validates the completed 800-update derivation, permits only the
+doubled budget and fresh evaluation seeds, and loads old adapted weights solely
+for control generation. It does not introduce another training algorithm.
+
+Snapshot the old 400-update training history as well as the 800-update control
+history, so the common copy boundary persists and scoring recovery needs no
+ancestor folders. Seal generation before final comparison scoring; incomplete
+training is not resumable. The [protocol](experiments/idr_lastblock_1600_2026-11-18.md)
+owns scientific settings and the stopping rule.
+
+## 2026-11-18 — Match GFN and supervised capacity without changing historical runs
+
+New `idr/objective_*` modules reuse the pinned final-block wrapper, probability
+accounting, original initialization and sequence scoring. Each learner owns a
+separate copied block/head, sharing only the frozen original model. Both gradients
+are accumulated and checked before either optimizer steps. Supervised weights
+use detached full-batch within-prompt softmax of log property factors, then split
+across microbatches; renormalizing inside a microbatch would change the objective.
+
+The shared collector saves every GFN/supervised/prior discovery and its detached
+reward, plus exact replay IDs in both update logs. This makes data-access matching
+auditable. The evaluator reconstructs reward labels, raw/noncopy endpoints and
+fixed-threshold sequence clusters from saved sequences; it does not infer GFN
+distributional accuracy from property success. New repeat exposure defines a
+common copy union, while old adapted training histories are not treated as inputs
+to these freshly initialized policies.
+
+Checkpoint writes use an atomic temporary replacement and only one rolling latest
+file per arm; completion renames it to the final checkpoint. This bounds retained
+weights and protects the previous checkpoint from write failure without adding
+an optimizer/RNG resume path. Seal generation and provenance before final scoring;
+recovery uses saved inputs without ProGen or ancestor folders. Keep measured setup,
+collection, scoring and per-arm update costs separate, labeling the original-prior
+audit overhead included in GFN updates. The
+[protocol](experiments/idr_objective_2026-11-18.md) owns scientific choices.

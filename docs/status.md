@@ -1,47 +1,66 @@
 # Current project status
 
-**16 November 2026 — A variance-reduced TB procedure passes the finite learning gate in six sampled fits.**
+**18 November 2026 — Matched GFN versus supervised comparison ready for the user to run.**
 
-[Specification](../spec.md) · [Pilot result](experiments/biological_first_results_2026-10-15.md)
+[Specification](../spec.md) · [Latest results](experiments/idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026)
 · [Runbook](runbook.md)
 
 ## Current decision
 
-The [CPU variance diagnosis and repair](experiments/idr_variance_repair_2026-11-16.md)
-now meets the local accuracy gate in **six of six sampled fits**, including three
-fresh confirmation seeds. Fixed-bank TB with conditioned inputs and a snapshot
-gradient correction reaches mean TV **0.019–0.021**, worst prompt **0.0348–0.0369**,
-and joint-pass mass **61.63–61.68%**, versus target **62.02%**.
+The user selected [matched final-block GFN versus weighted supervised training](experiments/idr_objective_2026-11-18.md).
+Both policies start from the same original weights, adapt the same block/head and
+share scored training trajectories from both policies, original ProGen and replay.
+Two fresh repeats use 1,600 updates per arm and final-only evaluation. This tests
+the objective at equal adaptable capacity and data access. It is not an independent
+pipeline cost benchmark. Nineteen tiny CPU tests and the real input-only preflight
+pass; no new real experiment has run. The
+[runbook](runbook.md#matched-gfn-versus-supervised-training) owns the command.
+Another profile and external methods remain deferred.
 
-The matched ordinary fixed-bank control still underfits (mean TV **0.11491**,
-joint mass **55.57%**). Both methods use identical sampled trajectories; the
-correction costs extra head-gradient evaluations. The audit found substantial
-noise from both fresh and replay sampling. The correction therefore addresses
-both by using a fixed sampling proposal and reliable snapshot gradients, while
-keeping the GFlowNet/TB reward and finite target unchanged.
+## Latest completed result
 
-**Stop tuning this CPU task.** We have a reproducible local sampled-learning
-repair, not a demonstrated IDR generator. The next boundary is a short fully
-branching transfer test with new frozen-ProGen states, explicit bank coverage,
-off-bank conditioning assessment and fresh generation evaluation. It is not yet
-implemented, and no GPU work was executed or command prepared here.
+The user completed `runs/idr-lastblock-1600-v1` in **3 h 49 min 39 s**.
+Both repeats finished training and evaluation after the earlier storage interruption.
+The complete artifacts are at `v1`; the suggested `v2` restart directory is absent.
+The [experiment record](experiments/idr_lastblock_1600_2026-11-18.md#interrupted-first-attempt--18-november-2026)
+preserves that history without assuming how the earlier folder was made reusable.
 
-The task has 408 selected training leaves/168 branch states, with most residues
-forced. Fixed-bank coverage and large-bank efficiency remain untested. The method
-is not cheaper than full enumeration on this tiny bank; the protocol reports all
-costs. Nineteen CPU tests and reconstruction of all nine fits pass. Production
-modules and earlier run artifacts remain unchanged.
+| Joint charge/predicted-disorder success | Repeat 1 | Repeat 2 | Mean |
+|---|---:|---:|---:|
+| Preserved 800-update model, fresh evaluation | 29.39% | 29.39% | 29.39% |
+| New 1,600-update model | 34.18% | 31.05% | 32.62% |
+| Gain | +4.79 points | +1.66 points | +3.22 points |
 
-The [completed continuous-reward run](experiments/idr_continuous_2026-11-15.md#completed-results--15-november-2026)
-remains the latest unrestricted result: 9.86% unchanged, 7.52% previous TB and
-9.57% continuous TB joint success. It fails the practical screen. No generated
-samples or completed run artifacts were changed by the diagnosis.
+Each arm has 1,024 raw outputs per repeat. Both improve, but neither reaches the
+predeclared five-point raw/noncopy gain. Disorder and uniqueness checks pass.
+Mean predicted-disorder pass is 91.06%, uniqueness is 98.63%, and none of the
+668 successes exactly copies the common training union. Charge remains limiting
+at 36.91% mean pass. Plain ProGen reaches 2.49% mean joint success in this evaluation.
 
-The preceding [supervised-start result](experiments/idr_warmstart_2026-11-15.md#completed-results--15-november-2026)
-was 9.38% unchanged, 16.11% continued supervision and 7.03% warm TB. Continued
-supervision remains the best observed generation baseline, but was not freshly
-sampled in the current comparison. It is a diagnostic/reference, not a replacement
-for the GFlowNet project. Protocols retain all historical settings and caveats.
+**The user chose to keep the 1,600-update models and budget, deferring further
+budget/checkpoint tests.** This supersedes the earlier recommendation to retain
+800; it does not change the recorded five-point gate outcome. The additional gain
+is modest relative to doubled training exposure. This supports diminishing returns,
+not proof of a hard plateau or accurate global target sampling. The
+[completed 800-update study](experiments/idr_lastblock_budget_2026-11-17.md#completed-results--18-november-2026)
+previously raised mean success from 21.78% to 29.64%; fresh evaluation explains the
+small change in the unchanged 800-update controls' percentages here.
+
+The previous supervised control trains only the head, so it cannot isolate the
+GFN objective's advantage. This motivates the authorized matched comparison above.
+One contrasting charge profile remains a possible subsequent test of whether the
+recipe learns another requested pattern. No automatic 3,200-step fit, reward
+change or additional layer unfreezing follows.
+
+The [result record](experiments/idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026)
+owns full metrics, costs and limitations. [Saved-array verification](verification.md#1600-update-result-audit--18-november-2026)
+reproduces all parent results and preserves 216 run files without neural inference.
+Current evidence remains limited to eight development prompts, one charge target
+and a shared supervised initialization. New-property/prompt generalization,
+external-reference novelty, biological function and an advantage over equally
+adaptable non-GFN models remain unestablished. The
+[benchmark/functional roadmap](../literature/IDR_BENCHMARK_ROADMAP_2026-11-17.md)
+remains optional research context. Real experiments and GPUs remain user-run.
 
 ## IDR experiment history
 

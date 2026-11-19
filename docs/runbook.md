@@ -1,5 +1,264 @@
 # Experiment commands
 
+## Matched GFN versus supervised training
+
+[Protocol](experiments/idr_objective_2026-11-18.md). Two fresh paired repeats;
+1,600 updates for each objective with the same adaptable final block/head and
+shared scored trajectories. Starts from the original common initialization;
+does not continue the completed 1,600-step checkpoints. Final generation covers
+GFN, weighted supervised and plain ProGen: 6,144 raw outputs total.
+
+Select an available GPU and export `CUDA_VISIBLE_DEVICES` yourself, then:
+
+```bash
+source .venv/bin/activate
+scripts/run.sh idr-objective --output runs/idr-objective-v1 --device cuda
+```
+
+Includes training, fresh generation, scoring, metrics and `report.md` in the
+output folder. Existing folders are refused. No automatic GPU selection or
+additional fits. Intermediate checkpoints replace one `latest.pt` per arm
+atomically; only final `checkpoint.pt` files remain when training completes.
+They are analysis/generation weights, not optimizer/RNG resumptions.
+
+Optional read-only input checks, without ProGen or scorer execution:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh idr-objective --check-only
+```
+
+If generation completed and only scoring failed, recover scoring into a new
+directory. This command executes disorder prediction on CPU and is user-run:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh evaluate-idr-objective \
+  --run runs/idr-objective-v1 --output runs/idr-objective-v1-eval
+```
+
+Recovery checks the sealed generation and source identity. It does not repeat
+generation or resume incomplete training. Historical experiments remain below.
+
+## 1,600 versus 800 updates — completed
+
+[Protocol/results](experiments/idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026).
+Completed at `runs/idr-lastblock-1600-v1`. Both repeats improve modestly but miss
+the five-point gain rule. The user chose to keep 1,600 as the working budget and
+defer further budget/checkpoint tests; the recorded gate outcome is unchanged.
+The command below is optional reproduction in a new folder, not the next proposed
+experiment. It trains from the original initialization, then generates and scores:
+
+```bash
+source .venv/bin/activate
+export CUDA_VISIBLE_DEVICES=0  # replace with your chosen GPU
+scripts/run.sh idr-lastblock-1600 --output runs/idr-lastblock-1600-reproduction --device cuda
+```
+
+The initial attempt failed at update 100 when scratch storage was full. The
+current `v1` artifacts are complete; the earlier `v2` restart suggestion is no
+longer the run location. Preserve completed outputs and use a new directory for
+any reproduction.
+
+The script respects your GPU selection. It trains both frozen/adapted arms in each
+repeat, then evaluates six arms, including freshly sampled preserved 800-update
+models and plain ProGen. There are 12,288 final outputs. The root `report.md`,
+`metrics.json` and `decision.json` retain both repeats and all prompts. Both repeats
+must pass the five-point raw/noncopy gain and quality checks; no automatic further
+extension or best-checkpoint selection follows.
+
+Optional read-only preflight, without model or scorer execution:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh idr-lastblock-1600 --check-only
+```
+
+If generation completes but final comparison scoring fails, recover into a fresh
+folder from saved sequences:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh evaluate-idr-lastblock-1600 \
+  --run runs/idr-lastblock-1600-v1 \
+  --output runs/idr-lastblock-1600-v1-eval
+```
+
+Recovery executes disorder scoring but does not run ProGen, train or generate.
+Incomplete training/generation needs inspection. Existing output directories and
+completed source models are protected. The common copy boundary includes original
+training tails and all 400-, 800- and 1,600-update fresh training histories.
+
+## Last-block training-budget comparison
+
+[Protocol/results](experiments/idr_lastblock_budget_2026-11-17.md#completed-results--18-november-2026).
+Completed; both repeats pass. The command below reproduces the experiment in a
+fresh folder and is not a proposed next run. This tests 800
+updates against the preserved 400-update adapted models on the same charge task.
+The learning-rate decay stretches from after update 300 to after 600; other
+optimizer settings, architecture and reward remain fixed. Each new fit starts
+from the original initialization, rather than resuming saved optimizer state.
+
+```bash
+source .venv/bin/activate
+export CUDA_VISIBLE_DEVICES=0  # replace with your chosen GPU
+scripts/run.sh idr-lastblock-budget --output runs/idr-lastblock-budget-reproduction --device cuda
+```
+
+The script respects your GPU selection. It runs two paired fits sequentially,
+with 800 updates for each frozen/adapted arm, then freshly evaluates six arms per
+repeat: old 400-update adapted, new 800-update adapted/frozen, unchanged head,
+saved supervised head and plain ProGen. Generation and evaluation are included;
+there are 12,288 final outputs in total. Both repeats must meet the five-point
+raw/noncopy improvement and quality checks. No checkpoint selection or automatic
+extension follows a poor result.
+
+Read-only preflight checks inputs without running a model or scorer:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh idr-lastblock-budget --check-only
+```
+
+If generation is complete but final scoring/reporting fails, recover saved
+sequences into a fresh directory:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh evaluate-idr-lastblock-budget \
+  --run runs/idr-lastblock-budget-v1 \
+  --output runs/idr-lastblock-budget-v1-eval
+```
+
+Recovery runs scoring on saved sequences; it does not resume training or launch
+ProGen generation. An incomplete training/generation stage requires inspection.
+The root `report.md`, `metrics.json`, `decision.json` and `costs.json` preserve
+individual repeats and the combined decision. The protocol defines the shared
+training-tail union used for every arm's copy-aware comparison. Existing output
+folders and completed 400-update models are protected.
+
+## Last-block confirmation — completed
+
+[Protocol/results](experiments/idr_lastblock_confirmation_2026-11-17.md#completed-results--17-november-2026).
+Both repeats pass the predefined screens. This command reproduces the same paired
+training comparison and RNG settings in a fresh folder; it is not a proposed next
+experiment. Each repeat starts from the original supervised initialization and
+includes fresh evaluation of all four pilot arms plus plain ProGen. Choose your
+GPU, then run one command:
+
+```bash
+source .venv/bin/activate
+export CUDA_VISIBLE_DEVICES=0  # replace with your chosen GPU
+scripts/run.sh idr-lastblock-confirm --output runs/idr-lastblock-confirmation-reproduction --device cuda
+```
+
+The script preserves your GPU selection and executes both repeats sequentially.
+Training settings remain fixed at 400 updates per fitted arm; it does not continue
+the adapted pilot weights or select a favorable checkpoint. Both repeats retain
+1,024 fresh outputs per arm, followed by CPU disorder scoring. The root `report.md`,
+`metrics.json` and `decision.json` report every repeat and prompt, with a combined
+pass only when both repeats meet the predeclared screens. `costs.json` separates
+costs; `replicate-1/fit` and `replicate-2/fit` contain individual training artifacts,
+and each repeat's `prior` folder contains its fresh plain-ProGen control.
+
+Optional read-only preflight, without model/scorer execution:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh idr-lastblock-confirm --check-only
+```
+
+If both fits and plain-ProGen generation finish but final scoring/reporting is
+interrupted, recover from the complete outer generation manifest into a fresh
+folder without ProGen execution or retraining:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh evaluate-idr-lastblock-confirm \
+  --run runs/idr-lastblock-confirmation-v1 \
+  --output runs/idr-lastblock-confirmation-v1-eval
+```
+
+Saved-sequence recovery checks current software/scorer compatibility and does not
+require the original source runs or ProGen checkpoint. It cannot resume incomplete
+training or generation. Existing output folders are protected.
+
+## Last-block IDR GFlowNet adaptation — completed
+
+[Protocol/results](experiments/idr_lastblock_2026-11-16.md#completed-results--16-november-2026).
+The original run passes its practical screen. This command reproduces the same
+seed in a fresh folder; the completed fresh-seed confirmation command is above.
+Activate the environment and choose your GPU:
+
+```bash
+source .venv/bin/activate
+export CUDA_VISIBLE_DEVICES=0  # replace with your chosen GPU
+scripts/run.sh idr-lastblock --output runs/idr-lastblock-reproduction --device cuda
+```
+
+The script keeps your GPU selection. It trains two GFlowNets for 400 updates each,
+with exactly the same refreshed batches: a frozen-head control and a final-block
+adaptation. The reference ProGen and terminal reward remain fixed. It then generates
+1,024 tails for each new model and each of the two saved supervised controls,
+followed by CPU disorder evaluation. No new supervised fit or automatic extension.
+
+`report.md`, `metrics.json` and `decision.json` summarize fresh performance.
+`training_summary.json`, `bank_diagnostics.json`, `adaptation.json` and `costs.json`
+separate fit, copying, reference drift and compute. The fixed final checkpoints
+are used for evaluation; intermediate checkpoints support diagnosis, not automatic
+resume or outcome-based selection. Existing output folders cannot be overwritten.
+
+Optional read-only preflight, without model/scorer execution:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh idr-lastblock --check-only
+```
+
+If generation completed but scoring was interrupted, recover scoring into a new
+directory without retraining or executing ProGen:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh evaluate-idr-lastblock \
+  --run runs/idr-lastblock-v1 --output runs/idr-lastblock-v1-eval
+```
+
+Recovery requires the generation manifest and unchanged code/scorer versions.
+Earlier failures need inspection; the command does not silently resume training.
+
+## Full-support IDR transfer pilot — completed
+
+[Protocol/results](experiments/idr_transfer_2026-11-16.md#completed-results--16-november-2026).
+The original run is complete and fails the practical screen. The command below
+is for reproduction, not a requested next experiment. From the project root, activate
+the environment, select a free GPU yourself, then run:
+
+```bash
+source .venv/bin/activate
+export CUDA_VISIBLE_DEVICES=0  # replace with your chosen GPU
+scripts/run.sh idr-transfer --output runs/idr-transfer-reproduction --device cuda
+```
+
+The script preserves your GPU selection. It prepares training-only conditioning,
+trains ordinary and variance-reduced TB for 400 updates each using cached features,
+then loads frozen ProGen to generate 1,024 fresh tails per arm, including the
+unchanged starting head. Final disorder scoring runs on CPU. No new training
+rollouts, supervised fit, sweep or automatic resume. Existing outputs are protected.
+
+Read `report.md`, `metrics.json` and `decision.json` in the output directory.
+`bank_diagnostics.json` separates bank fit from fresh generation;
+`conditioning.json`, `generation_diagnostics.json`, training logs and `costs.json`
+record the transfer and compute diagnostics.
+
+Optional read-only preflight (no pretrained model/scorer execution):
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh idr-transfer --check-only
+```
+
+If generation finishes but scoring is interrupted, recover evaluation into a fresh
+directory without rerunning training or ProGen:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh evaluate-idr-transfer \
+  --run runs/idr-transfer-v1 --output runs/idr-transfer-v1-eval
+```
+
+Recovery requires the saved generation manifest and unchanged implementation/scorer
+versions. A failure before generation completes needs investigation, not scoring
+recovery or an automatic training restart.
+
 ## Continuous-reward GFlowNet comparison
 
 [Protocol](experiments/idr_continuous_2026-11-15.md). Activate the environment and

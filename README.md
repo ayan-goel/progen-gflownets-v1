@@ -1,18 +1,18 @@
-# Property-guided IDR generation with frozen ProGen2
+# Property-guided IDR generation with ProGen2 and GFlowNets
 
-Learn a small GFlowNet guidance head that steers frozen ProGen2 toward specified
-properties of intrinsically disordered regions (IDRs).
+Train a GFlowNet to guide ProGen2 toward specified properties of intrinsically
+disordered regions (IDRs). The working method jointly adapts ProGen's final
+transformer block and a guidance head. The original
+ProGen remains fixed as the reward reference.
 
-**The continuous-reward comparison is complete.** Joint charge/disorder success
-was 9.86% for the starting head, 7.52% after previous-reward TB and 9.57% after
-continuous-reward TB. The reward change did not improve on initialization and
-failed the practical screen. See the [results and next decision](docs/experiments/idr_continuous_2026-11-15.md#completed-results--15-november-2026).
-
-The [CPU variance-reduction repair](docs/experiments/idr_variance_repair_2026-11-16.md)
-passes the small learning check in all six sampled fits: distribution error is
-0.019–0.021 and joint-pass probability is about 61.7%, close to the 62.0% target.
-A matched ordinary trainer still underfits. This is a fixed-bank GFlowNet training
-result; transfer to new states and unrestricted IDR generation remains to be tested.
+**Last-block GFlowNet adaptation improves IDR property generation.** The latest
+1,600-update models achieve 34.18% and 31.05% joint charge/predicted-disorder success,
+versus freshly evaluated 800-update controls at 29.39% in both repeats. These
+smaller gains miss the predefined five-point improvement rule. We retain 1,600
+updates as the working budget at the user's decision and defer further budget
+tests. Diversity and disorder are retained. See the
+[completed results](docs/experiments/idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026).
+New-prompt/property generalization and experimental biology remain untested.
 
 Completed stability experiments established accurate local reward-target sampling
 and showed how reward errors limit biological utility. They remain the foundation
@@ -26,17 +26,23 @@ immediate objective.
 - [Completed experiment records](docs/experiments/README.md)
 - [Existing commands](docs/runbook.md)
 
-## Reproducing the completed comparison
+## Next experiment: GFlowNet versus supervised training
 
-No rerun is recommended as the next experiment. Use a fresh output directory
-when reproducing; existing outputs are protected. Activate the environment and choose your GPU. Training and evaluation run together;
-ProGen stays frozen and no new supervised fit occurs.
+Compare GFlowNet training against reward-weighted supervised learning, with the
+same adaptable ProGen block/head, initialization and scored training examples.
+Two fresh repeats train each method for 1,600 updates, then evaluate fresh IDRs.
+See the [protocol](docs/experiments/idr_objective_2026-11-18.md) for the comparison
+and its limits.
+
+After choosing a GPU with `CUDA_VISIBLE_DEVICES`:
 
 ~~~bash
 source .venv/bin/activate
-export CUDA_VISIBLE_DEVICES=0
-scripts/run.sh idr-continuous --output runs/idr-continuous-reproduction --device cuda
+scripts/run.sh idr-objective --output runs/idr-objective-v1 --device cuda
 ~~~
+
+Training and evaluation run together. The [runbook](docs/runbook.md#matched-gfn-versus-supervised-training)
+also provides input checks and saved-generation scoring recovery.
 
 Real experiments and all GPU execution are user initiated. Development checks
 are CPU-only:
@@ -44,7 +50,3 @@ are CPU-only:
 ~~~bash
 scripts/test_cpu.sh
 ~~~
-
-The run writes `report.md` and `metrics.json`, with per-method and per-prompt results.
-See the [protocol](docs/experiments/idr_continuous_2026-11-15.md) for choices,
-interpretation limits, and CPU evaluation recovery.

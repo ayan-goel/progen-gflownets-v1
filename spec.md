@@ -1,6 +1,15 @@
-# Property-guided IDR generation with frozen ProGen2
+# Property-guided IDR generation with ProGen2 and GFlowNets
 
-**Scope: 16 November 2026. Keep frozen-ProGen GFlowNet guidance. Conditioned fixed-bank TB with a snapshot gradient correction passes the finite learning gate in six sampled fits. Stop local CPU tuning; next assess transfer to new states and fully branching generation. See [variance diagnosis and repair](docs/experiments/idr_variance_repair_2026-11-16.md).**
+**Scope: 18 November 2026. The goal remains GFlowNet-based IDR property generation.
+The completed [1,600-versus-800 comparison](docs/experiments/idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026)
+raises mean joint charge/predicted-disorder success from 29.39% to 32.62%, but
+both repeats miss the predefined five-point gain. The user nevertheless chose
+1,600 as the working budget and deferred further budget/checkpoint tests; the
+historical gate outcome is unchanged. The method adapts ProGen's copied final
+block and GFN head against a fixed
+original prior. This is improved generation on the development task, not exact
+target sampling, property/prompt generalization or biological function. The user
+selected the matched supervised comparison described below.**
 The project now investigates IDP/IDR property guidance. Stability experiments remain
 completed groundwork. Their [historical specification](docs/stability_spec_2026-11-10.md)
 and [results](docs/status.md) preserve their original definitions; they are not
@@ -8,18 +17,30 @@ instructions to launch more stability experiments.
 
 ## Objective
 
-Guide a frozen pretrained protein language model toward specified properties of
+Guide a pretrained protein language model toward specified properties of
 intrinsically disordered sequences using a small GFlowNet head. Study when guidance
 learns the desired distribution, how reward quality affects it, and whether it
 provides useful diversity or efficiency compared with direct selection/design.
+
+The current [objective-comparison protocol](docs/experiments/idr_objective_2026-11-18.md)
+trains GFN and reward-weighted supervised policies from the same initialization,
+with independent final-block/head copies and the same refreshed scored examples.
+Both receive 1,600 updates in each of two fresh repeats. Supervised weights use
+only the terminal property factor, normalized within prompt; this baseline fits
+the weighted shared proposal, not the exact GFN target. Report fresh property
+success, diversity, copies and cost without claiming independent-pipeline
+efficiency. Current charge/reward conventions remain fixed; other properties and
+external-method implementations are deferred. The protocol owns numerical choices.
 
 The first proposed object is an isolated, fixed-length IDR sequence. This does not
 establish behavior when that region is inserted into a full protein. ProGen2 remains
 the primary backbone; IDiom is literature and a candidate comparator, not an
 implicitly approved replacement. Flexibility is not the initial property.
 
-The [IDP/IDR review](literature/IDP_IDR_REVIEW_2026-11-12.md) owns source assessment,
-property/tool choices and dataset leads. The
+The [IDP/IDR review](literature/IDP_IDR_REVIEW_2026-11-12.md) owns initial source
+assessment. The [updated benchmark roadmap](literature/IDR_BENCHMARK_ROADMAP_2026-11-17.md)
+owns proposed method comparisons, functional tools and validation requirements.
+The
 [pivot decision](docs/decisions.md#2026-11-12--pivot-from-stability-to-idpidr-property-guidance)
 explains why we are leaving stability as the active biological task.
 
@@ -29,22 +50,30 @@ Use a local charge profile, calculated directly from the completed sequence unde
 explicit residue-charge and window conventions. Control charged-residue content;
 then test charge ordering at fixed composition. This provides an exact descriptor
 benchmark, not an exact prediction of biological function. Disorder was evaluation-only
-in completed runs; the new candidate below explicitly includes predicted disorder.
+in the initial charge experiment; the current continuous reward explicitly includes
+predicted disorder.
 Hydropathy is a possible later second descriptor.
 
 The [baseline protocol](docs/experiments/idr_baseline_2026-11-12.md) fixes the inherited
-length, prompts and support. The authorized [charge-pilot protocol](docs/experiments/idr_charge_2026-11-12.md)
-now fixes a coarse two-block profile (+0.125 then −0.125 mean nominal charge),
-charged fraction 0.25, score scales, beta 2, tolerances and comparison budgets.
+length, prompts and support. The completed [charge-pilot protocol](docs/experiments/idr_charge_2026-11-12.md)
+introduced a coarse two-block profile (+0.125 then −0.125 mean nominal charge)
+and charged fraction 0.25. The current continuous reward retains its acceptance
+tolerances, with effective beta one and penalty 2.5 as defined below; the pilot's
+beta-two reward is historical.
 The existing nine-residue sliding profile is a secondary descriptor; finer targets
 and exact fixed-composition generation remain later experiments. These numbers
 are explicit engineering choices informed by development data, not literature defaults.
 
 ## Architecture and distribution
 
-Frozen ProGen produces prefix features and next-residue logits. A trainable head
+The policy produces prefix features and next-residue logits, and a trainable head
 adds token corrections. A fixed scoring procedure evaluates complete sequences.
-Only guidance parameters and a normalization estimate are trained initially.
+Original ProGen stays frozen to define the reference probabilities.
+Earlier experiments trained only the guidance head and normalization estimates.
+The completed last-block comparison additionally trains a copy of the final
+transformer block, retaining the original frozen model as its reference prior.
+Its confirmation preserves that architecture; it does not change the IDR objective
+or authorize whole-model fine-tuning.
 
 The proposed target retains our prior-times-property formulation:
 
@@ -56,7 +85,7 @@ q_\theta(x\mid c)\approx p^*(x\mid c).
 
 | Symbol | Meaning |
 |---|---|
-| \(x\) | Completed IDR sequence. |
+| \(x\) | Complete generated IDR tail, following the supplied prefix. |
 | \(c\) | Fixed design context: prompt, length, allowed sequence space and requested property profile. |
 | \(p_0(x\mid c)\) | Frozen-ProGen baseline probability under that explicitly defined generation convention. |
 | \(S(x,c)\) | Dimensionless property score; proposed to decrease with profile mismatch. Higher is better. |
@@ -64,8 +93,8 @@ q_\theta(x\mid c)\approx p^*(x\mid c).
 | \(R(x\mid c)\) | Positive, unnormalized combined sequence weight. |
 | \(Z(c)\) | Sum of those weights over the allowed completed sequences. |
 | \(p^*(x\mid c)\) | Desired normalized sampling distribution. |
-| \(q_\theta(x\mid c)\) | Learned sampling distribution from ProGen plus the guidance head. |
-| \(\theta\) | Trainable guidance parameters. |
+| \(q_\theta(x\mid c)\) | Learned sampling distribution from the policy's ProGen plus guidance head; the final block is also trainable in the adapted arm. |
+| \(\theta\) | Trainable policy parameters: guidance head and, in the adapted arm, the copied final transformer block. |
 
 The exponential makes terminal weights positive; the property score itself can be
 negative. At zero guidance strength, the target is the baseline. Exact score terms,
@@ -117,7 +146,67 @@ the old TB checkpoints. Real execution remains user-run. Preserve historical evi
 
 ## Training and evaluation contract
 
-### Current reward comparison: continuous_acceptance_v1
+### Completed experiment: unchanged-design confirmation
+
+The [confirmation protocol](docs/experiments/idr_lastblock_confirmation_2026-11-17.md)
+fixes two new training/replay/evaluation seed sets before execution. Each repeats
+the same 400-update frozen-versus-adapted GFlowNet comparison from the original
+supervised initialization. The saved supervised controls are evaluated afresh;
+plain ProGen is a separate final-evaluation arm with no guidance head.
+
+Retain every replicate and every prompt. The original progression criteria remain
+unchanged; a separate practical screen checks improvement over plain ProGen.
+Both fresh replicates must pass both screens to confirm the result under this
+fixed development setting. The historical pilot is reported separately. This
+checks training randomness, not unseen-prompt generalization, new properties or
+biological function. No additional unfreezing or reward/loss tuning is included.
+
+Both fresh confirmation repeats pass. The subsequent completed
+[training-budget comparison](docs/experiments/idr_lastblock_budget_2026-11-17.md#completed-results--18-november-2026)
+also passes in both repeats, raising mean joint success from 21.78% to 29.64%.
+That result supported 800 updates with the inherited 75%-of-run decay convention. Reward and
+architecture stay fixed; the absolute decay point and training duration change
+together. This is not exact checkpoint resumption or a pure extra-low-rate-update
+test. No outcome-selected checkpoint or automatic extension follows.
+
+The completed [1,600-versus-800 comparison](docs/experiments/idr_lastblock_1600_2026-11-18.md)
+keeps reward and architecture fixed, repeats both training streams from the
+original initialization, and freshly samples preserved 800-update controls.
+Decay moves from after update 600 to after 1,200. Final joint gains are 4.79 and
+1.66 percentage points; both miss the five-point raw/noncopy rule while quality
+checks pass. The rule initially supported retaining 800, but the user subsequently
+chose to keep 1,600 as the working budget and defer further budget/checkpoint tests.
+The historical gate remains unchanged; no hard ceiling is established.
+The matched supervised baseline with the same adaptable layers and equivalent
+scored-data access is now authorized under its separate protocol above.
+The protocol owns budgets, copy boundaries, seeds, results and recovery.
+
+A separately trained second charge profile remains
+a possible test of property control, not zero-shot target conditioning. The
+current head encodes prompt identity, so unseen-prompt testing requires its own
+explicit design. The completed protocol owns numerical results and limitations.
+
+### Completed transfer pilot: full-support offline TB
+
+The [implemented pilot](docs/experiments/idr_transfer_2026-11-16.md) retains
+`continuous_acceptance_v1` and the original supervised starting head. Compare
+unchanged, ordinary TB and variance-reduced TB; both trained arms use identical
+full-trajectory conditioning, fixed training-bank sampling, initialization and
+400-update schedules. The correction uses a periodically refreshed full-bank
+gradient to reduce sampled-gradient noise. All 20 residues remain allowed at
+every generated position. No new training rollouts are collected in this pilot.
+
+The primary test is fresh generation: 1,024 outputs per arm, with raw and noncopy
+joint charge/disorder success, diversity, conditioning shift and bank coverage.
+Finite-bank fit cannot establish full-support target matching; a learned
+normalizer can absorb changes in total probability assigned to observed paths.
+Do not reuse diagnostic checkpoints as production heads or report bank-normalized
+TV as global TV. The protocol owns numerical settings and the bounded progression
+screen. The completed run fails that screen despite near-exact training-bank fit;
+the result record owns the holdout gap and next design boundary. Real execution
+remains user-run.
+
+### Completed reward comparison: continuous_acceptance_v1
 
 The user authorized a [bounded reward-only comparison](docs/experiments/idr_continuous_2026-11-15.md)
 after the supervised-start TB result. Use `R_lambda(x|c) = p0(x|c) exp(-lambda V(x))`,
@@ -145,9 +234,22 @@ Compare:
 
 - Frozen ProGen on identical support and prompts.
 - ProGen generation followed by selection, including discarded candidates/cost.
+- Supervised fine-tuning of the same final block and head, with matched initialization
+  and data access. The existing head-only control does not establish this comparison.
+- One capacity-matched KL-regularized RL method using the same property score and
+  reference with corresponding KL strength, not the combined GFN terminal weight
+  as its scalar reward. Declare training/tuning cost alongside generation cost.
 - GOOSE or direct descriptor optimization, with compatible constraints.
 - Composition-preserving shuffles as an order/control comparison.
-- IDiom as an optional domain-specific prior comparator, clearly labeled as such.
+- IDiom and its post-training workflow as domain-specific comparators, clearly
+  distinguished from same-backbone objective ablations.
+
+These additional comparisons are research requirements/proposals, not implemented
+experiments or authorization to launch them. The working GFN already performs
+partial ProGen fine-tuning; the methodological claim concerns its training objective
+and resulting success/diversity/cost tradeoff. Neither property-guided protein
+generation nor PLM/GFN combinations are novel by themselves; the linked roadmap
+cites GOOSE, IDiom and PG-AbD as relevant precedents.
 
 Assess property-profile error/success, disorder predictions, duplicates/repetition,
 diversity, novelty and total cost. Exact distribution distances require an enumerable
@@ -224,5 +326,7 @@ Stop the previous replay-only intervention; no extension is automatic. All real
 execution remains user-run. Preserve historical configurations. No broad guidance success is established.
 
 Keep existing stability artifacts and code intact. Pause the proposed ESM stability
-comparison. Do not restore retired pipelines, introduce generator fine-tuning,
-SMC or speculative decoding as part of the baseline experiment.
+comparison. The completed baseline experiments did not permit generator fine-tuning.
+The newly authorized last-block protocol is the specific extension to that boundary;
+it does not authorize whole-model training, SMC, speculative decoding or restored
+retired pipelines.

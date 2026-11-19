@@ -216,3 +216,9 @@ cache/coverage and generation-cost budget. It must compare fresh generated sampl
 not just bank fit, and assess conditioning off-bank. Do not deploy these diagnostic
 checkpoints or claim unrestricted generation is solved. Any needed GPU capture
 or training remains user-run. No GPU command is prepared as part of this CPU study.
+
+
+Subsequent authorized implementation: the [full-support transfer pilot](idr_transfer_2026-11-16.md)
+is ready for the user's run. It trains new heads from the original supervised
+initialization, retains all 20 actions, and evaluates fresh generation. The results
+above remain evidence only for the completed finite task.

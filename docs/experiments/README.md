@@ -1,10 +1,43 @@
 # Experiment history and current pilot
 
-Current: [CPU variance diagnosis and repair](idr_variance_repair_2026-11-16.md).
+Current authorized experiment: [matched GFN versus weighted supervised training](idr_objective_2026-11-18.md).
+Two fresh paired repeats, the same final block/head and shared scored examples,
+1,600 updates per objective. Real results are pending; other charge profiles and
+external-method comparisons remain deferred.
+
+Latest completed: [1,600 versus 800 updates](idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026).
+Joint success rises from 29.39% to 34.18% and 29.39% to 31.05% in fresh paired
+evaluations. Both miss the five-point gain threshold; quality is retained. The
+user chose to keep 1,600 as the working budget and defer further budget tests;
+the historical gate outcome is unchanged. A supervised comparison with the same
+adaptable layers is now authorized above.
+
+Earlier completed: [last-block training-budget comparison](idr_lastblock_budget_2026-11-17.md#completed-results--18-november-2026).
+Joint success increases from 19.92% to 29.59% and 23.63% to 29.69% when comparing
+freshly evaluated preserved 400-update models with new 800-update models. Both
+predefined screens pass. Retain the larger-budget recipe with its stretched
+learning-rate schedule; the subsequent 1,600-update comparison above has completed.
+
+Earlier completed: [two fresh-seed last-block confirmations](idr_lastblock_confirmation_2026-11-17.md#completed-results--17-november-2026).
+Both repeats pass all predeclared screens. Joint success is 20.41% and 23.14%
+adapted, 10.45% and 11.04% frozen TB, and 2.25% and 2.15% fresh plain ProGen.
+All eight prompts favor adaptation over frozen TB in each repeat. Retain the
+method and prioritize improving this same charge task. The
+[post-hoc diagnosis](idr_lastblock_confirmation_2026-11-17.md#post-hoc-headroom-analysis--17-november-2026)
+motivates the authorized bounded 800-update comparison above.
+These completed fits are not new-prompt/property evidence.
+The [original matched pilot](idr_lastblock_2026-11-16.md#completed-results--16-november-2026)
+remains separate from the confirmation decision.
+
+Earlier completed: [full-support transfer pilot](idr_transfer_2026-11-16.md#completed-results--16-november-2026).
+Joint generation success is 8.50% unchanged, 6.45% ordinary TB, 6.93% corrected TB.
+Both fit the bank almost exactly but leave a substantial holdout gap; the practical
+screen fails. Next investigate coverage/generalization rather than longer bank fits.
+
+Completed: [CPU variance diagnosis and repair](idr_variance_repair_2026-11-16.md).
 Corrected fixed-bank TB passes the local gate in six sampled fits (TV 0.019–0.021),
 including three fresh confirmation seeds. Matched ordinary fixed-bank training
-still fails. Stop local tuning; new-state/full-generation transfer is the next
-boundary, not yet implemented. The [averaged-sampling](idr_averaged_sampling_2026-11-16.md)
+still fails. The completed pilot above fails to transfer this into useful generation. The [averaged-sampling](idr_averaged_sampling_2026-11-16.md)
 and [exact-expectation](idr_expected_conditioning_2026-11-16.md) controls retain
 preceding evidence and cost limits.
 

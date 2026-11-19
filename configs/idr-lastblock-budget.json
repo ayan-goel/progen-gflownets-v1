@@ -1,0 +1,9 @@
+{
+  "confirmation_run": "runs/idr-lastblock-confirmation-v1",
+  "confirmation_generation_sha256": "df0320fe54f2053255de8d3076c95c8b632b49feca1d634c45b080e8965d244f",
+  "training_steps": 800,
+  "replicates": [
+    {"name": "replicate-1", "evaluation_seed": 433000},
+    {"name": "replicate-2", "evaluation_seed": 533000}
+  ]
+}

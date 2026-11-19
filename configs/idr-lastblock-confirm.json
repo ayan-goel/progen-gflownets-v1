@@ -1,0 +1,18 @@
+{
+  "pilot_run": "runs/idr-lastblock-v1",
+  "pilot_generation_sha256": "00c7be30752158be58d57320cfe70e770558b5ff7e2ce47ceeb18304174240f2",
+  "replicates": [
+    {
+      "name": "replicate-1",
+      "training_seed": 223000,
+      "evaluation_seed": 233000,
+      "bank_sampling_seed": 225000
+    },
+    {
+      "name": "replicate-2",
+      "training_seed": 323000,
+      "evaluation_seed": 333000,
+      "bank_sampling_seed": 325000
+    }
+  ]
+}

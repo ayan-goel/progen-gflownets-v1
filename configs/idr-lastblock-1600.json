@@ -1,0 +1,9 @@
+{
+  "budget_run": "runs/idr-lastblock-budget-v1",
+  "budget_generation_sha256": "32e82214bcab3d2b8ae8676a763645d19d360217157d4f31982134d83754ee06",
+  "training_steps": 1600,
+  "replicates": [
+    {"name": "replicate-1", "evaluation_seed": 633000},
+    {"name": "replicate-2", "evaluation_seed": 733000}
+  ]
+}

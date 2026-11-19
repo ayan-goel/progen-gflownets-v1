@@ -1,0 +1,36 @@
+{
+  "fit": {
+    "source_run": "runs/idr-continuous-v1",
+    "source_generation_sha256": "2f4dfc3296b4d72b8eba7f8bb57a5f1a9832677d488bcbdbe6923d1ff85c0c11",
+    "control_run": "runs/idr-warmstart-v1",
+    "control_generation_sha256": "eab5e8066d85ebe8244aa26b5b3d87ac0def8fd3dd4aa3d3990cf9f9473b2312",
+    "control_checkpoint": "continued_supervised/step-400.pt",
+    "control_checkpoint_sha256": "e0db233fa73caaee03a9b7f7076d87ce595236ec0a69b2bd58350cc4f9a7a999",
+    "training_steps": 1600,
+    "refresh_every": 4,
+    "shared_batch": {"gfn": 8, "supervised": 8, "prior": 8, "replay": 8},
+    "microbatch_size": 4,
+    "evaluation_samples_per_prompt": 128,
+    "training_seed": 123000,
+    "evaluation_seed": 133000,
+    "bank_sampling_seed": 125000,
+    "penalty": 2.5,
+    "last_block_learning_rate": 0.00001,
+    "block_gradient_clip": 1.0,
+    "sft_weighting": "property_factor_per_prompt"
+  },
+  "replicates": [
+    {
+      "name": "replicate-1",
+      "training_seed": 823000,
+      "evaluation_seed": 833000,
+      "bank_sampling_seed": 825000
+    },
+    {
+      "name": "replicate-2",
+      "training_seed": 923000,
+      "evaluation_seed": 933000,
+      "bank_sampling_seed": 925000
+    }
+  ]
+}
