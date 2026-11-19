@@ -1,10 +1,31 @@
 # Verification evidence
 
+Success-bonus preparation: [32 focused CPU tests](idr-success-bonus-tests-2026-11-19.txt)
+and [real-input preflight](idr-success-bonus-preflight-2026-11-19.json).
+The [verification record](../verification.md#success-bonus-comparison--19-november-2026)
+describes the synthetic three-repeat integration, reward consistency, immutable
+reference, saved-data checks and recovery. Real outcomes remain pending.
+
+Objective-comparison [mechanism analysis](idr-objective-mechanism-2026-11-19.json)
+([script](idr-objective-mechanism-2026-11-19.py)): saved prior-sample target
+sensitivity, residual decomposition and clipping diagnostics. These are post-hoc
+calculations with finite-sample limitations, not new trained outcomes. The
+[research assessment](../../literature/IDR_GFN_IMPROVEMENT_2026-11-19.md) owns interpretation.
+
+Completed objective comparison: [cached-array reconstruction](idr-objective-results-2026-11-19.json)
+([script](idr-objective-results-2026-11-19.py)),
+[independent counts/copy/cluster audit](idr-objective-independent-2026-11-19.json)
+([script](idr-objective-independent-2026-11-19.py)), and
+[protocol/checkpoint audit](idr-objective-protocol-2026-11-19.json)
+([script](idr-objective-protocol-2026-11-19.py)).
+The [verification record](../verification.md#objective-comparison-result-audit--19-november-2026)
+defines these saved-artifact checks and their limits.
+
 Matched GFN/supervised preparation: [19 focused CPU tests](idr-objective-tests-2026-11-18.txt)
 and [real-input CLI preflight](idr-objective-preflight-2026-11-18.json).
 The [verification record](../verification.md#matched-gfn-versus-supervised-comparison--18-november-2026)
-describes tiny fixture, shared-data, recovery and write-failure checks. Real results
-are pending.
+describes tiny fixture, shared-data, recovery and write-failure checks. The completed
+real-result audits appear above.
 
 Completed 1,600-update comparison: [saved-array reconstruction](idr-lastblock-1600-results-2026-11-18.json)
 ([script](idr-lastblock-1600-results-2026-11-18.py)),

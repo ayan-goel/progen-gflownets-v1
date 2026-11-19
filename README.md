@@ -5,13 +5,13 @@ disordered regions (IDRs). The working method jointly adapts ProGen's final
 transformer block and a guidance head. The original
 ProGen remains fixed as the reward reference.
 
-**Last-block GFlowNet adaptation improves IDR property generation.** The latest
-1,600-update models achieve 34.18% and 31.05% joint charge/predicted-disorder success,
-versus freshly evaluated 800-update controls at 29.39% in both repeats. These
-smaller gains miss the predefined five-point improvement rule. We retain 1,600
-updates as the working budget at the user's decision and defer further budget
-tests. Diversity and disorder are retained. See the
-[completed results](docs/experiments/idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026).
+**The matched supervised baseline has higher success on our current charge task.**
+With the ninefold success bonus and 1,600 updates, GFN achieves 38.87% joint
+charge/predicted-disorder success versus 44.43% for weighted supervision.
+Excluding exact training copies gives 38.87% versus 38.83%, with 1,194 versus
+1,193 distinct successful noncopy tails. GFN preserves more predicted disorder
+and overall unique outputs; a substantial GFN advantage remains unestablished.
+See the [completed results](docs/experiments/idr_success_bonus_2026-11-19.md#completed-results--19-november-2026).
 New-prompt/property generalization and experimental biology remain untested.
 
 Completed stability experiments established accurate local reward-target sampling
@@ -26,23 +26,26 @@ immediate objective.
 - [Completed experiment records](docs/experiments/README.md)
 - [Existing commands](docs/runbook.md)
 
-## Next experiment: GFlowNet versus supervised training
+## Completed experiment: stronger success reward
 
-Compare GFlowNet training against reward-weighted supervised learning, with the
+Three fresh paired repeats gave both methods a ninefold multiplier for meeting
+charge and predicted-disorder requirements. All three miss the declared GFN
+advantage screen. The [protocol and results](docs/experiments/idr_success_bonus_2026-11-19.md)
+preserve the design, outcome and next decision. No further GPU experiment is
+selected. The [runbook](docs/runbook.md#matched-training-with-a-success-bonus)
+provides optional reproduction and scoring recovery.
+
+## Completed comparison: GFlowNet versus supervised training
+
+The experiment compared GFlowNet against reward-weighted supervised learning, with the
 same adaptable ProGen block/head, initialization and scored training examples.
-Two fresh repeats train each method for 1,600 updates, then evaluate fresh IDRs.
+Two fresh repeats trained each method for 1,600 updates and evaluated fresh IDRs.
 See the [protocol](docs/experiments/idr_objective_2026-11-18.md) for the comparison
 and its limits.
 
-After choosing a GPU with `CUDA_VISIBLE_DEVICES`:
-
-~~~bash
-source .venv/bin/activate
-scripts/run.sh idr-objective --output runs/idr-objective-v1 --device cuda
-~~~
-
-Training and evaluation run together. The [runbook](docs/runbook.md#matched-gfn-versus-supervised-training)
-also provides input checks and saved-generation scoring recovery.
+Keep 1,600 as the working budget and weighted supervision as a comparator.
+The [runbook](docs/runbook.md#matched-gfn-versus-supervised-training)
+provides optional reproduction and saved-generation scoring recovery.
 
 Real experiments and all GPU execution are user initiated. Development checks
 are CPU-only:

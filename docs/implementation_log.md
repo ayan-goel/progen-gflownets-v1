@@ -615,3 +615,22 @@ recovery uses saved inputs without ProGen or ancestor folders. Keep measured set
 collection, scoring and per-arm update costs separate, labeling the original-prior
 audit overhead included in GFN updates. The
 [protocol](experiments/idr_objective_2026-11-18.md) owns scientific choices.
+
+## 2026-11-19 — Version the acceptance bonus across training and evaluation
+
+The `idr/success_bonus_*` modules preserve source-pinned historical implementations
+while reusing the existing last-block policy, samplers, objective updates and metric
+helpers. The new target adds log(9) only to joint passes and retains all failure
+weights; both objectives consume the same final factor. Relabel cloned bank rows
+before training-only normalizer initialization and replay, and label fresh shared
+samples before either learner sees them. Keep base factor, bonus and final factor
+in saved records so evaluation can reconstruct the intended labels independently.
+
+Three fresh seed plans exclude prior sampling streams. Checkpoints and the separate
+reward definition carry the new version; inherited pilot configuration describes
+original probability/acceptance conventions and is not the authoritative reward
+version. The evaluator uses all three repeats for the conservative training-copy
+union and applies the prospective ten-point/distinct-success gate. Atomic rolling
+checkpoint storage and sealed generation recovery are retained. The
+[protocol](experiments/idr_success_bonus_2026-11-19.md) owns budgets, reward rationale,
+baseline fairness and limits; no new algorithm is hidden in the shared trainer.

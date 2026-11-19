@@ -1,15 +1,15 @@
 # Property-guided IDR generation with ProGen2 and GFlowNets
 
-**Scope: 18 November 2026. The goal remains GFlowNet-based IDR property generation.
-The completed [1,600-versus-800 comparison](docs/experiments/idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026)
-raises mean joint charge/predicted-disorder success from 29.39% to 32.62%, but
-both repeats miss the predefined five-point gain. The user nevertheless chose
-1,600 as the working budget and deferred further budget/checkpoint tests; the
-historical gate outcome is unchanged. The method adapts ProGen's copied final
-block and GFN head against a fixed
-original prior. This is improved generation on the development task, not exact
-target sampling, property/prompt generalization or biological function. The user
-selected the matched supervised comparison described below.**
+**Scope: 19 November 2026. The goal remains GFlowNet-based IDR property generation.
+The [ninefold success-bonus comparison](docs/experiments/idr_success_bonus_2026-11-19.md#completed-results--19-november-2026)
+is complete across three paired repeats. GFN joint success is 38.87% versus
+44.43% for weighted supervision; excluding exact training copies gives 38.87%
+versus 38.83%. Distinct successful noncopy yield nearly ties (1,194 versus 1,193).
+GFN retains more predicted disorder and overall uniqueness, but all three repeats
+fail the substantial-advantage screen. Keep the 1,600-update budget and matched
+supervised baseline; no new GPU experiment is selected. The method
+still adapts a copied final ProGen block and GFN head against the fixed original
+prior; biological function and general property control remain unestablished.**
 The project now investigates IDP/IDR property guidance. Stability experiments remain
 completed groundwork. Their [historical specification](docs/stability_spec_2026-11-10.md)
 and [results](docs/status.md) preserve their original definitions; they are not
@@ -21,15 +21,23 @@ Guide a pretrained protein language model toward specified properties of
 intrinsically disordered sequences using a small GFlowNet head. Study when guidance
 learns the desired distribution, how reward quality affects it, and whether it
 provides useful diversity or efficiency compared with direct selection/design.
+The user's current methodological goal is a substantial, reproducible advantage
+over matched fine-tuning in successful IDR generation, with useful distinct
+candidates and quality retained. Improvement over plain ProGen alone is insufficient.
+The [19 November research assessment](literature/IDR_GFN_IMPROVEMENT_2026-11-19.md)
+motivates stronger acceptance preference while recognizing the remaining learning
+gap. Its selected intervention is defined below; the dated protocol owns seeds,
+budgets and the prospective decision rule. Real execution remains user-run.
 
-The current [objective-comparison protocol](docs/experiments/idr_objective_2026-11-18.md)
-trains GFN and reward-weighted supervised policies from the same initialization,
+The completed [objective-comparison protocol](docs/experiments/idr_objective_2026-11-18.md)
+trained GFN and reward-weighted supervised policies from the same initialization,
 with independent final-block/head copies and the same refreshed scored examples.
-Both receive 1,600 updates in each of two fresh repeats. Supervised weights use
+Both received 1,600 updates in each of two fresh repeats. Supervised weights use
 only the terminal property factor, normalized within prompt; this baseline fits
 the weighted shared proposal, not the exact GFN target. Report fresh property
 success, diversity, copies and cost without claiming independent-pipeline
-efficiency. Current charge/reward conventions remain fixed; other properties and
+efficiency. Charge acceptance remains fixed; the completed follow-up strengthened only
+the reward for joint passes, equally for both methods. Other properties and
 external-method implementations are deferred. The protocol owns numerical choices.
 
 The first proposed object is an isolated, fixed-length IDR sequence. This does not
@@ -50,15 +58,16 @@ Use a local charge profile, calculated directly from the completed sequence unde
 explicit residue-charge and window conventions. Control charged-residue content;
 then test charge ordering at fixed composition. This provides an exact descriptor
 benchmark, not an exact prediction of biological function. Disorder was evaluation-only
-in the initial charge experiment; the current continuous reward explicitly includes
+in the initial charge experiment; the current reward explicitly includes
 predicted disorder.
 Hydropathy is a possible later second descriptor.
 
 The [baseline protocol](docs/experiments/idr_baseline_2026-11-12.md) fixes the inherited
 length, prompts and support. The completed [charge-pilot protocol](docs/experiments/idr_charge_2026-11-12.md)
 introduced a coarse two-block profile (+0.125 then −0.125 mean nominal charge)
-and charged fraction 0.25. The current continuous reward retains its acceptance
-tolerances, with effective beta one and penalty 2.5 as defined below; the pilot's
+and charged fraction 0.25. The current success-bonus reward retains its acceptance
+tolerances, with effective beta one and penalty 2.5 plus a passing multiplier
+of nine as defined below; the pilot's
 beta-two reward is historical.
 The existing nine-residue sliding profile is a secondary descriptor; finer targets
 and exact fixed-composition generation remain later experiments. These numbers
@@ -107,7 +116,38 @@ termination must be explicit and shared across methods. If support changes, repo
 it; do not compare gains against mismatched priors or silently condition on a
 post-generation filter.
 
-### Revised reward contract: joint_acceptance_v1
+### Current reward contract: success_bonus_v1
+
+The selected experiment uses
+
+\[
+\log R(x\mid c)=\log p_0(x\mid c)-2.5V(x)+\log(9)\,\mathbf1_A(x).
+\]
+
+`x`, `c`, `p0` and `R` retain the definitions above. `V(x)` is the sum of
+normalized, nonnegative violations outside the existing charge and predicted-
+disorder tolerances. `A` is the event that all requirements pass, and `1_A` is
+its zero/one indicator. Thus the property factor is nine for joint passes;
+failure factors remain `exp(-2.5 V)`. Effective `beta` is one. The normalized
+target is still `p* = R/Z`; ninefold weight is not ninefold probability.
+
+This version preserves the preceding continuous reward's ordering among failures
+and all acceptance thresholds. It is a new fixed target, not annealing. The
+[protocol](docs/experiments/idr_success_bonus_2026-11-19.md) owns numerical
+definitions, uncertainty in saved-pool estimates, and the boundary discontinuity.
+Both GFN and weighted supervision use the new factor on fresh and replayed paths.
+Three new paired repeats retain 1,600 updates and the same adaptable layers/data
+recipe. In every repeat, the prospective advantage screen requires at least ten
+percentage points more raw joint success, strictly more distinct successful
+noncopy tails, and at most five points loss in disorder pass or overall uniqueness.
+This is a practical screen, not a significance test. The completed comparison
+fails it in all three repeats; noncopy yield is nearly tied, with better GFN
+disorder/uniqueness. This does not establish a large GFN advantage or authorize
+another reward change. The dated result record owns the full interpretation.
+
+Historical reward versions and their commands below remain unchanged.
+
+### Historical reward contract: joint_acceptance_v1
 
 The completed joint-acceptance candidate prioritizes satisfying all existing charge tolerances and
 the existing predicted-disorder screen, rather than closeness to exact charge
@@ -178,7 +218,7 @@ checks pass. The rule initially supported retaining 800, but the user subsequent
 chose to keep 1,600 as the working budget and defer further budget/checkpoint tests.
 The historical gate remains unchanged; no hard ceiling is established.
 The matched supervised baseline with the same adaptable layers and equivalent
-scored-data access is now authorized under its separate protocol above.
+scored-data access is now complete under its separate protocol above.
 The protocol owns budgets, copy boundaries, seeds, results and recovery.
 
 A separately trained second charge profile remains

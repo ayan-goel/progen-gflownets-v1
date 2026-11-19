@@ -1631,3 +1631,73 @@ replacement of one latest checkpoint per arm limits storage and avoids truncatin
 the previous checkpoint on write failure. Retain only final weights when training
 completes; checkpoint sweeps and automatic training resumption are out of scope.
 No new target or external RL/direct-design implementation is bundled into this test.
+
+## 2026-11-19 — Retain the supervised comparator; no GFN yield advantage yet
+
+The [completed objective comparison](experiments/idr_objective_2026-11-18.md#completed-results--19-november-2026)
+gives mean joint success 31.35% for GFN versus 40.92% for weighted supervision.
+Both repeats fail the predeclared GFN advantage screen. Training-copy exclusion
+reduces the difference to 31.35% versus 33.94%, but supervision still yields more
+distinct successful noncopy tails (695 versus 642) and successful noncopy clusters
+(687 versus 642) over the same 2,048 outputs per method.
+
+GFN's higher overall uniqueness and predicted-disorder pass are useful tradeoffs,
+not evidence that it produces a better successful library. All 143 supervised
+successful-copy draws occur under RPB1; their contribution explains most of the
+raw gap, but excluding them does not reverse the outcome. Do not discard that
+prompt or substitute a favorable metric for the declared screen. Neither model's
+optimized disorder predictions establish biological function or external novelty.
+
+Keep both methods and the user-selected 1,600-update budget. This is evidence
+against claiming a GFN advantage on this task, not a reason to abandon the GFN
+project or automatically run longer training. One contrasting profile with both
+recipes could test whether the observed tradeoff persists across requests; any
+such comparison needs its own initialization/data protocol and user selection.
+No new fitting, reward change or external method follows automatically.
+
+## 2026-11-19 — Prioritize a substantial GFN advantage through target and learning design
+
+The user clarified that the goal is materially better generation than matched
+fine-tuning, not only improvement over plain ProGen or higher overall diversity.
+The [research assessment](../literature/IDR_GFN_IMPROVEMENT_2026-11-19.md) supersedes
+another charge profile as the immediate proposed next step. It owns the source
+review, saved-array diagnosis, candidate comparison and bounded decision rules.
+
+Using 6,400 fixed-prior training draws, the current target has estimated mean
+joint success about 51%, while the learned GFN achieves 31%. Scalar residual
+re-centering leaves 98% of sampled TB error. These suggest both target softness
+and incomplete path-probability fitting; finite-pool estimates do not certify
+the true target or isolate a single learning cause.
+
+Propose one ninefold joint-pass property bonus while retaining the current smooth
+failure penalties, last-block adaptation, TB and 1,600 updates. This directly
+raises target acceptance odds, with a much smaller increase in observed log-factor
+range than multiplying all violation penalties. It also introduces a boundary
+jump, could be harder to learn, and has severe rare-success uncertainty. The
+estimated 89% target mass is not a predicted trained result. Stronger smooth
+penalties remain a reasonable alternative, not an intervention to bundle or sweep.
+
+Give weighted supervision the identical reward and equal development allowance.
+A proposed new substantive-win screen is at least ten percentage points of raw
+joint success plus more distinct successful noncopy candidates, with quality
+retained; it does not rewrite the prior experiment's failed five-point screen.
+Use fresh confirmation after development selection. If the target intervention
+does not establish a useful advantage, choose at most one justified learning/data
+follow-up before reconsidering this benchmark. Dynamic diverse replay is a
+literature-supported candidate, not an automatic next run or guaranteed GFN win.
+This turn authorizes research/documentation only; no production reward changed.
+
+## 2026-11-19 — Implement the selected ninefold success-bonus comparison
+
+The user selected the [bounded protocol](experiments/idr_success_bonus_2026-11-19.md):
+three fresh matched GFN/supervised pairs, a fixed ninefold joint-pass multiplier,
+unchanged continuous failure penalties and 1,600 updates. Both methods receive
+the new reward, same initial head/block and shared scored samples. The new gate
+requires at least ten points raw-success gain in every repeat, more distinct
+successful noncopy candidates and retained disorder/uniqueness. Historical results
+and their gates remain unchanged. No reward sweep or further real run is implied.
+
+Use a versioned experiment rather than editing historical reward or objective
+modules, because completed runs pin their hashes. Keep real experiments user-run
+and verify preparation with tiny CPU fixtures and input-only preflight. The
+implementation record owns data/reward propagation and recovery choices.

@@ -1,6 +1,10 @@
 # Matched GFlowNet versus supervised IDR generation — 18 November 2026
 
-**Status: implemented and CPU-verified; ready for the user to run. Real outcomes pending.**
+**Status: completed by the user at `runs/idr-objective-v1`; analyzed 19 November 2026.**
+Weighted supervision has higher joint success in both repeats. Its lead shrinks
+after excluding training copies, but remains positive. GFN retains more predicted
+disorder and overall distinct tails; this does not establish a GFN advantage in
+successful candidate yield. See [completed results](#completed-results--19-november-2026).
 The user selected this comparison after retaining the completed 1,600-step recipe.
 The [previous result](idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026)
 has mean joint success 32.62%, but its supervised control trained only the head.
@@ -185,3 +189,119 @@ failure. Synthetic scorers and a tiny randomly initialized ProGen are the only
 models executed. [Real input preflight](../verification/idr-objective-preflight-2026-11-18.json)
 passes with CUDA uninitialized and no model/scorer execution. Ruff and
 `git diff --check` pass. These are correctness checks, not scientific results.
+
+## Completed results — 19 November 2026
+
+Both paired repeats reached update 1,600 and completed final generation/scoring
+in **3 h 41 min 43 s**. The saved [report](../../runs/idr-objective-v1/report.md),
+[metrics](../../runs/idr-objective-v1/metrics.json) and
+[decision](../../runs/idr-objective-v1/decision.json) preserve the original outcomes.
+There are 1,024 raw outputs per arm/repeat, 6,144 total. The table reports the
+fraction passing both charge and V3 predicted-disorder requirements:
+
+| Method | Repeat 1 | Repeat 2 | Mean |
+|---|---:|---:|---:|
+| Plain ProGen | 1.56% (16) | 3.32% (34) | 2.44% |
+| GFN | 30.08% (308) | 32.62% (334) | 31.35% |
+| Reward-weighted supervised | **38.57% (395)** | **43.26% (443)** | **40.92%** |
+
+GFN minus supervised joint success is −8.50 and −10.64 percentage points.
+Both repeats fail the predeclared GFN advantage screen. This is an observed
+supervised success advantage under this recipe, not proof of universal method
+superiority. Both generators substantially improve on the plain prior.
+
+### What happens after accounting for copies and diversity?
+
+The following aggregates both repeats, with **2,048 raw outputs per method**.
+Distinct counts are deduplicated across the two repeats; all rate denominators
+remain the full raw output count.
+
+| Outcome | GFN | Weighted supervised |
+|---|---:|---:|
+| Joint successes | 642 (31.35%) | 838 (40.92%) |
+| Successful exact training copies | 0 | 143 |
+| Joint successes excluding exact training copies | 642 (31.35%) | 695 (33.94%) |
+| Distinct successful tails | 642 | 702 |
+| Distinct successful noncopy tails | 642 | 695 |
+| Successful noncopy clusters, fixed 80% identity rule | 642 | 687 |
+| Predicted-disorder pass, all raw outputs | 91.60% | 84.42% |
+| Distinct tails, all raw outputs | 2,021 (98.68%) | 1,912 (93.36%) |
+
+Supervision's 196 extra raw successes include 143 copied-success draws, accounting
+for 73.0% of the raw count difference. All its successful training copies occur
+under the RPB1 prefix (DP00181). These are copies of the common experimental
+training union, not an external novelty assessment. After excluding them,
+supervision still produces **53 more distinct successful noncopy tails** and
+**45 more successful noncopy clusters**. Per-repeat noncopy success is 31.05%
+and 36.82% for supervision versus 30.08% and 32.62% for GFN.
+
+The observed GFN quality/diversity benefit is real but narrower than a better
+candidate generator: it preserves more predicted disorder and overall unique
+outputs, while supervision yields more distinct passing candidates at this sample
+budget. Do not turn the diversity endpoints into a replacement pass rule.
+Within-sequence repeated-trimer fraction is actually lower for supervision
+(0.0680 versus 0.1103); output duplication and internal motif repetition are
+different properties. No claim of uniformly better GFN diversity is supported.
+
+### Prompt dependence, objective interpretation and costs
+
+Pooled supervised raw and noncopy joint counts exceed GFN on seven of eight
+prompts; GFN leads on DP01299. RPB1 contributes much of the raw gap, but removing
+training copies does not reverse the aggregate result. These prompt breakdowns
+are descriptive analysis of the declared development panel; no prompt is removed
+from the primary comparison.
+
+The mean own-policy log ratio against original ProGen is 2.36 nats per generated
+tail for GFN and 21.72 for supervision. This sampled diagnostic indicates much
+larger policy drift under supervision. It is compatible with their different
+objectives: GFN seeks a fixed prior-times-property target, while supervision
+weights the changing shared proposal. It is not a biological-quality score or
+proof that GFN accurately learned its target, and does not establish the causal
+reason for the success difference.
+
+The saved training audit finds concentrated supervised weights: effective sample
+size averages 1.83 and 1.82 out of four examples per prompt, and replay receives
+about 52% of total weight despite supplying 25% of rows. Both GFN parameter groups
+hit the clipping threshold at every update; supervision clips no head updates and
+about 9–11% of block updates. These are descriptive optimization differences,
+not evidence that changing clipping or replay would improve the outcome. The
+audit found no material protocol bug or diagnostic-bank holdout exposure.
+
+Measured updates total approximately 1,897 seconds for GFN and 1,811 seconds
+for supervision. GFN timing includes the documented original-prior likelihood
+audit forwards. Final generation takes approximately 776 seconds per method
+across both repeats. There is no demonstrated GFN speed advantage here. Shared
+collection/scoring and inherited initialization costs prevent interpreting these
+as separately measured end-to-end training pipelines.
+
+The new GFN mean of 31.35% is close to the prior experiment's 32.62%, but this is
+not a controlled gain/loss comparison: seeds, proposal mixture, evaluation draws
+and the applicable training-copy union differ. The matched comparison is between
+the two freshly trained methods in this run.
+
+### Interpretation and next decision
+
+We have a working GFN IDR generator and a stronger capacity-matched supervised
+baseline. We **have not demonstrated a GFN advantage in successful noncopy-candidate
+yield** on the current task. Keep both outcomes, the 1,600-update budget and the
+predeclared failed screen. Do not automatically extend training or change the
+score/threshold to rescue the comparison.
+
+Keep weighted supervision in subsequent comparisons. A next bounded question,
+if selected, is whether both recipes learn one contrasting charge profile with
+the same evaluation of distinct successful noncopy candidates. That would test
+transfer of the recipe across requests, not repair or erase this result. No new
+fit, property or external baseline is implemented or authorized by this analysis.
+Biological function, unseen-prefix control, external novelty and global target
+accuracy remain unestablished.
+
+### Saved-artifact verification
+
+[Cached-array reconstruction](../verification/idr-objective-results-2026-11-19.json)
+and its [script](../verification/idr-objective-results-2026-11-19.py) reproduce
+the scientific output files without ProGen or neural disorder prediction.
+The [independent count audit](../verification/idr-objective-independent-2026-11-19.json)
+checks success, copy and diversity arithmetic; the
+[protocol audit](../verification/idr-objective-protocol-2026-11-19.json) checks
+source identity, shared training, schedules and final checkpoints. Audits preserve
+completed run files and do not constitute independent biological validation.

@@ -1,8 +1,53 @@
 # Experiment commands
 
+## Matched training with a success bonus
+
+Completed at `runs/idr-success-bonus-v1`; [results](experiments/idr_success_bonus_2026-11-19.md#completed-results--19-november-2026)
+show no substantial GFN advantage. The command below is optional reproduction in
+a fresh directory, not a selected next experiment.
+
+The [protocol](experiments/idr_success_bonus_2026-11-19.md) specifies three fresh
+GFN/supervised pairs, 1,600 updates per arm, and the same ninefold joint-success
+reward for both methods. Training, final generation and evaluation run together.
+Use your own `CUDA_VISIBLE_DEVICES` selection; the launcher preserves it.
+
+```bash
+cd /usr/scratch/agoel320/progen-gflownets-v1
+source .venv/bin/activate
+scripts/run.sh idr-success-bonus --output runs/idr-success-bonus-reproduction --device cuda
+```
+
+The run saves `report.md`, `metrics.json`, `decision.json`, `training_summary.json`
+and per-repeat final checkpoints. It refuses an existing output directory. Preserve
+completed or failed artifacts and choose a fresh output path for a rerun. Checkpoints
+do not support training resume. Each arm keeps only one rolling checkpoint during
+training and one final checkpoint afterward.
+
+Optional read-only preparation check (no ProGen or scorer execution):
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh idr-success-bonus --check-only
+```
+
+If final generation is sealed but evaluation fails, recover scoring into a fresh
+directory without loading ProGen. This executes the disorder predictor on CPU and
+is a user-run evaluation command:
+
+```bash
+CUDA_VISIBLE_DEVICES='' scripts/run.sh evaluate-idr-success-bonus \
+  --run runs/idr-success-bonus-v1 --output runs/idr-success-bonus-v1-eval
+```
+
+The completed GFN pass rate is 38.87%. The earlier finite-pool 89% target estimate
+was not a prediction of its trained pass rate.
+
 ## Matched GFN versus supervised training
 
-[Protocol](experiments/idr_objective_2026-11-18.md). Two fresh paired repeats;
+[Completed results](experiments/idr_objective_2026-11-18.md#completed-results--19-november-2026).
+Completed at `runs/idr-objective-v1`. Supervision has higher joint success in both
+repeats; GFN preserves more disorder and overall uniqueness. The following command
+is optional reproduction in a new directory, not a selected next experiment.
+Two fresh paired repeats;
 1,600 updates for each objective with the same adaptable final block/head and
 shared scored trajectories. Starts from the original common initialization;
 does not continue the completed 1,600-step checkpoints. Final generation covers
@@ -12,7 +57,7 @@ Select an available GPU and export `CUDA_VISIBLE_DEVICES` yourself, then:
 
 ```bash
 source .venv/bin/activate
-scripts/run.sh idr-objective --output runs/idr-objective-v1 --device cuda
+scripts/run.sh idr-objective --output runs/idr-objective-reproduction --device cuda
 ```
 
 Includes training, fresh generation, scoring, metrics and `report.md` in the

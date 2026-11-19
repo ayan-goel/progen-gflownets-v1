@@ -1,66 +1,94 @@
 # Current project status
 
-**18 November 2026 — Matched GFN versus supervised comparison ready for the user to run.**
+**19 November 2026 — Success-bonus comparison complete: 38.87% GFN versus 44.43% supervised success; noncopy yield nearly ties. No substantial GFN advantage.**
 
-[Specification](../spec.md) · [Latest results](experiments/idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026)
+[Specification](../spec.md) · [Latest results](experiments/idr_success_bonus_2026-11-19.md#completed-results--19-november-2026)
 · [Runbook](runbook.md)
 
 ## Current decision
 
-The user selected [matched final-block GFN versus weighted supervised training](experiments/idr_objective_2026-11-18.md).
-Both policies start from the same original weights, adapt the same block/head and
-share scored training trajectories from both policies, original ProGen and replay.
-Two fresh repeats use 1,600 updates per arm and final-only evaluation. This tests
-the objective at equal adaptable capacity and data access. It is not an independent
-pipeline cost benchmark. Nineteen tiny CPU tests and the real input-only preflight
-pass; no new real experiment has run. The
-[runbook](runbook.md#matched-gfn-versus-supervised-training) owns the command.
-Another profile and external methods remain deferred.
+The [success-bonus comparison](experiments/idr_success_bonus_2026-11-19.md#completed-results--19-november-2026)
+completed all three paired 1,600-update repeats in **5 h 57 min 2 s**. Both methods
+received the same ninefold joint-pass weight, unchanged acceptance criteria,
+initialization, adaptable layers and shared examples. All real execution was user-run.
 
-## Latest completed result
+| Pooled over 3,072 outputs per method | GFN | Weighted supervised |
+|---|---:|---:|
+| Joint charge/predicted-disorder success | 38.87% | 44.43% |
+| Success excluding exact training copies | 38.87% | 38.83% |
+| Distinct successful noncopy tails | 1,194 | 1,193 |
+| Predicted-disorder pass | 93.16% | 89.16% |
+| Unique-tail fraction | 98.96% | 94.60% |
 
-The user completed `runs/idr-lastblock-1600-v1` in **3 h 49 min 39 s**.
-Both repeats finished training and evaluation after the earlier storage interruption.
-The complete artifacts are at `v1`; the suggested `v2` restart directory is absent.
-The [experiment record](experiments/idr_lastblock_1600_2026-11-18.md#interrupted-first-attempt--18-november-2026)
-preserves that history without assuming how the earlier folder was made reusable.
+**All three repeats fail the prospective substantial-GFN-advantage screen.**
+Supervision has higher raw success in every repeat. Its 172 passing training-copy
+draws explain almost all of the pooled raw difference. GFN retains more disorder
+and overall uniqueness, but noncopy yield is effectively tied rather than
+substantially better. Exact noncopy does not establish biological novelty.
+
+The GFN rate is above the earlier 31.35%; different seeds, repeat counts and
+shared generated data prevent attributing the full change solely to the bonus.
+Both methods remain far above plain ProGen (2.02%). Charge is still the main
+observed GFN failure. Keep the methods, 1,600-update budget and recorded negative
+comparison; do not automatically increase the bonus or steps. Review learning and
+coverage evidence before selecting one new intervention. No new GPU run is selected.
+The [result record](experiments/idr_success_bonus_2026-11-19.md#completed-results--19-november-2026)
+owns repeat effects, copy interpretation, verification and limitations.
+
+## Previous objective comparison
+
+`runs/idr-objective-v1` completed both paired repeats and final evaluation in
+**3 h 41 min 43 s**. Both objectives adapted the same final block/head from the
+same original initialization, using identical refreshed scored examples and
+1,600 updates per arm. All real execution was user-run.
 
 | Joint charge/predicted-disorder success | Repeat 1 | Repeat 2 | Mean |
 |---|---:|---:|---:|
-| Preserved 800-update model, fresh evaluation | 29.39% | 29.39% | 29.39% |
-| New 1,600-update model | 34.18% | 31.05% | 32.62% |
-| Gain | +4.79 points | +1.66 points | +3.22 points |
+| GFN | 30.08% | 32.62% | 31.35% |
+| Reward-weighted supervised | 38.57% | 43.26% | 40.92% |
+| Plain ProGen | 1.56% | 3.32% | 2.44% |
 
-Each arm has 1,024 raw outputs per repeat. Both improve, but neither reaches the
-predeclared five-point raw/noncopy gain. Disorder and uniqueness checks pass.
-Mean predicted-disorder pass is 91.06%, uniqueness is 98.63%, and none of the
-668 successes exactly copies the common training union. Charge remains limiting
-at 36.91% mean pass. Plain ProGen reaches 2.49% mean joint success in this evaluation.
+Each method generated 2,048 raw outputs across the repeats. Supervision's raw
+advantage shrinks after excluding exact training copies: **33.94% versus 31.35%**
+for GFN. All 143 supervised successful-copy draws occur under the RPB1 prefix;
+GFN has none. Nevertheless supervision yields more distinct successful noncopy
+tails (695 versus 642) and successful noncopy clusters (687 versus 642).
 
-**The user chose to keep the 1,600-update models and budget, deferring further
-budget/checkpoint tests.** This supersedes the earlier recommendation to retain
-800; it does not change the recorded five-point gate outcome. The additional gain
-is modest relative to doubled training exposure. This supports diminishing returns,
-not proof of a hard plateau or accurate global target sampling. The
-[completed 800-update study](experiments/idr_lastblock_budget_2026-11-17.md#completed-results--18-november-2026)
-previously raised mean success from 21.78% to 29.64%; fresh evaluation explains the
-small change in the unchanged 800-update controls' percentages here.
+GFN retains higher predicted-disorder pass (91.60% versus 84.42%) and pooled
+unique-tail fraction (98.68% versus 93.36%). These are useful tradeoffs, not a
+replacement for the failed GFN advantage screen. There is no demonstrated GFN
+speed advantage or superior successful-candidate yield on this task. Exact
+noncopy does not establish external biological novelty.
 
-The previous supervised control trains only the head, so it cannot isolate the
-GFN objective's advantage. This motivates the authorized matched comparison above.
-One contrasting charge profile remains a possible subsequent test of whether the
-recipe learns another requested pattern. No automatic 3,200-step fit, reward
-change or additional layer unfreezing follows.
+**Keep the 1,600-update budget and weighted supervision as a required comparator.**
+Both methods work on this charge task; a general GFN advantage remains unproven.
+The user clarified that the research goal is a substantial GFN advantage over
+fine-tuning. The [new research assessment](../literature/IDR_GFN_IMPROVEMENT_2026-11-19.md)
+prioritizes stronger acceptance preference on this same task before another
+profile. Saved prior training draws estimated roughly 51% success under the preceding
+target; GFN also has an unresolved fitting gap. A proposed ninefold pass bonus
+raises the finite-pool target estimate to roughly 89%, with serious rare-success
+uncertainty. This is not a trained result or forecast. Give supervision the same
+new reward and equal development allowance. The completed comparison above
+preserves this completed run. The [result record](experiments/idr_objective_2026-11-18.md#completed-results--19-november-2026)
+owns counts, prompt effects, costs and verification. The
+[benchmark roadmap](../literature/IDR_BENCHMARK_ROADMAP_2026-11-17.md) remains context
+for later external-method and biological comparisons.
 
-The [result record](experiments/idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026)
-owns full metrics, costs and limitations. [Saved-array verification](verification.md#1600-update-result-audit--18-november-2026)
-reproduces all parent results and preserves 216 run files without neural inference.
-Current evidence remains limited to eight development prompts, one charge target
-and a shared supervised initialization. New-property/prompt generalization,
-external-reference novelty, biological function and an advantage over equally
-adaptable non-GFN models remain unestablished. The
-[benchmark/functional roadmap](../literature/IDR_BENCHMARK_ROADMAP_2026-11-17.md)
-remains optional research context. Real experiments and GPUs remain user-run.
+This is a coupled shared-data comparison on eight development prompts and one
+charge profile. Supervised weighting and GFN target matching are different
+objectives; the common collection is not two independent training pipelines.
+Unseen-prefix control, biological function, external novelty and global target
+accuracy remain unestablished.
+
+## Earlier budget result
+
+The [completed 1,600-versus-800 study](experiments/idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026)
+raised mean joint success from 29.39% to 32.62%, missing its five-point gain rule.
+The user retained 1,600 as the working budget and deferred checkpoint/step tests.
+The new GFN mean is not a controlled change from that run: training/evaluation
+seeds, the proposal mixture and copy exposure differ. Its completed record also
+preserves the earlier storage interruption and recovery history.
 
 ## IDR experiment history
 

@@ -1,16 +1,23 @@
 # Experiment history and current pilot
 
-Current authorized experiment: [matched GFN versus weighted supervised training](idr_objective_2026-11-18.md).
-Two fresh paired repeats, the same final block/head and shared scored examples,
-1,600 updates per objective. Real results are pending; other charge profiles and
-external-method comparisons remain deferred.
+Latest completed: [ninefold success-bonus comparison](idr_success_bonus_2026-11-19.md#completed-results--19-november-2026).
+Three fresh paired repeats at 1,600 updates give 38.87% GFN versus 44.43% supervised
+joint success, or 38.87% versus 38.83% excluding exact training copies. Distinct
+successful noncopy counts are 1,194 versus 1,193. All three fail the substantial
+GFN advantage screen, despite better GFN disorder/uniqueness. No next GPU run is selected.
 
-Latest completed: [1,600 versus 800 updates](idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026).
+Earlier completed: [matched GFN versus weighted supervised training](idr_objective_2026-11-18.md#completed-results--19-november-2026).
+Mean joint success is 31.35% GFN versus 40.92% supervision; excluding training
+copies gives 31.35% versus 33.94%. GFN retains more disorder and overall uniqueness,
+but supervision yields more distinct successful noncopy tails. The GFN advantage
+screen fails in both repeats. The stronger-reward follow-up above is now complete.
+
+Earlier completed: [1,600 versus 800 updates](idr_lastblock_1600_2026-11-18.md#completed-results--18-november-2026).
 Joint success rises from 29.39% to 34.18% and 29.39% to 31.05% in fresh paired
 evaluations. Both miss the five-point gain threshold; quality is retained. The
 user chose to keep 1,600 as the working budget and defer further budget tests;
 the historical gate outcome is unchanged. A supervised comparison with the same
-adaptable layers is now authorized above.
+adaptable layers is now completed above.
 
 Earlier completed: [last-block training-budget comparison](idr_lastblock_budget_2026-11-17.md#completed-results--18-november-2026).
 Joint success increases from 19.92% to 29.59% and 23.63% to 29.69% when comparing

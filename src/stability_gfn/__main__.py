@@ -369,19 +369,52 @@ def main():
     lastblock_1600_eval.add_argument("--run", required=True)
     lastblock_1600_eval.add_argument("--output", required=True)
     objective = commands.add_parser(
-        "idr-objective", help="Matched final-block GFN versus weighted supervised training"
+        "idr-objective",
+        help="Matched final-block GFN versus weighted supervised training",
     )
     objective.add_argument("--config", default="configs/idr-objective.json")
     objective.add_argument("--output")
     objective.add_argument("--device", default="cuda")
     objective.add_argument("--check-only", action="store_true")
     objective_eval = commands.add_parser(
-        "evaluate-idr-objective", help="Recover objective-comparison scoring without ProGen"
+        "evaluate-idr-objective",
+        help="Recover objective-comparison scoring without ProGen",
     )
     objective_eval.add_argument("--run", required=True)
     objective_eval.add_argument("--output", required=True)
+    success_bonus = commands.add_parser(
+        "idr-success-bonus",
+        help="Matched GFN/supervised training with a ninefold success bonus",
+    )
+    success_bonus.add_argument("--config", default="configs/idr-success-bonus.json")
+    success_bonus.add_argument("--output")
+    success_bonus.add_argument("--device", default="cuda")
+    success_bonus.add_argument("--check-only", action="store_true")
+    success_bonus_eval = commands.add_parser(
+        "evaluate-idr-success-bonus",
+        help="Recover saved success-bonus evaluation without ProGen",
+    )
+    success_bonus_eval.add_argument("--run", required=True)
+    success_bonus_eval.add_argument("--output", required=True)
     args = parser.parse_args()
-    if args.command == "idr-objective":
+    if args.command == "idr-success-bonus":
+        from .idr.success_bonus_data import success_bonus_preflight
+        from .idr.success_bonus_experiment import run_success_bonus
+
+        settings = json.loads(project_path(args.config).read_text())
+        if args.check_only:
+            print(json.dumps(success_bonus_preflight(settings), indent=2))
+        else:
+            if args.output is None:
+                parser.error("idr-success-bonus requires --output unless --check-only")
+            print(run_success_bonus(settings, project_path(args.output), args.device))
+    elif args.command == "evaluate-idr-success-bonus":
+        from .idr.success_bonus_experiment import reevaluate_success_bonus
+
+        print(
+            reevaluate_success_bonus(project_path(args.run), project_path(args.output))
+        )
+    elif args.command == "idr-objective":
         from .idr.objective_data import objective_preflight
         from .idr.objective_experiment import run_objective
 

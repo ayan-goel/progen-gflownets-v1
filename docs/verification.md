@@ -1,5 +1,60 @@
 # Verification
 
+## Success-bonus comparison — 19 November 2026
+
+[Protocol](experiments/idr_success_bonus_2026-11-19.md),
+[32 focused CPU tests](verification/idr-success-bonus-tests-2026-11-19.txt),
+[real-input preflight](verification/idr-success-bonus-preflight-2026-11-19.json).
+
+Thirteen new tests and nineteen existing objective-comparison tests pass. Tiny
+fixtures run three paired four-update fits and 36 final outputs, verifying the
+same bonus on bank/fresh/evaluation rows, the `log(9)/2` normalizer initialization
+shift, shared examples, independent trained blocks and an immutable reference.
+Saved-data checks reject corrupted reward metadata, labels, checkpoints and
+evaluation records. Atomic-write failure preserves the preceding checkpoint;
+source-independent recovery reproduces five scientific output files byte-for-byte.
+The real model constructor and disorder scorer are blocked in these fixtures.
+
+The CLI preflight validates protected source artifacts and declares three repeats,
+1,600 updates per arm and 9,216 final outputs, without running ProGen or a scorer.
+The completed objective run's 86 captured files and pinned implementation also
+verify unchanged. CUDA remained uninitialized and the new real run was not
+started. These are correctness checks, not evidence that the bonus improves
+generation. Source/test lint and formatting checks pass.
+
+## Target and learning mechanism analysis — 19 November 2026
+
+The [saved-array script](verification/idr-objective-mechanism-2026-11-19.py) and
+[results](verification/idr-objective-mechanism-2026-11-19.json) separate 6,400
+fixed-prior training draws from adaptive/replay data, calculate target-strength
+sensitivity, and decompose saved final TB residuals by prompt and repeat.
+Input hashes remain unchanged; no neural model, scoring, training or GPU runs.
+Finite-pool target estimates and reused final outcomes are explicitly post-hoc,
+with per-stream variation and effective sample size reported. They do not verify
+global target probabilities or predict retraining outcomes. The
+[research assessment](../literature/IDR_GFN_IMPROVEMENT_2026-11-19.md) owns the
+proposed intervention, alternatives and limitations.
+
+## Objective-comparison result audit — 19 November 2026
+
+[Result record](experiments/idr_objective_2026-11-18.md#completed-results--19-november-2026).
+The [cached-array reconstruction](verification/idr-objective-results-2026-11-19.json)
+([script](verification/idr-objective-results-2026-11-19.py)) reproduces five files
+byte-for-byte: sequence metrics, aggregate metrics, decision, training summary
+and report. It uses saved V2/V3 arrays, blocks model/scorer execution, and confirms
+all 95 completed run files remain unchanged with CUDA uninitialized.
+
+The [independent arithmetic audit](verification/idr-objective-independent-2026-11-19.json)
+([script](verification/idr-objective-independent-2026-11-19.py)) recomputes charge,
+disorder acceptance, copy definitions, distinct-success and cluster counts from
+saved sequences/arrays. It also verifies all 19,200 fresh training reward rows.
+The [protocol audit](verification/idr-objective-protocol-2026-11-19.json)
+([script](verification/idr-objective-protocol-2026-11-19.py)) checks manifests,
+source identity, matched training batches/schedules and saved final checkpoints.
+No training tests were repeated for this results-only review, and no real neural
+inference was executed. These checks verify recorded computational evidence,
+not biological validity or independent statistical replication.
+
 ## Matched GFN versus supervised comparison — 18 November 2026
 
 [Protocol](experiments/idr_objective_2026-11-18.md),
